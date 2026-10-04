@@ -29,6 +29,10 @@ const BOSS_FLIGHT_SPEED := 300.0
 @onready var middle_layer: Parallax2D = $MiddleLayer
 @onready var track_layer: Parallax2D = $Track
 
+var lab = preload("res://lab_telemetry.gd").new()
+var lab_panel: CanvasLayer
+var retry_requested := false
+
 var player := Vector2(GD.PLAYER_X, GD.GROUND_Y)
 var velocity_y := 0.0
 var crouching := false
@@ -80,6 +84,10 @@ var boss := {}
 
 func _ready() -> void:
 	randomize()
+	lab_panel = preload("res://lab_panel.gd").new()
+	lab_panel.game = self
+	lab_panel.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(lab_panel)
 	boss_actor.bomb_requested.connect(_on_boss_bomb_requested)
 	boss_actor.particle_requested.connect(_on_boss_particle_requested)
 	boss_actor.feedback.connect(_on_boss_feedback)
@@ -87,12 +95,17 @@ func _ready() -> void:
 	boss_actor.form_changed.connect(_on_boss_form_changed)
 	_start_segment(0)
 	_update_parallax()
+	lab.start(lab_panel.values, "baseline_pending")
 
 func _process(delta: float) -> void:
+	if lab_panel.blocked: return
+	if lab.active: lab.duration += delta
 	_update_fx(delta)
 	if state == "dead":
 		death_delay -= delta
-		if death_delay <= 0 and (Input.is_action_just_pressed("restart") or Input.is_action_just_pressed("jump") or Input.is_action_just_pressed("fire")):
+		if Input.is_action_just_pressed("restart") or Input.is_action_just_pressed("jump") or Input.is_action_just_pressed("fire"):
+			retry_requested = true
+		if death_delay <= 0 and retry_requested:
 			_retry()
 		queue_redraw()
 		return
@@ -123,6 +136,7 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if lab_panel.blocked: return
 	if event is InputEventMouseMotion: aim = event.position
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT: aim = event.position
 	if state == "playing" and event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
@@ -134,16 +148,16 @@ func _update_player(delta: float) -> void:
 	if stick.length() > 0.28: aim = _player_center() + stick.normalized() * 420
 	var crouch_pressed := Input.is_action_pressed("crouch") and _grounded()
 	if crouch_pressed and not crouching:
-		slide_time_left = MIN_SLIDE_TIME
+		slide_time_left = float(lab_panel.values.slide_time)
 	slide_time_left = maxf(0.0, slide_time_left - delta)
 	var wants_crouch := _grounded() and (crouch_pressed or slide_time_left > 0.0)
 	if crouching and not wants_crouch and _grounded() and not _can_stand():
 		wants_crouch = true
 	crouching = wants_crouch
 	if Input.is_action_just_pressed("jump") and _grounded() and not crouching:
-		velocity_y = -GD.PLAYER.jump_speed
+		velocity_y = -float(lab_panel.values.jump_speed)
 		_emit(_player_center(), CYAN, 7, 115)
-	if not _grounded(): velocity_y += GD.PLAYER.gravity * delta
+	if not _grounded(): velocity_y += float(lab_panel.values.gravity) * delta
 	player.y += velocity_y * delta
 	if player.y >= GD.GROUND_Y: player.y = GD.GROUND_Y; velocity_y = 0
 	player_visual.position = player
@@ -153,14 +167,14 @@ func _update_player(delta: float) -> void:
 	guarding = Input.is_action_pressed("guard") and guard_energy > 0 and guard_lock <= 0
 	if guarding:
 		guard_idle = 0
-		guard_energy = maxf(0, guard_energy - GD.GUARD.drain_per_second * delta)
+		guard_energy = maxf(0, guard_energy - float(lab_panel.values.guard_drain) * delta)
 		if guard_energy <= 0:
-			guarding = false; guard_lock = GD.GUARD.break_lockout
+			guarding = false; guard_lock = float(lab_panel.values.guard_lock)
 			_notify("GUARD BREAK", RED); _emit(_player_center(), RED, 22, 190)
 	else:
 		guard_idle += delta
-		if guard_lock <= 0 and guard_idle >= GD.GUARD.regen_delay:
-			guard_energy = minf(GD.GUARD.maximum, guard_energy + GD.GUARD.regen_per_second * delta)
+		if guard_lock <= 0 and guard_idle >= float(lab_panel.values.guard_delay):
+			guard_energy = minf(GD.GUARD.maximum, guard_energy + float(lab_panel.values.guard_regen) * delta)
 
 	if Input.is_action_just_pressed("switch_weapon"): _switch_weapon()
 	if Input.is_action_just_pressed("weapon_slot_1"): _select_slot(0)
@@ -223,7 +237,7 @@ func _fire() -> void:
 	shots.append({"pos": origin, "previous": origin, "velocity": direction * _weapon().projectile_speed, "penetration": _weapon().penetration, "color": _weapon().color})
 	ammo[weapon_index] -= 1
 	_refresh_player_ui()
-	shot_left = _weapon().cadence
+	shot_left = float(lab_panel.values.rifle_cadence if weapon_index == 0 else lab_panel.values.piercer_cadence)
 	_emit(origin, _weapon().color, 5, 145)
 
 func _grenade() -> void:
@@ -344,7 +358,7 @@ func _update_world(delta: float) -> void:
 			if landed_on_turret:
 				player.y = turret_rect.position.y
 				player_visual.position = player
-				velocity_y = -GD.PLAYER.stomp_speed
+				velocity_y = -float(lab_panel.values.stomp_speed)
 				turret.contact_cooldown = 0.3
 				_emit(Vector2(player.x, turret_rect.position.y), CYAN, 7, 115)
 			else:
@@ -354,7 +368,7 @@ func _update_world(delta: float) -> void:
 		if not is_instance_valid(gate) or gate.is_queued_for_deletion():
 			laser_gates.remove_at(i)
 			continue
-		gate.advance(delta, LASER_GATE_SPEED)
+		gate.advance(delta, float(lab_panel.values.laser_gate_speed))
 		if gate.position.x < -200:
 			gate.queue_free()
 			laser_gates.remove_at(i)
@@ -424,7 +438,7 @@ func _enemy_contact(enemy: Dictionary) -> void:
 		return
 	if not _circle_rect(enemy.pos, enemy.radius, _player_hitbox()): return
 	if velocity_y > 80 and player.y < enemy.pos.y - enemy.radius * 0.35:
-		velocity_y = -GD.PLAYER.stomp_speed; enemy.touch_lock = 0.5
+		velocity_y = -float(lab_panel.values.stomp_speed); enemy.touch_lock = 0.5
 		if enemy.type == "heavy": _notify("HEAVY STOMP // SLIDE OFF", RED); _emit(enemy.pos, YELLOW, 14, 210)
 		else: _kill_enemy(enemy); _notify("STOMP", CYAN)
 	else: _receive(false, "ENEMY COLLISION")
@@ -489,6 +503,8 @@ func _receive(unblockable: bool, cause: String) -> void:
 func _die(cause: String) -> void:
 	if not PLAYER_CAN_DIE: return
 	if state != "playing": return
+	lab.finish(score, cause, player, segment, boss_mode, true)
+	retry_requested = false
 	state = "dead"; death_delay = 0.35; banner = cause; _emit(_player_center(), RED, 40, 300)
 	if boss_mode:
 		boss_actor.set_combat_enabled(false)
@@ -574,6 +590,7 @@ func _boss_damage() -> void:
 	_emit(_boss_pos(), WHITE, 45, 390)
 	if boss.hp <= 0:
 		score += GD.SCORE.boss
+		lab.finish(score, "victory", player, segment, boss_mode)
 		state = "victory"
 		banner = "THE FRONT NEVER STOPS"
 		boss_actor.start_death()
@@ -583,12 +600,22 @@ func _boss_damage() -> void:
 		_notify("BOSS HIT // HP %d / %d" % [boss.hp, GD.BOSS.health], WHITE, 1)
 
 func _retry() -> void:
+	retry_requested = false
 	state = "playing"; score = checkpoint_score; stats = checkpoint_stats.duplicate(true); ammo = checkpoint_ammo.duplicate()
 	if boss_mode: _start_boss()
 	else: _start_segment(segment)
+	lab.retry()
+	lab.start(lab_panel.values, "baseline_pending")
 
 func _new_run() -> void:
+	lab.finish(score, "administrative_restart", player, segment, boss_mode)
+	lab.failed_at = -1
+	retry_requested = false
+	weapon_index = 0
+	ammo = [GD.WEAPONS[0].magazine, GD.WEAPONS[1].magazine]
+	distance = 0
 	score = 0; stats = {"unarmored": 0, "light": 0, "heavy": 0, "flyer": 0}; state = "playing"; _start_segment(0)
+	lab.start(lab_panel.values, "baseline_pending")
 
 func _reset_player() -> void:
 	player = Vector2(GD.PLAYER_X, GD.GROUND_Y); velocity_y = 0; crouching = false; guarding = false; slide_time_left = 0.0
@@ -631,6 +658,7 @@ func _update_fx(delta: float) -> void:
 		if floaters[i].life <= 0: floaters.remove_at(i)
 
 func _emit(origin: Vector2, color: Color, count: int, speed: float) -> void:
+	if lab_panel and not lab_panel.values.particles_enabled: return
 	for i in range(count): particles.append({"pos": origin, "velocity": Vector2.from_angle(randf_range(0, TAU)) * randf_range(speed * 0.3, speed), "life": randf_range(0.18, 0.62), "color": color})
 
 func _notify(text: String, color: Color, duration := 0.55) -> void:
@@ -646,7 +674,7 @@ func _refresh_player_ui() -> void:
 	player_hud.follow_hitbox(_player_hitbox())
 func _slot_color() -> Color: return CYAN if selected_slot == 2 else _weapon().color
 func _slot_name() -> String: return "GRENADE LAUNCHER" if selected_slot == 2 else _weapon().name
-func _scroll() -> float: return (GD.BOSS.scroll if boss_mode else GD.SEGMENTS[segment].scroll) * GD.SCROLL_MULTIPLIER
+func _scroll() -> float: return (GD.BOSS.scroll if boss_mode else GD.SEGMENTS[segment].scroll) * float(lab_panel.values.scroll_multiplier)
 func _update_parallax() -> void:
 	# The world distance already drives enemies and obstacles. Quantize only
 	# rendering offsets so the unscaled pixel art never samples half pixels.
@@ -727,3 +755,12 @@ func _draw_victory() -> void:
 	var lines := [["LIGHT TURRETS", stats.unarmored], ["HEAVY TURRETS", stats.heavy], ["BOSS DEFEATED", "YES"]]
 	for i in range(lines.size()): draw_string(ThemeDB.fallback_font, Vector2(300, 320 + i * 30), lines[i][0], HORIZONTAL_ALIGNMENT_LEFT, 210, 15, DIM); draw_string(ThemeDB.fallback_font, Vector2(560, 320 + i * 30), str(lines[i][1]), HORIZONTAL_ALIGNMENT_LEFT, -1, 15, WHITE)
 	draw_string(ThemeDB.fallback_font, Vector2(0, 550), "PRESS R / SPACE TO REDEPLOY", HORIZONTAL_ALIGNMENT_CENTER, 960, 14, YELLOW)
+
+func lab_parameters_changed(key: String) -> void:
+	lab.finish(score, "parameter_change", player, segment, boss_mode)
+	lab.record("parameter_change", {"changed": key, "new_parameters": lab_panel.values.duplicate(true)})
+	_new_run()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		lab.finish(score, "window_close", player, segment, boss_mode)
