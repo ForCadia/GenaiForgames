@@ -31,3 +31,10 @@ Actual issues/fixes: the full parameter list would exceed the viewport height; p
 Validation: original gameplay aim/armor/transitions, shield, Boss, turret, laser gate, ground spikes and player HUD checks passed. New Lab B checks passed for 12 controls, live gameplay effects, UI input isolation, buffered retry, JSON fields and session separation. Expanded jump verification initially used a zero time step and failed because the grounded reset clears velocity; changed the test to a real 0.01-second step and it passed. Compatibility rendered panel/death captures passed and the panel screenshot was inspected. Native Web release export succeeded with official 4.7.2 templates; fetched just Web entries from the official 1.28 GB archive using HTTP ranges. Browser automation initialization exited unexpectedly twice, so browser loading, download and live-link verification remain unverified. A/B switching remains intentionally unimplemented pending student decisions. No external playtests performed. Automated checks are engineering verification, not Loop Log evidence.
 
 Time spent: pending student entry.
+
+
+## 2026-10-04 ? Duke upload completed
+
+Tool: Codex / PowerShell / Godot. Student confirmed replacing testdemo and reconnected Z:.
+
+Re-exported the current Godot Web build successfully, then ran deploy_duke.ps1. It reported Deployment succeeded and verified SHA256 hashes for index.html, index.js, index.wasm and index.pck. Public HTTP verification: homepage 200 and content identical to local HTML; JS, WASM and PCK all returned 200. WASM Content-Type was application/wasm. Live URL: https://people.duke.edu/~wz204/testdemo/. Existing Unity subdirectories were not deleted. Initial upload waited on network access before succeeding. Browser play and JSON download still require incognito verification; no playtest evidence was created. Time spent: pending student entry.
