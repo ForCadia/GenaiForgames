@@ -43,3 +43,8 @@ Re-exported the current Godot Web build successfully, then ran deploy_duke.ps1. 
 ## 2026-10-04 ? dedicated everfront deployment
 
 Student requested a new everfront folder instead of testdemo. Changed deploy_duke.ps1 default to Z:\public_html\everfront and updated the documented live URL. Uploaded the current build into that directory; deployment succeeded and required file hashes matched. The public everfront homepage matches local HTML and JS/WASM/PCK return HTTP 200. No files in testdemo were changed or deleted during this deployment. Time spent: pending student entry.
+
+## 2026-10-04 — requested Web rebuild and Duke update
+
+Tool: Codex / Godot / PowerShell. Prompt: rebuild Web and upload to Duke. First export failed because build/web was absent; created it and re-exported successfully. Recreated build/web.zip and uploaded to Z:\public_html\everfront; script reported success and verified required-file hashes. Public homepage matches local HTML, and JS/WASM/PCK return HTTP 200. Existing uncommitted project.godot edit and Windows PCK deletion were preserved. Browser gameplay/download verification remains manual. Time spent: pending student entry.
+
