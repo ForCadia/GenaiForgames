@@ -32,6 +32,10 @@ Validation: original gameplay aim/armor/transitions, shield, Boss, turret, laser
 
 Time spent: pending student entry.
 
+## 2026-10-04 — user-authorized Duke and GitHub refresh
+
+Tool: Codex / PowerShell / Git. Prompt: refresh Duke website and GitHub files. This latest instruction authorizes deployment after the earlier build-only task. Ran the existing deploy_duke.ps1 against the latest Web build; it reported Deployment succeeded for Z:\public_html\everfront and verified required-file hashes. Pushed the committed start-screen, A/B, parameter-mode and documentation changes to origin/main without force. Preserved the student's uncommitted project.godot edit and Windows PCK deletion. No private telemetry was uploaded and no external playtest evidence was created. Interactive browser behavior and JSON downloads require checking the refreshed release in an incognito window. Time spent: pending student entry.
+
 
 ## 2026-10-04 ? Duke upload completed
 
