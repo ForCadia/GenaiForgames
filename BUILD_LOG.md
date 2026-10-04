@@ -48,3 +48,8 @@ Student requested a new everfront folder instead of testdemo. Changed deploy_duk
 
 Tool: Codex / Godot / PowerShell. Prompt: rebuild Web and upload to Duke. First export failed because build/web was absent; created it and re-exported successfully. Recreated build/web.zip and uploaded to Z:\public_html\everfront; script reported success and verified required-file hashes. Public homepage matches local HTML, and JS/WASM/PCK return HTTP 200. Existing uncommitted project.godot edit and Windows PCK deletion were preserved. Browser gameplay/download verification remains manual. Time spent: pending student entry.
 
+
+
+## 2026-10-04 ? Failed to fetch investigation and repair
+
+Tool: Codex / PowerShell / existing Edge / Godot. User reported local Failed to fetch and confirmed double-clicking index.html (file://). Added start_web.ps1 to serve the current Web build over HTTP and open the correct URL. Identified and fixed a separate authoring error: custom web_release.zip was threaded while the preset disabled threads; fetched official web_nothreads templates, rebuilt and verified the generated JS no longer allocates shared WASM memory. Raw HTTP headers also showed Duke missing the WASM Content-Type; added additive .htaccess MIME rules and verified application/wasm after deployment. Upload hashes passed. Automated installation of a temporary browser library was rejected as potentially conflicting with project rules; used installed Edge instead. Browser screenshot showed complete resource download with no fetch error; a longer Edge headless capture timed out, so full interactive gameplay and JSON download remain unverified. No tester records or conclusions were created. Time spent: pending student entry.

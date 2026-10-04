@@ -117,3 +117,16 @@ Default target: `Z:\public_html\everfront`; expected URL: https://people.duke.ed
 - Actual telemetry JSON files in telemetry/ (currently none).
 - 60-90 second gameplay video as a link/upload (student recording pending).
 - Telemetry operational and browser-checked before **October 8** class swap; Canvas due **October 14, 2026, 23:59** (confirm course timezone).
+
+
+### Local Failed to fetch troubleshooting
+
+Do not double-click `build/web/index.html`: `file://` prevents the engine from fetching WASM/PCK. Start the local HTTP preview from the project root:
+
+```powershell
+.\start_web.ps1
+```
+
+It opens http://127.0.0.1:8000/ and reuses only a server whose homepage matches this build; use `-Port 8001` if another project occupies the port. Python is needed only for this local development preview. Online players install nothing.
+
+The Web custom templates must be **web_nothreads_debug.zip / web_nothreads_release.zip**, matching `variant/thread_support=false`. The initial custom templates were threaded despite that setting; corrected on 2026-10-04. The Duke deploy script installs the WASM/PCK MIME rules from `tools/duke.htaccess` without discarding existing rules. The WASM header must be `Content-Type: application/wasm`. Use a private window after updates.

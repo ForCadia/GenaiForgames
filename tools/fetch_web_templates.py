@@ -21,7 +21,8 @@ class RemoteZip(io.RawIOBase):
   self.pos+=len(data)
   return data
 with zipfile.ZipFile(RemoteZip()) as z:
- targets=[i for i in z.infolist() if Path(i.filename).name in ['web_release.zip','web_debug.zip','version.txt']]
+ print('Available Web templates:',[i.filename for i in z.infolist() if 'web' in i.filename],flush=True)
+ targets=[i for i in z.infolist() if Path(i.filename).name in ['web_nothreads_release.zip','web_nothreads_debug.zip','version.txt']]
  print([(i.filename,i.file_size,i.compress_size) for i in targets],flush=True)
  out=Path('tmp/web-templates'); out.mkdir(parents=True,exist_ok=True)
  for entry in targets:

@@ -27,7 +27,20 @@ if ($PSCmdlet.ShouldProcess($destinationRoot, 'Upload Godot Web build; replace m
     New-Item -ItemType Directory -Force -Path $destinationRoot | Out-Null
     # Copy only build files. Do not delete the existing Unity build or other hosted content.
     foreach ($file in Get-ChildItem -LiteralPath $sourceRoot -File) {
+        if ($file.Extension -eq '.import') { continue }
         Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $destinationRoot $file.Name) -Force
+    }
+    $mimeConfig = Join-Path $PSScriptRoot 'tools\duke.htaccess'
+    $destinationConfig = Join-Path $destinationRoot '.htaccess'
+    if (Test-Path -LiteralPath $mimeConfig) {
+        if (Test-Path -LiteralPath $destinationConfig) {
+            $existingConfig = Get-Content -LiteralPath $destinationConfig -Raw
+            foreach ($mimeLine in Get-Content -LiteralPath $mimeConfig) {
+                if (-not $existingConfig.Contains($mimeLine)) { Add-Content -LiteralPath $destinationConfig -Value $mimeLine }
+            }
+        } else {
+            Copy-Item -LiteralPath $mimeConfig -Destination $destinationConfig
+        }
     }
     foreach ($fileName in $requiredFiles) {
         $sourceHash = (Get-FileHash -LiteralPath (Join-Path $sourceRoot $fileName) -Algorithm SHA256).Hash
