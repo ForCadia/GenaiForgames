@@ -55,3 +55,39 @@ After death, press R, Space, or Fire to restart the current segment checkpoint. 
 3. Guard drain (1.5 s), 0.75 s recovery delay, and 0.5 s break lockout.
 4. Piercer armor-breaking against heavy enemies and the boss, followed by body hits.
 5. Every segment and boss death restoring a clean, repeatable checkpoint state.
+
+
+## Lab B additions (2026-10-04)
+
+Verified engine: **4.7.2.stable.official.ed1daf0bf**. Existing gameplay and art remain. The current active campaign has **four segments followed by Boss**; six timeline segments are defined, so older six-segment/grenade notes above do not describe the full active path.
+
+- **F1** or the LAB B button opens/closes the tuning panel. Gameplay, enemy timers and animations pause while open. Scroll to reach all 12 sliders/number controls, cosmetic particle toggle and reset/export/session buttons.
+- An edit takes effect immediately and starts a clean campaign attempt; JSON records an administrative parameter-change ending. Restore Defaults resets all values once. Do not count these resets as player retries.
+- **T** exports JSON (unused by original controls); while typing a number, use the export button. Web downloads the session; desktop archives it under Godot `user://lab_b_telemetry` and opens the folder. Copy actual tester exports into `telemetry/`.
+- **New tester** archives/exports first, retains old files and starts a new session. Check the download is saved before giving the game to the next tester. No network/AI telemetry calls.
+- Retry uses one press of R / Space / Fire, including a press during the 0.35-second death animation. HUD shows runs started, median completed death/victory duration, retried failures/all failures, and retries within 10 seconds/all failures.
+- A/B is **pending the student's question, hypothesis and values**. Existing 1/2/3 weapon keys remain. No two-variant experiment is claimed yet.
+
+### Browser build and deployment
+
+`build/web/` contains the native single-threaded Godot Web release (index.html, index.js, index.wasm, index.pck and supporting files). Match Godot version exactly; use Compatibility renderer for Web. Export instructions and checks are in AGENTS.md. This machine temporarily uses official Web templates fetched into ignored `tmp/web-templates`; another checkout should install the normal matching templates and clear Web custom-template paths in the editor, or recreate the local templates using `tools/fetch_web_templates.py`. Python is a tooling aid only, not a dependency players install.
+
+Preview locally:
+
+```powershell
+python -m http.server 8000 --bind 127.0.0.1 --directory build/web
+```
+
+Open http://127.0.0.1:8000. Host all files together using HTTPS; do not use file://. For itch.io, create an HTML game, ZIP the contents of build/web with index.html at the ZIP root, upload it and enable browser play; choose Restricted and supply the password if used. GitHub Pages can serve the same exported directory. Single-threaded export avoids requiring SharedArrayBuffer headers. No existing deployment configuration or remote was found, and no live URL has been published.
+
+After deployment, **open the live link in a private/incognito window**; check loading, failure, one-key retry, parameter controls and T download. Browser automation was unavailable in this session, so successful export and desktop Compatibility checks do not prove browser execution. Test the deployed build before inviting testers.
+
+### Submission checklist
+
+- Live browser URL (plus password for a restricted page).
+- GitHub repository with instructor added, or project ZIP **including hidden .git**. Keep tmp/ and .godot/ out of the ZIP; if omitting tmp Web templates, clear those custom paths and use installed templates as described above.
+- AGENTS.md, GDD.md, PROTOTYPE.md and BUILD_LOG.md; completed Prototype Card committed before first outside playtest.
+- Three actual one-variable loops, one actual A/B comparison, six or more real testers including two outside class, and evidence-based approximately one-page Verdict last.
+- Actual telemetry JSON files in telemetry/ (currently none).
+- 60-90 second gameplay video as a link/upload (student recording pending).
+- Telemetry operational and browser-checked before **October 8** class swap; Canvas due **October 14, 2026, 23:59** (confirm course timezone).
