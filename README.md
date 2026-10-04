@@ -65,12 +65,29 @@ After death, press R, Space, or Fire to restart the current segment checkpoint. 
 
 Verified engine: **4.7.2.stable.official.ed1daf0bf**. Existing gameplay and art remain. The current active campaign has **four segments followed by Boss**; six timeline segments are defined, so older six-segment/grenade notes above do not describe the full active path.
 
-- **F1** or the LAB B button opens/closes the tuning panel. Gameplay, enemy timers and animations pause while open. Scroll to reach all 12 sliders/number controls, cosmetic particle toggle and reset/export/session buttons.
+- First choose A/B and 原版 / 慢速 / 快速换弹 on the static start screen, then click **开始游戏 / START**. Default is **A + 原版**. World, timers and run telemetry stay paused until Start. Each start applies the selected complete combination once and starts at campaign entry; held keys and clicks cannot fire through the menu.
+- **F1** or the LAB B button opens/closes the existing tuning panel. The original 12 controls remain; a single **Reload time multiplier** is added. Gameplay, enemy timers and animations pause while open. Scroll to reach all controls, particle toggle and return/reset/export/session buttons.
 - An edit takes effect immediately and starts a clean campaign attempt; JSON records an administrative parameter-change ending. Restore Defaults resets all values once. Do not count these resets as player retries.
 - **T** exports JSON (unused by original controls); while typing a number, use the export button. Web downloads the session; desktop archives it under Godot `user://lab_b_telemetry` and opens the folder. Copy actual tester exports into `telemetry/`.
-- **New tester** archives/exports first, retains old files and starts a new session. Check the download is saved before giving the game to the next tester. No network/AI telemetry calls.
-- Retry uses one press of R / Space / Fire, including a press during the 0.35-second death animation. HUD shows runs started, median completed death/victory duration, retried failures/all failures, and retries within 10 seconds/all failures.
-- A/B is **pending the student's question, hypothesis and values**. Existing 1/2/3 weapon keys remain. No two-variant experiment is claimed yet.
+- **New tester** archives/exports first, retains old files and returns to the menu with a new session and zero runs. Check the download is saved before handing over. No network/AI telemetry calls. **返回开始界面** retains the existing session/data; an active run ends as administrative_return_to_start.
+- Retry uses one press of R / Space / Fire, including during the 0.35-second death animation, and retains the current combination. HUD shows the combination, runs started, median duration, and separate A/B failures/retries/rates. No observations show N/A. Rapid rate uses the first retry keypress within 10 seconds, not the end of the animation; raw JSON also records failure-to-ready and input-to-ready delays.
+- **F2 = A / Checkpoint**, **F3 = B / Campaign**, also selectable in the panel. A restores segment entry (full Boss battle on Boss death); B always restores campaign entry. A restores checkpoint score/kill counters/ammo/weapon/scroll distance; B starts with zero score/counters/distance, rifle and 24/5 ammo. All temporary threats/player timers clear. Same failures, score-award rules and controls. Switching mode while playing produces administrative_variant_switch and resets the campaign; it is not a retry. Existing 1/2/3 weapon keys remain.
+
+### Parameter modes and test procedure
+
+Original baseline verified from game constants and git 613233e; it is never captured from temporary sliders. All twelve original defaults remain. Added reload multiplier defaults to 1.0. See PROTOTYPE.md for the full parameter table.
+
+| Mode | Only change from 原版 | Effective example |
+|---|---|---|
+| 原版 | None | scroll multiplier 1.5; rifle/piercer reload 1.2/1.8 s |
+| 慢速 | scroll multiplier 1.5→1.275 (−15%) | first-segment scroll 330→280.5 px/s; event times and independent gate speed unchanged |
+| 快速换弹 | reload multiplier 1.0→0.8 (−20%) | rifle/piercer reload 0.96/1.44 s; animation and HUD use the same duration |
+
+These three modes combine with A/B to give six choices. The panel uses the same names; a selection changes the full snapshot with exactly one administrative_parameter_change reset. Manual edits display 自定义. Selecting 原版 restores all original values. Returning to the start screen remembers the last named choice; Start reapplies it, including after custom edits. Former Baseline / Loop presets are superseded.
+
+For parameter rounds, fix **A** and begin each single-variable test from 原版; keep the panel closed while testers play. Third manual iteration can use jump speed 720→755.14 with gravity 1250 unchanged (ideal jump height approximately +10%); it is not a fourth preset. Formal A/B uses **原版 only**, the same tester tries both, and tester orders alternate A→B / B→A. Presets do not count as real measured iterations. Complete thresholds and commit the Prototype Card before the first external playtest.
+
+JSON schema 2 retains raw events with variant, restart_mode, parameter_mode, experiment_preset (same-name compatibility alias), segment/checkpoint, full parameters and session/run IDs. run_start includes start_score; run_end includes score_delta. retry_requested preserves first input time; retry includes failure_to_input_seconds / failure_to_restart_seconds / input_to_restart_seconds. Per-mode rates count unique retried deaths / actual deaths of that mode; administrative endings and tester resets are excluded, but an actual death abandoned without retry remains in the denominator. HUD totals span parameter modes in one session; filter raw records or keep formal A/B entirely 原版. These are run percentages, not participant percentages.
 
 ### Browser build and deployment
 
@@ -84,7 +101,7 @@ python -m http.server 8000 --bind 127.0.0.1 --directory build/web
 
 Open http://127.0.0.1:8000. Host all files together using HTTPS; do not use file://. For itch.io, create an HTML game, ZIP the contents of build/web with index.html at the ZIP root, upload it and enable browser play; choose Restricted and supply the password if used. GitHub Pages can serve the same exported directory. Single-threaded export avoids requiring SharedArrayBuffer headers. Duke deployment was later supplied by the student and completed on 2026-10-04: https://people.duke.edu/~wz204/everfront/.
 
-After deployment, **open the live link in a private/incognito window**; check loading, failure, one-key retry, parameter controls and T download. Browser automation was unavailable in this session, so successful export and desktop Compatibility checks do not prove browser execution. Test the deployed build before inviting testers.
+The student reports earlier browser checks and Duke deployment completed. After uploading this new build, **open the live link in a private/incognito window** and check the new menu, six combinations, F2/F3, one-key retry and T download. This task prepares the local Web build/ZIP; it does not upload a new Duke release. Headless game checks and desktop Compatibility captures do not verify browser UI/download interaction.
 
 ### Submission checklist
 

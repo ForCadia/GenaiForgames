@@ -16,6 +16,7 @@ godot --path .
 godot --headless --path . --editor --quit
 godot --headless --path . --script res://tests/gameplay_smoke.gd -- --lab-test
 godot --headless --path . --script res://tests/lab_b_smoke.gd -- --lab-test
+godot --headless --path . --script res://tests/start_modes_smoke.gd -- --lab-test
 New-Item -ItemType Directory -Force build/web
 godot --headless --path . --export-release Web build/web/index.html
 python -m http.server 8000 --directory build/web
@@ -32,6 +33,7 @@ This checkout currently has Web custom templates at ignored `tmp/web-templates/w
 - `Player*`, `player_visual.gd`, `player_hud.gd`: player artwork, shapes and HUD.
 - Enemy scenes and scripts: turrets, laser gates, spikes, Boss and attacks.
 - `lab_panel.gd`: live tuning UI; `lab_telemetry.gd`: local event records and JSON download.
+- `start_screen.gd`: static start screen; no run or simulation before Start. `assets/fonts/`: Noto Sans SC and OFL license for consistent Chinese labels in Web.
 - `tests/`: existing checks plus Lab B regression verification; automated exports belong in ignored `tmp/`, never `telemetry/`.
 - `telemetry/`: actual tester JSON files, manually copied from downloads/local archives.
 - Markdown documents remain at project root. Keep existing source layout rather than moving everything into the assignment's illustrative `src/` tree.
@@ -42,4 +44,14 @@ Read AGENTS.md, GDD.md and PROTOTYPE.md before changes. Preserve this demo, engi
 
 The student chooses the question, hypothesis, A/B values, thresholds and verdict. Never invent Lab A / Rep 3 decisions, testers, results, timings, or prior work. Missing content is explicitly pending. Change one test variable per measured iteration; hold other parameters constant between variants. Every gameplay number tuned during Lab B must be on the panel. Commit small, explicit changes. Complete and commit the Prototype Card before the first outside playtest; a placeholder does not satisfy this requirement.
 
-No AI-service requests or API keys in game code. Telemetry is local only. Do not upload tester data automatically. A new tester archives/exports the previous session before resetting; do not erase archives. Panel pauses are excluded from gameplay duration; retry latency is real elapsed time. Administrative resets must not count as player retries. A/B is pending student confirmation; do not create two identical options and call them an experiment.
+No AI-service requests or API keys in game code. Telemetry is local only. Do not upload tester data automatically. A new tester archives/exports the previous session before resetting; do not erase archives. Panel/menu pauses are excluded from gameplay duration; retry latency is real elapsed time. Administrative resets must not count as player retries.
+
+## Confirmed experiment and start screen
+
+The student selected restart location as the A/B variable: A checkpoint (full Boss encounter on Boss death), B campaign entry on every death. F2/F3 and the existing panel select modes; preserve 1/2/3 weapons. All switches reset cleanly to campaign entry. Default is A + 原版. The latest parameter choices are only 原版 / 慢速 / 快速换弹 (plus 自定义 displayed after a manual panel edit). The earlier four presets are superseded.
+
+Original defaults are verified at commit 613233e and against game_data.gd. Preserve all existing 12 numbers and their defaults; the added reload_multiplier defaults to 1.0. 慢速 changes only scroll_multiplier 1.5→1.275. 快速换弹 changes only reload_multiplier 1.0→0.8. Keep panel selections, menu labels and telemetry parameter_mode consistent. JSON experiment_preset is an alias using the same names.
+
+Only Start creates a run while on the menu; gate held input/clicks before gameplay. Return records administrative_return_to_start and retains session/data. Preset and mode changes record administrative_parameter_change / administrative_variant_switch without fake failures/retries. The first retry event-dispatch time must be preserved during the animation lock; rapid rate uses failure_to_input_seconds. failure_to_restart_seconds separately measures when play is ready. Per-variant denominators are actual deaths, including abandoned deaths. Empty rates are null/N/A. See PROTOTYPE.md for score restoration and analysis definitions.
+
+Parameter rounds use A; formal A/B uses 原版 with alternating tester orders. These are experiment preparations, not real iterations. Thresholds, tester records and results stay pending. Browser verification and the existing Duke deployment were completed by the student; this change prepares a new Web build/ZIP for the student to upload. Do not run the Duke upload script for this task.
