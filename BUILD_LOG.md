@@ -1,5 +1,11 @@
 # Lab B — Build log
 
+## 2026-10-04 — existing Duke deployment adaptation
+
+Tool: Codex / PowerShell. Key prompt: student supplied “Unity 重新 Build → PowerShell 运行上传脚本” and the Duke CIFS destination.
+
+Read the existing Unity deployment script. It requires Unity Build/TemplateData directories and deletes those destination entries, so it cannot upload the Godot Web export. Added a separate Godot-specific `deploy_duke.ps1` in this project, copying exported files and verifying SHA256 hashes. Updated deployment instructions to prioritize the supplied Duke host. No remote upload or deletion was performed. Z: was not available in this session. Time spent: pending student entry.
+
 ## 2026-10-04 — inspection and baseline
 
 Tool: Codex; PowerShell; Godot 4.7.2; Git.

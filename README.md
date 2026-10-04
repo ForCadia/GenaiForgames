@@ -84,6 +84,28 @@ After deployment, **open the live link in a private/incognito window**; check lo
 
 ### Submission checklist
 
+### Existing Duke upload workflow
+
+The student supplied the existing Duke CIFS deployment method. The original script in `D:\Unity Project\My project` checks Unity-specific Build/TemplateData directories. Use this project's `deploy_duke.ps1` for Godot instead; it uploads exported files, verifies required-file hashes and does not build or delete old hosted directories.
+
+```powershell
+cd 'D:\GodotDemo\shoot-planes'
+# First re-export the Web preset (Godot executable must be on PATH):
+godot --headless --path . --export-release Web build/web/index.html
+# Then upload; this replaces the current testdemo index.html:
+.\deploy_duke.ps1
+```
+
+If Z: is unavailable, reconnect using the supplied command and enter the password interactively:
+
+```powershell
+net use Z: \\homedir.oit.duke.edu\users\w\wz204 /user:WIN\wz204 * /persistent:yes
+```
+
+Default target: `Z:\public_html\testdemo`; expected URL: https://people.duke.edu/~wz204/testdemo/. This Godot build has **not** been uploaded by the assistant. To keep the existing Unity homepage, specify another destination such as `-DestinationPath 'Z:\public_html\everfront'` and use the corresponding URL. After uploading, Ctrl+F5 and test the live URL in an incognito window, including T download. The script has `-WhatIf` for a preview.
+
+### Submission checklist (continued)
+
 - Live browser URL (plus password for a restricted page).
 - GitHub repository with instructor added, or project ZIP **including hidden .git**. Keep tmp/ and .godot/ out of the ZIP; if omitting tmp Web templates, clear those custom paths and use installed templates as described above.
 - AGENTS.md, GDD.md, PROTOTYPE.md and BUILD_LOG.md; completed Prototype Card committed before first outside playtest.
