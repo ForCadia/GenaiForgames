@@ -53,3 +53,8 @@ Tool: Codex / Godot / PowerShell. Prompt: rebuild Web and upload to Duke. First 
 ## 2026-10-04 ? Failed to fetch investigation and repair
 
 Tool: Codex / PowerShell / existing Edge / Godot. User reported local Failed to fetch and confirmed double-clicking index.html (file://). Added start_web.ps1 to serve the current Web build over HTTP and open the correct URL. Identified and fixed a separate authoring error: custom web_release.zip was threaded while the preset disabled threads; fetched official web_nothreads templates, rebuilt and verified the generated JS no longer allocates shared WASM memory. Raw HTTP headers also showed Duke missing the WASM Content-Type; added additive .htaccess MIME rules and verified application/wasm after deployment. Upload hashes passed. Automated installation of a temporary browser library was rejected as potentially conflicting with project rules; used installed Edge instead. Browser screenshot showed complete resource download with no fetch error; a longer Edge headless capture timed out, so full interactive gameplay and JSON download remain unverified. No tester records or conclusions were created. Time spent: pending student entry.
+
+## 2026-10-04 — preserve game aspect ratio
+
+User screenshot showed wide-screen expansion beyond the fixed 960x720 gameplay UI/death overlay. Changed window/stretch/aspect from expand to keep so the authored 4:3 viewport scales uniformly with letterboxing. Verified Compatibility captures at 1600x900 and rebuilt the Web release. No gameplay numbers changed; existing user edits remain unstaged. Time spent: pending student entry.
+
