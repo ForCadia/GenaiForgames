@@ -1,7 +1,7 @@
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [string]$BuildPath = (Join-Path $PSScriptRoot 'build\web'),
-    [string]$DestinationPath = 'Z:\public_html\testdemo'
+    [string]$DestinationPath = 'Z:\public_html\everfront'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -36,5 +36,5 @@ if ($PSCmdlet.ShouldProcess($destinationRoot, 'Upload Godot Web build; replace m
     }
     Write-Host 'Deployment succeeded.'
     Write-Host "Destination: $destinationRoot"
-    Write-Host 'Default Duke URL: https://people.duke.edu/~wz204/testdemo/'
+    Write-Host 'Default Duke URL: https://people.duke.edu/~wz204/everfront/'
 }

@@ -38,3 +38,8 @@ Time spent: pending student entry.
 Tool: Codex / PowerShell / Godot. Student confirmed replacing testdemo and reconnected Z:.
 
 Re-exported the current Godot Web build successfully, then ran deploy_duke.ps1. It reported Deployment succeeded and verified SHA256 hashes for index.html, index.js, index.wasm and index.pck. Public HTTP verification: homepage 200 and content identical to local HTML; JS, WASM and PCK all returned 200. WASM Content-Type was application/wasm. Live URL: https://people.duke.edu/~wz204/testdemo/. Existing Unity subdirectories were not deleted. Initial upload waited on network access before succeeding. Browser play and JSON download still require incognito verification; no playtest evidence was created. Time spent: pending student entry.
+
+
+## 2026-10-04 ? dedicated everfront deployment
+
+Student requested a new everfront folder instead of testdemo. Changed deploy_duke.ps1 default to Z:\public_html\everfront and updated the documented live URL. Uploaded the current build into that directory; deployment succeeded and required file hashes matched. The public everfront homepage matches local HTML and JS/WASM/PCK return HTTP 200. No files in testdemo were changed or deleted during this deployment. Time spent: pending student entry.

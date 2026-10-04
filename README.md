@@ -78,7 +78,7 @@ Preview locally:
 python -m http.server 8000 --bind 127.0.0.1 --directory build/web
 ```
 
-Open http://127.0.0.1:8000. Host all files together using HTTPS; do not use file://. For itch.io, create an HTML game, ZIP the contents of build/web with index.html at the ZIP root, upload it and enable browser play; choose Restricted and supply the password if used. GitHub Pages can serve the same exported directory. Single-threaded export avoids requiring SharedArrayBuffer headers. Duke deployment was later supplied by the student and completed on 2026-10-04: https://people.duke.edu/~wz204/testdemo/.
+Open http://127.0.0.1:8000. Host all files together using HTTPS; do not use file://. For itch.io, create an HTML game, ZIP the contents of build/web with index.html at the ZIP root, upload it and enable browser play; choose Restricted and supply the password if used. GitHub Pages can serve the same exported directory. Single-threaded export avoids requiring SharedArrayBuffer headers. Duke deployment was later supplied by the student and completed on 2026-10-04: https://people.duke.edu/~wz204/everfront/.
 
 After deployment, **open the live link in a private/incognito window**; check loading, failure, one-key retry, parameter controls and T download. Browser automation was unavailable in this session, so successful export and desktop Compatibility checks do not prove browser execution. Test the deployed build before inviting testers.
 
@@ -92,7 +92,7 @@ The student supplied the existing Duke CIFS deployment method. The original scri
 cd 'D:\GodotDemo\shoot-planes'
 # First re-export the Web preset (Godot executable must be on PATH):
 godot --headless --path . --export-release Web build/web/index.html
-# Then upload; this replaces the current testdemo index.html:
+# Then upload; this uploads to the dedicated everfront directory:
 .\deploy_duke.ps1
 ```
 
@@ -102,7 +102,7 @@ If Z: is unavailable, reconnect using the supplied command and enter the passwor
 net use Z: \\homedir.oit.duke.edu\users\w\wz204 /user:WIN\wz204 * /persistent:yes
 ```
 
-Default target: `Z:\public_html\testdemo`; expected URL: https://people.duke.edu/~wz204/testdemo/. This Godot build was uploaded on 2026-10-04 after student confirmation; the default URL now returns the matching Godot homepage. To keep the existing Unity homepage, specify another destination such as `-DestinationPath 'Z:\public_html\everfront'` and use the corresponding URL. After uploading, Ctrl+F5 and test the live URL in an incognito window, including T download. The script has `-WhatIf` for a preview.
+Default target: `Z:\public_html\everfront`; expected URL: https://people.duke.edu/~wz204/everfront/. This Godot build was uploaded on 2026-10-04 after student confirmation; the game now uses its dedicated everfront directory. The default destination is now the dedicated everfront directory; normal uploads do not target testdemo. After uploading, Ctrl+F5 and test the live URL in an incognito window, including T download. The script has `-WhatIf` for a preview.
 
 ### Submission checklist (continued)
 
