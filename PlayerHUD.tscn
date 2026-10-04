@@ -1,0 +1,109 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://player_hud.gd" id="1_script"]
+
+[sub_resource type="StyleBoxEmpty" id="PanelStyle"]
+
+[sub_resource type="StyleBoxFlat" id="TrackStyle"]
+bg_color = Color(0.065, 0.085, 0.115, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.25, 0.3, 1)
+
+[sub_resource type="StyleBoxFlat" id="HealthFill"]
+bg_color = Color(0.9, 0.18, 0.22, 1)
+
+[sub_resource type="StyleBoxFlat" id="AmmoFill"]
+bg_color = Color(1, 0.78, 0.24, 1)
+
+[sub_resource type="StyleBoxFlat" id="ReloadFill"]
+bg_color = Color(0.2, 0.65, 1, 1)
+
+[node name="PlayerHUD" type="CanvasLayer"]
+layer = 5
+script = ExtResource("1_script")
+reload_fill_style = SubResource("ReloadFill")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture_filter = 1
+
+[node name="StatusPanel" type="PanelContainer" parent="Root"]
+layout_mode = 0
+offset_left = 150.0
+offset_top = 474.0
+offset_right = 230.0
+offset_bottom = 522.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("PanelStyle")
+
+[node name="Margin" type="MarginContainer" parent="Root/StatusPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 2
+
+[node name="VBox" type="VBoxContainer" parent="Root/StatusPanel/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 1
+
+[node name="WeaponLabel" type="Label" parent="Root/StatusPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.97, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 9
+text = "ASSAULT RIFLE"
+horizontal_alignment = 1
+
+[node name="HealthRow" type="HBoxContainer" parent="Root/StatusPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="HealthLabel" type="Label" parent="Root/StatusPanel/Margin/VBox/HealthRow"]
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.97, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 8
+text = "HP1/1"
+
+[node name="HealthBar" type="ProgressBar" parent="Root/StatusPanel/Margin/VBox/HealthRow"]
+custom_minimum_size = Vector2(42, 7)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("TrackStyle")
+theme_override_styles/fill = SubResource("HealthFill")
+max_value = 1.0
+value = 1.0
+show_percentage = false
+
+[node name="AmmoRow" type="HBoxContainer" parent="Root/StatusPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="PenetrationLabel" type="Label" parent="Root/StatusPanel/Margin/VBox/AmmoRow"]
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.86, 0.93, 1)
+theme_override_font_sizes/font_size = 8
+text = "PEN 1"
+
+[node name="AmmoBar" type="ProgressBar" parent="Root/StatusPanel/Margin/VBox/AmmoRow"]
+custom_minimum_size = Vector2(42, 7)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("TrackStyle")
+theme_override_styles/fill = SubResource("AmmoFill")
+max_value = 1.0
+step = 0.0
+value = 1.0
+show_percentage = false
