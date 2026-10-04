@@ -45,6 +45,9 @@ func _run() -> void:
 
 	var game: Node2D = load("res://main.tscn").instantiate()
 	root.add_child(game)
+	game.start_game("checkpoint", 0)
+	game.lab_panel._process(0.01)
+	game.lab_panel._process(0.01)
 	await process_frame
 	game.set_process(false)
 	var before_threats: int = game.threats.size()
@@ -70,6 +73,9 @@ func _run() -> void:
 
 	var standing_game: Node2D = load("res://main.tscn").instantiate()
 	root.add_child(standing_game)
+	standing_game.start_game("checkpoint", 0)
+	standing_game.lab_panel._process(0.01)
+	standing_game.lab_panel._process(0.01)
 	await process_frame
 	standing_game.set_process(false)
 	standing_game._spawn_laser_gate()
@@ -78,6 +84,9 @@ func _run() -> void:
 	assert(standing_game.state == "dead")
 	var sliding_game: Node2D = load("res://main.tscn").instantiate()
 	root.add_child(sliding_game)
+	sliding_game.start_game("checkpoint", 0)
+	sliding_game.lab_panel._process(0.01)
+	sliding_game.lab_panel._process(0.01)
 	await process_frame
 	sliding_game.set_process(false)
 	sliding_game.crouching = true

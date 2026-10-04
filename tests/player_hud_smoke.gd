@@ -15,6 +15,9 @@ func _run() -> void:
 
 	var game: Node2D = load("res://main.tscn").instantiate()
 	root.add_child(game)
+	game.start_game("checkpoint", 0)
+	game.lab_panel._process(0.01)
+	game.lab_panel._process(0.01)
 	await process_frame
 	game.set_process(false)
 	var hud: PlayerHUD = game.player_hud

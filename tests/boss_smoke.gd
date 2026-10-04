@@ -77,6 +77,9 @@ func _run() -> void:
 	_check(main_scene != null, "Main scene must load after Boss integration")
 	var game := main_scene.instantiate()
 	root.add_child(game)
+	game.start_game("checkpoint", 0)
+	game.lab_panel._process(0.01)
+	game.lab_panel._process(0.01)
 	await process_frame
 	game._start_boss()
 	_check(game.boss.hp == 4 and game.boss.armor == 2, "Boss checkpoint must preserve original four-point weak health")

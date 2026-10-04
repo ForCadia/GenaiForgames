@@ -7,10 +7,13 @@ func _run() -> void:
 	assert("--lab-test" in OS.get_cmdline_user_args(), "Use -- --lab-test; never write test data into playtest logs")
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)
+	game.start_game("checkpoint", 0)
+	game.lab_panel._process(0.01)
+	game.lab_panel._process(0.01)
 	await process_frame
 	game.set_process(false)
 	var ui = game.lab_panel
-	assert(ui.SPECS.size() == 12)
+	assert(ui.SPECS.size() == 13)
 	assert(game.lab.run_number == 1 and game.lab.active)
 	# Live controls change the exact values used by the simulation, restart
 	# cleanly, and preserve the previous parameter snapshot.
@@ -129,11 +132,11 @@ func _run() -> void:
 	game.lab.persistence = false
 	var old_session: String = game.lab.session_id
 	ui.new_tester()
-	assert(game.lab.session_id != old_session and game.lab.run_number == 1)
+	assert(game.lab.session_id != old_session and game.lab.run_number == 0)
 	assert(game.lab.events.filter(func(e): return e.event == "retry").is_empty())
-	assert(game.lab.summary().contains("retry 0/0"))
+	assert(game.lab.summary().contains("rate N/A"))
 	DirAccess.make_dir_recursive_absolute("res://tmp")
 	var file := FileAccess.open("res://tmp/automated-lab-b-validation.json", FileAccess.WRITE)
 	file.store_string(JSON.stringify(data, "\t"))
-	print("LAB B: 12 controls / live effects / panel isolation / buffered retry / JSON / session separation PASS")
+	print("LAB B: 13 controls / live effects / panel isolation / buffered retry / JSON / session separation PASS")
 	quit(0)

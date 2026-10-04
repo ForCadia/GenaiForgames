@@ -8,6 +8,9 @@ func _capture() -> void:
 	root.size = Vector2i(960, 720)
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)
+	game.start_game("checkpoint", 0)
+	game.lab_panel._process(0.01)
+	game.lab_panel._process(0.01)
 	await create_timer(0.2).timeout
 	game.set_process(false)
 	game.lab_panel.toggle_panel()

@@ -6,6 +6,9 @@ func _initialize() -> void:
 func _run() -> void:
 	var game: Node2D = load("res://main.tscn").instantiate()
 	root.add_child(game)
+	game.start_game("checkpoint", 0)
+	game.lab_panel._process(0.01)
+	game.lab_panel._process(0.01)
 	await process_frame
 	game.set_process(false)
 	for segment_index in range(GameData.CAMPAIGN_SEGMENT_COUNT):

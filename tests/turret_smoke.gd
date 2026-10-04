@@ -97,6 +97,9 @@ func _run() -> void:
 
 	var game: Node2D = load("res://main.tscn").instantiate()
 	root.add_child(game)
+	game.start_game("checkpoint", 0)
+	game.lab_panel._process(0.01)
+	game.lab_panel._process(0.01)
 	await process_frame
 	game.set_process(false)
 	var enemy_count: int = game.enemies.size()
@@ -131,6 +134,9 @@ func _run() -> void:
 
 	var stomp_game: Node2D = load("res://main.tscn").instantiate()
 	root.add_child(stomp_game)
+	stomp_game.start_game("checkpoint", 0)
+	stomp_game.lab_panel._process(0.01)
+	stomp_game.lab_panel._process(0.01)
 	await process_frame
 	stomp_game.set_process(false)
 	stomp_game._spawn_turret(load("res://LightTurret.tscn"))

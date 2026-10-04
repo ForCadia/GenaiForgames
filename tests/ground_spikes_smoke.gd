@@ -25,6 +25,9 @@ func _run() -> void:
 
 	var game: Node2D = load("res://main.tscn").instantiate()
 	root.add_child(game)
+	game.start_game("checkpoint", 0)
+	game.lab_panel._process(0.01)
+	game.lab_panel._process(0.01)
 	await process_frame
 	game.set_process(false)
 	var original_obstacles: int = game.obstacles.size()
@@ -41,6 +44,9 @@ func _run() -> void:
 
 	var slide_game: Node2D = load("res://main.tscn").instantiate()
 	root.add_child(slide_game)
+	slide_game.start_game("checkpoint", 0)
+	slide_game.lab_panel._process(0.01)
+	slide_game.lab_panel._process(0.01)
 	await process_frame
 	slide_game.set_process(false)
 	slide_game.crouching = true
@@ -52,6 +58,9 @@ func _run() -> void:
 
 	var jump_game: Node2D = load("res://main.tscn").instantiate()
 	root.add_child(jump_game)
+	jump_game.start_game("checkpoint", 0)
+	jump_game.lab_panel._process(0.01)
+	jump_game.lab_panel._process(0.01)
 	await process_frame
 	jump_game.set_process(false)
 	jump_game._spawn_ground_spikes()

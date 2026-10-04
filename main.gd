@@ -32,6 +32,10 @@ const BOSS_FLIGHT_SPEED := 300.0
 var lab = preload("res://lab_telemetry.gd").new()
 var lab_panel: CanvasLayer
 var retry_requested := false
+var restart_mode := "checkpoint"
+var start_screen: CanvasLayer
+var checkpoint_weapon_index := 0
+var checkpoint_distance := 0.0
 
 var player := Vector2(GD.PLAYER_X, GD.GROUND_Y)
 var velocity_y := 0.0
@@ -61,7 +65,7 @@ var next_event := 0
 var segment_transition_pending := false
 var distance := 0.0
 var boss_mode := false
-var state := "playing"
+var state := "start"
 var death_delay := 0.0
 var banner := ""
 var banner_time := 0.0
@@ -93,18 +97,23 @@ func _ready() -> void:
 	boss_actor.feedback.connect(_on_boss_feedback)
 	boss_actor.weak_point_hit.connect(_boss_damage)
 	boss_actor.form_changed.connect(_on_boss_form_changed)
-	_start_segment(0)
+	_clear_world()
+	_reset_player()
 	_update_parallax()
-	lab.start(lab_panel.values, "baseline_pending")
+	start_screen = preload("res://start_screen.gd").new()
+	start_screen.game = self
+	start_screen.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(start_screen)
+	return_to_start()
 
 func _process(delta: float) -> void:
-	if lab_panel.blocked: return
+	if state == "start" or lab_panel.blocked: return
 	if lab.active: lab.duration += delta
 	_update_fx(delta)
 	if state == "dead":
 		death_delay -= delta
 		if Input.is_action_just_pressed("restart") or Input.is_action_just_pressed("jump") or Input.is_action_just_pressed("fire"):
-			retry_requested = true
+			_request_retry("polled_input")
 		if death_delay <= 0 and retry_requested:
 			_retry()
 		queue_redraw()
@@ -136,7 +145,13 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if lab_panel.blocked: return
+	if state == "start" or lab_panel.blocked: return
+	if state == "dead":
+		for action in ["restart", "jump", "fire"]:
+			if event.is_action_pressed(action) and not event.is_echo():
+				_request_retry(action)
+				get_viewport().set_input_as_handled()
+				return
 	if event is InputEventMouseMotion: aim = event.position
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT: aim = event.position
 	if state == "playing" and event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
@@ -221,7 +236,7 @@ func _select_slot(slot: int) -> void:
 
 func _reload() -> void:
 	if state != "playing" or reload_left > 0 or ammo[weapon_index] >= _weapon().magazine: return
-	reload_left = _weapon().reload
+	reload_left = _reload_duration()
 	player_visual.play_reload(reload_left)
 	_refresh_player_ui()
 
@@ -516,7 +531,10 @@ func _die(cause: String) -> void:
 func _start_segment(index: int) -> void:
 	segment = index; segment_time = 0; next_event = 0; segment_transition_pending = false; boss_mode = false
 	checkpoint_score = score; checkpoint_stats = stats.duplicate(true); checkpoint_ammo = ammo.duplicate()
+	checkpoint_weapon_index = weapon_index; checkpoint_distance = distance
 	_clear_world(); _reset_player()
+	lab.set_location(segment, false)
+	if lab.active: lab.record("checkpoint_reached", {"score": score})
 	player_visual.start_scrolling()
 	banner = "CHECKPOINT // " + GD.SEGMENTS[index].title; banner_time = 2
 
@@ -524,6 +542,9 @@ func _start_boss() -> void:
 	boss_mode = true; segment_time = 0; segment_transition_pending = false; _clear_world(); _reset_player()
 	player_visual.start_scrolling()
 	checkpoint_score = score; checkpoint_stats = stats.duplicate(true); checkpoint_ammo = ammo.duplicate()
+	checkpoint_weapon_index = weapon_index; checkpoint_distance = distance
+	lab.set_location(segment, true)
+	if lab.active: lab.record("checkpoint_reached", {"score": score})
 	boss = {"armor": GD.BOSS.armor_per_cycle, "hp": GD.BOSS.health, "phase": 1}
 	boss_actor.position = Vector2(785.0, BOSS_IDLE_Y)
 	boss_actor.reset_for_battle(true)
@@ -599,25 +620,106 @@ func _boss_damage() -> void:
 	else:
 		_notify("BOSS HIT // HP %d / %d" % [boss.hp, GD.BOSS.health], WHITE, 1)
 
-func _retry() -> void:
-	retry_requested = false
-	state = "playing"; score = checkpoint_score; stats = checkpoint_stats.duplicate(true); ammo = checkpoint_ammo.duplicate()
-	if boss_mode: _start_boss()
-	else: _start_segment(segment)
-	lab.retry()
-	lab.start(lab_panel.values, "baseline_pending")
+func _request_retry(action: String) -> void:
+	if state != "dead" or retry_requested: return
+	retry_requested = true
+	lab.request_retry(action)
 
-func _new_run() -> void:
-	lab.finish(score, "administrative_restart", player, segment, boss_mode)
-	lab.failed_at = -1
+func _retry() -> void:
+	if state != "dead": return
+	if not retry_requested: _request_retry("direct_retry")
+	retry_requested = false
+	state = "playing"
+	if restart_mode == "campaign":
+		_reset_campaign()
+	else:
+		score = checkpoint_score
+		stats = checkpoint_stats.duplicate(true)
+		ammo = checkpoint_ammo.duplicate()
+		weapon_index = checkpoint_weapon_index
+		distance = checkpoint_distance
+		if boss_mode: _start_boss()
+		else: _start_segment(segment)
+	_update_parallax()
+	# Keep old failure context until the retry event has been attributed.
+	lab.retry()
+	_start_lab_run()
+
+func _reset_campaign() -> void:
 	retry_requested = false
 	weapon_index = 0
 	ammo = [GD.WEAPONS[0].magazine, GD.WEAPONS[1].magazine]
 	distance = 0
-	score = 0; stats = {"unarmored": 0, "light": 0, "heavy": 0, "flyer": 0}; state = "playing"; _start_segment(0)
-	lab.start(lab_panel.values, "baseline_pending")
+	score = 0
+	stats = {"unarmored": 0, "light": 0, "heavy": 0, "flyer": 0}
+	state = "playing"
+	_start_segment(0)
+	_update_parallax()
+
+func _start_lab_run() -> void:
+	lab.start(lab_panel.values, restart_mode, lab_panel.parameter_mode, segment, boss_mode, score)
+	lab_panel.refresh_summary()
+
+func _new_run(reason := "administrative_restart") -> void:
+	lab.finish(score, reason, player, segment, boss_mode)
+	lab.clear_pending_retry()
+	_reset_campaign()
+	_start_lab_run()
+	queue_redraw()
+
+func set_restart_mode(mode: String) -> void:
+	if mode not in ["checkpoint", "campaign"] or mode == restart_mode: return
+	var previous := restart_mode
+	lab.finish(score, "administrative_variant_switch", player, segment, boss_mode)
+	lab.record("variant_switch", {"from_restart_mode": previous, "to_restart_mode": mode,
+		"from_variant": "A" if previous == "checkpoint" else "B",
+		"to_variant": "A" if mode == "checkpoint" else "B"})
+	lab.clear_pending_retry()
+	restart_mode = mode
+	lab_panel.mode_selector.select(0 if mode == "checkpoint" else 1)
+	if state != "start":
+		_new_run("administrative_variant_switch")
+		_gate_gameplay_input()
+	else:
+		lab.restart_mode = mode
+		lab.variant = "A" if mode == "checkpoint" else "B"
+	lab_panel.refresh_summary()
+
+func _gate_gameplay_input() -> void:
+	lab_panel.blocked = true
+	lab_panel.release_pending = not lab_panel.expanded
+	lab_panel.release_frames = 1
+
+func start_game(mode: String, parameter_index: int) -> void:
+	if state != "start": return
+	set_restart_mode(mode)
+	lab_panel.apply_preset(parameter_index, false)
+	start_screen.hide()
+	lab_panel.show()
+	lab_panel.expanded = false
+	lab_panel.panel.hide()
+	_new_run()
+	_gate_gameplay_input()
+	get_tree().paused = false
+
+func return_to_start() -> void:
+	lab.finish(score, "administrative_return_to_start", player, segment, boss_mode)
+	lab.clear_pending_retry()
+	retry_requested = false
+	state = "start"
+	_clear_world()
+	lab_panel.expanded = false
+	lab_panel.panel.hide()
+	lab_panel.blocked = true
+	lab_panel.release_pending = false
+	lab_panel.hide()
+	start_screen.show_selection(restart_mode, lab_panel.selected_parameter_index)
+	get_tree().paused = true
+	queue_redraw()
 
 func _reset_player() -> void:
+	death_delay = 0.0
+	player_visual.set_primary_weapon(weapon_index)
 	player = Vector2(GD.PLAYER_X, GD.GROUND_Y); velocity_y = 0; crouching = false; guarding = false; slide_time_left = 0.0
 	player_visual.position = player
 	player_visual.set_collision_pose(false)
@@ -666,11 +768,12 @@ func _notify(text: String, color: Color, duration := 0.55) -> void:
 	floaters.append({"pos": Vector2(330, 158), "text": text, "color": color, "life": duration})
 
 func _weapon() -> Dictionary: return GD.WEAPONS[weapon_index]
+func _reload_duration() -> float: return float(_weapon().reload) * float(lab_panel.values.reload_multiplier)
 func _refresh_player_ui() -> void:
 	# The current game is one-hit death; state is its only health source.
 	player_hud.refresh(0 if state == "dead" else 1, 1, _weapon().name,
 		_weapon().penetration, ammo[weapon_index], _weapon().magazine,
-		reload_left, _weapon().reload)
+		reload_left, _reload_duration())
 	player_hud.follow_hitbox(_player_hitbox())
 func _slot_color() -> Color: return CYAN if selected_slot == 2 else _weapon().color
 func _slot_name() -> String: return "GRENADE LAUNCHER" if selected_slot == 2 else _weapon().name
@@ -756,10 +859,18 @@ func _draw_victory() -> void:
 	for i in range(lines.size()): draw_string(ThemeDB.fallback_font, Vector2(300, 320 + i * 30), lines[i][0], HORIZONTAL_ALIGNMENT_LEFT, 210, 15, DIM); draw_string(ThemeDB.fallback_font, Vector2(560, 320 + i * 30), str(lines[i][1]), HORIZONTAL_ALIGNMENT_LEFT, -1, 15, WHITE)
 	draw_string(ThemeDB.fallback_font, Vector2(0, 550), "PRESS R / SPACE TO REDEPLOY", HORIZONTAL_ALIGNMENT_CENTER, 960, 14, YELLOW)
 
-func lab_parameters_changed(key: String) -> void:
-	lab.finish(score, "parameter_change", player, segment, boss_mode)
-	lab.record("parameter_change", {"changed": key, "new_parameters": lab_panel.values.duplicate(true)})
-	_new_run()
+func lab_parameters_changed(key: String, manual := true) -> void:
+	if manual: lab_panel.mark_custom()
+	lab.finish(score, "administrative_parameter_change", player, segment, boss_mode)
+	lab.record("parameter_change", {"changed": key, "new_parameters": lab_panel.values.duplicate(true),
+		"new_parameter_mode": lab_panel.parameter_mode})
+	if state != "start":
+		_new_run("administrative_parameter_change")
+		_gate_gameplay_input()
+	else:
+		lab.snapshot = lab_panel.values.duplicate(true)
+		lab.parameter_mode = lab_panel.parameter_mode
+	lab_panel.refresh_summary()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
