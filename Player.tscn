@@ -1,0 +1,93 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://player_visual.gd" id="1_player"]
+[ext_resource type="SpriteFrames" path="res://player_frames.tres" id="2_frames"]
+[ext_resource type="Texture2D" path="res://helmet_game.png" id="3_helmet"]
+[ext_resource type="Texture2D" path="res://low_ap_fire_3x2.png" id="4_low_arm"]
+[ext_resource type="Texture2D" path="res://high_ap_fire_3x2.png" id="5_high_arm"]
+[ext_resource type="Texture2D" path="res://low_ap_reload_8x2.png" id="6_low_reload"]
+[ext_resource type="Texture2D" path="res://high_ap_reload_8x2.png" id="7_high_reload"]
+[ext_resource type="Texture2D" path="res://sheild_game.png" id="8_guard"]
+
+[sub_resource type="AtlasTexture" id="Atlas_front_idle"]
+atlas = ExtResource("4_low_arm")
+region = Rect2(0, 0, 192, 204)
+
+[sub_resource type="AtlasTexture" id="Atlas_back_idle"]
+atlas = ExtResource("4_low_arm")
+region = Rect2(0, 204, 192, 204)
+
+[sub_resource type="RectangleShape2D" id="StandingShape"]
+size = Vector2(38, 92)
+
+[sub_resource type="RectangleShape2D" id="SlideShape"]
+size = Vector2(54, 36)
+
+[node name="Player" type="CharacterBody2D"]
+collision_layer = 1
+collision_mask = 2
+script = ExtResource("1_player")
+low_fire_sheet = ExtResource("4_low_arm")
+high_fire_sheet = ExtResource("5_high_arm")
+low_reload_sheet = ExtResource("6_low_reload")
+high_reload_sheet = ExtResource("7_high_reload")
+standing_shape = SubResource("StandingShape")
+slide_shape = SubResource("SlideShape")
+
+[node name="VisualRoot" type="Node2D" parent="."]
+scale = Vector2(0.5, 0.5)
+
+[node name="BackArmPivot" type="Node2D" parent="VisualRoot"]
+position = Vector2(2, -148)
+scale = Vector2(0.75, 0.75)
+
+[node name="BackArmLayer" type="Sprite2D" parent="VisualRoot/BackArmPivot"]
+position = Vector2(-50, -95)
+texture = SubResource("Atlas_back_idle")
+centered = false
+texture_filter = 1
+
+[node name="Body" type="AnimatedSprite2D" parent="VisualRoot"]
+position = Vector2(0, -88)
+sprite_frames = ExtResource("2_frames")
+animation = &"idle"
+texture_filter = 1
+
+[node name="Helmet" type="Sprite2D" parent="VisualRoot"]
+position = Vector2(18, -158)
+texture = ExtResource("3_helmet")
+offset = Vector2(-110, -152)
+centered = false
+texture_filter = 1
+
+[node name="WeaponPivot" type="Node2D" parent="VisualRoot"]
+position = Vector2(2, -148)
+scale = Vector2(0.75, 0.75)
+
+[node name="Weapon" type="Sprite2D" parent="VisualRoot/WeaponPivot"]
+position = Vector2(-40, -125)
+texture = SubResource("Atlas_front_idle")
+centered = false
+texture_filter = 1
+
+[node name="GuardField" type="Sprite2D" parent="VisualRoot"]
+visible = false
+position = Vector2(82, -135)
+scale = Vector2(0.16, 0.16)
+texture = ExtResource("8_guard")
+texture_filter = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -46)
+shape = SubResource("StandingShape")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -46)
+shape = SubResource("StandingShape")
+
+[node name="Muzzle" type="Marker2D" parent="."]
+position = Vector2(58, -112)

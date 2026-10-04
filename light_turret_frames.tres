@@ -1,0 +1,41 @@
+[gd_resource type="SpriteFrames" load_steps=10 format=3]
+
+[ext_resource type="Texture2D" path="res://enemy_turret_light_4x2.png" id="1"]
+
+[sub_resource type="AtlasTexture" id="F0"]
+atlas = ExtResource("1")
+region = Rect2(0, 0, 256, 256)
+[sub_resource type="AtlasTexture" id="F1"]
+atlas = ExtResource("1")
+region = Rect2(256, 0, 256, 256)
+[sub_resource type="AtlasTexture" id="F2"]
+atlas = ExtResource("1")
+region = Rect2(512, 0, 256, 256)
+[sub_resource type="AtlasTexture" id="F3"]
+atlas = ExtResource("1")
+region = Rect2(768, 0, 256, 256)
+[sub_resource type="AtlasTexture" id="F4"]
+atlas = ExtResource("1")
+region = Rect2(0, 256, 256, 256)
+[sub_resource type="AtlasTexture" id="F5"]
+atlas = ExtResource("1")
+region = Rect2(256, 256, 256, 256)
+[sub_resource type="AtlasTexture" id="F6"]
+atlas = ExtResource("1")
+region = Rect2(512, 256, 256, 256)
+[sub_resource type="AtlasTexture" id="F7"]
+atlas = ExtResource("1")
+region = Rect2(768, 256, 256, 256)
+
+[resource]
+animations = [{
+"frames": [{"duration": 1.0, "texture": SubResource("F4")}], "loop": true, "name": &"damaged_idle", "speed": 4.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("F5")}, {"duration": 1.0, "texture": SubResource("F4")}], "loop": false, "name": &"damaged_shoot", "speed": 12.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("F6")}, {"duration": 1.0, "texture": SubResource("F7")}], "loop": false, "name": &"explode", "speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("F0")}, {"duration": 1.0, "texture": SubResource("F1")}], "loop": true, "name": &"idle", "speed": 4.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("F2")}, {"duration": 1.0, "texture": SubResource("F3")}], "loop": false, "name": &"shoot", "speed": 12.0
+}]
