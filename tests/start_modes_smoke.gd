@@ -35,7 +35,7 @@ func _run() -> void:
 	game.set_process(false)
 	var ui = game.lab_panel
 	check(game.state == "start" and paused and not game.lab.active, "starts in paused menu")
-	check(game.restart_mode == "checkpoint" and ui.parameter_mode == "原版", "default A + original")
+	check(game.restart_mode == "checkpoint" and ui.parameter_mode == "Original", "default A + original")
 	game._process(2.0)
 	await create_timer(0.03).timeout
 	check(game.lab.run_number == 0 and game.lab.duration == 0 and game.segment_time == 0, "menu creates no runs or simulation time")
@@ -135,7 +135,7 @@ func _run() -> void:
 		game._process(0.36)
 		check(game.segment == 0 and not game.boss_mode and game.score == 0, "B campaign reset including boss death")
 		check(game.ammo == [24, 5] and game.weapon_index == 0 and game.distance == 0, "B initial resources")
-		check(game.restart_mode == "campaign" and ui.parameter_mode == "原版", "retry retains combination")
+		check(game.restart_mode == "campaign" and ui.parameter_mode == "Original", "retry retains combination")
 		check_clean(game)
 	var counts: Dictionary = game.lab.variant_statistics()
 	check(counts.A.failures == 2 and counts.A.retries == 2 and counts.B.failures == 2 and counts.B.retries == 2, "per-variant actual failure denominators")
@@ -146,7 +146,7 @@ func _run() -> void:
 	check(added.filter(func(e): return e.event == "run_start").size() == 1, "preset produces exactly one start")
 	check(game.restart_mode == "campaign", "parameter mode does not alter A/B")
 	ui.controls.gravity.value += 25.0
-	check(ui.parameter_mode == "自定义" and game.lab.parameter_mode == "自定义", "manual edit is custom")
+	check(ui.parameter_mode == "Custom" and game.lab.parameter_mode == "Custom", "manual edit is custom")
 	ui.apply_preset(0)
 	check(ui.values == expected, "original restores all values from custom")
 	release_gate(game)
