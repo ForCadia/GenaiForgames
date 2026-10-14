@@ -1,39 +1,43 @@
-# Lab B submission audit — 2026-10-14
+# Final Lab B submission checklist - 2026-10-14
 
-This bundle is a technical submission draft, **not a claim that all assignment evidence is complete**. Deadline supplied by the student: October 14, 2026, 23:59; course timezone must be confirmed.
+This bundle contains current materials, not a claim that every requirement passed. Nothing is uploaded to Canvas by the packaging process. Deadline supplied by the student is October 14, 2026, 23:59; course timezone should be confirmed.
 
-| Requirement | Evidence / status |
+| Requirement | Current evidence / status |
 |---|---|
-| Public browser game | https://people.duke.edu/~wz204/everfront/ — English build uploaded earlier today; student previously verified browser play. Current audit rebuild remains local until explicitly deployed. |
-| Repository | https://github.com/ForCadia/GenaiForgames — local audit commits may be newer than remote; source ZIP includes hidden .git. |
-| Core action, failure, score | Jump/slide/aim/fire/guard; one unblocked hit; HUD score and checkpoint/Boss progress. |
-| Single-key retry | R / Space / Fire; buffered during existing 0.35 s death lock. |
-| Tuning | 13 effective numerical controls plus existing particle toggle, F1 panel, defaults reset. |
-| A/B | A checkpoint/full Boss encounter; B campaign entry. F2/F3 and panel retain weapon keys 1/2/3. |
-| JSON | T/button download, local session archives; durations, score, cause/location, retries, mode/snapshot and raw switches. |
-| Four documents | AGENTS.md, GDD.md, PROTOTYPE.md, BUILD_LOG.md supplied. Content completeness below. |
-| Real telemetry | **TODO: no real JSON in telemetry/**. Engineering tests cannot replace it. |
-| Completed pre-test Card | **TODO** thresholds; existing Git commits contain placeholders, not a complete pre-test Card. First external test date and separate evidence unknown. |
-| Three real loops | **TODO** measured results/dates/decisions; three single-variable plans exist. |
-| Variant comparison | **TODO** same testers in A/B, actual results and order records. |
-| Six testers / two outside class | **TODO** anonymous IDs, dates, course membership and observations. |
-| Verdict, about one page | **TODO** student's evidence-based Keep/Pivot/Kill and first Lab C change; last section stays pending. |
-| Lab A / Rep 3 | Lab A originals plus Downloads W4_Zhu_Submission.pdf / W4_Zhu_Journal.pdf archived unchanged in design_sources/. W4 contains full project GDD and two-week sprint plan, now summarized in GDD.md. Cover uses Week 4 Production Rep rather than the numeric assignment/course label; historical implementation outcomes/provenance still require separate evidence. |
-| Video, 60–90 seconds | **TODO** recording/file/link. |
-| Development history | Existing actual log preserved; unprovided work/timings remain TODO. |
+| Public game | https://people.duke.edu/~wz204/everfront/ - lab-b-0.4 re-exported/deployed; public HTML/JS/WASM/PCK returned 200 and matched local hashes |
+| Private-window interaction | **PENDING HUMAN CONFIRMATION**: gameplay, one-key retry and actual JSON download. Browser control could not initialize; video filename/frames are not substituted for confirmation |
+| Repository / source ZIP | https://github.com/ForCadia/GenaiForgames; seven human exports were explicitly authorized and pushed. Local latest documentation may be newer. Final source ZIP includes hidden .git and current working-copy source; manifest records commit and pending configuration/generated-file differences |
+| Core loop / retry | Existing shooter, one-hit failure, score/progress; R/Space/Fire buffered retry. Relevant engineering checks recorded; not a new browser validation |
+| Tuning / A-B | 13 numerical controls plus particle toggle. A checkpoint/full Boss, B campaign; F2/F3 preserve weapon keys |
+| Current gravity | 1250/1.1, jump strength 720. All named modes share it; fixed-step engineering airtime results in PROTOTYPE. Historical human JSON remains unchanged with gravity 1250 |
+| Four root documents | AGENTS.md, GDD.md, PROTOTYPE.md, BUILD_LOG.md present and current |
+| Seven human JSON | A1/A2/A3/B1/B2/B3/B1playA1 copied unchanged from Downloads. Hashes and archive entries verified; no automated data substituted |
+| Tester log | Six different human testers, all outside class, student-confirmed; one row each, real provided feedback and references |
+| Paired comparison | P04 B1 then B1playA1, Original/full parameters equal; n=1 paired. Final A death response window incomplete, not abandonment. Evidence does not establish higher willingness |
+| Prototype Card timing | Numeric thresholds were not set before testing; timing gap disclosed. No retroactive threshold or pre-test commit invented |
+| Three iterations | Higher-speed and higher-jump trials reverted after developer disliked feel, no quantified results. Historical values/dates remain pending. Retained current airtime change has engineering evidence, not new human validation |
+| Verdict | About one page, last section. Student chooses Keep A independently of limited data; Lab C keeps A and tunes challenge intensity |
+| Lab A / W4 sources | Original design PDFs/DOCX and full W4 GDD/sprint plan copied unchanged under design_sources/. Historical estimates/plans are not represented as completed work |
+| Video | User-selected Desktop EverFront InPrivate recording. **99.31 seconds: OUTSIDE 60-90 second requirement, 9.31 s over maximum.** Full audio/video decode exit 0, no errors with original time-base passthrough; inspected frames show the game. Copied unchanged as EverFront-demo.mp4; no trimming performed |
+| Asset provenance | Original document disclosure retained; full runtime sprite/audio license evidence remains pending |
+| Canvas | Not uploaded or submitted |
 
-## Submission files
+## Bundle contents and validation
 
-Run `python tools/package_lab_b.py` after updates to create a new independent directory under `tmp/lab-b-submission-20261014` (a suffix is used if it exists). It contains the four documents, README, this checklist, deployable `web/`, `web.zip`, `EverFront-project-with-git.zip`, `telemetry/`, engineering logs and a hash manifest. Generated assets/temp/template downloads are excluded from the source ZIP; install matching templates or fetch Web templates as documented in AGENTS.md. The current working copy is preserved, including the student's pending edits; manifest records its status. Never put automated JSON into telemetry/.
+Final output is a fresh directory under tmp/lab-b-final-20261014 (suffix if needed), separate from source. It contains EverFront-project-with-git.zip; standalone PROTOTYPE.md and BUILD_LOG.md; AGENTS/GDD/README/checklist; original video copied as EverFront-demo.mp4; design_sources/; telemetry/ with seven originals; web/ and web.zip; VIDEO_VALIDATION.json; MANIFEST.json; GAME_LINK.txt. Source ZIP includes current tracked working-copy files, original Git history, design_sources and telemetry. Generated build folders, temporary tools/export templates and .godot are excluded; install/import matching Godot as AGENTS documents. Git history may include old generated files, preserved as history.
 
-## Testing and deployment
+Validation reopens ZIP, tests CRC, checks hidden .git/HEAD and config, documents and source, compares every JSON and design original, verifies standalone copies, hashes every output and ensures Verdict is final. Video copy hash must match Desktop original. Engineering artifacts remain labeled and separate from human telemetry. Metadata/decoding do not constitute the user-confirmed browser/download checklist.
 
-For parameter loops use A and Original before each single change: Slow (scroll 1.5 to 1.275), Fast Reload (reload multiplier 1 to 0.8), then manual jump 720 to 755.14 with gravity 1250. Actual results are not yet supplied. Formal A/B uses Original only, identical snapshots and the same people; alternate A→B and B→A. Keep the panel closed during actual play. Export before selecting New tester.
+## Still required / not claimed complete
 
-The existing Duke upload script uploads, **does not build**. Re-export first, then run `./deploy_duke.ps1` when deployment is authorized and Z: is connected. Do not delete the source or other hosted directories. Local preview: `./start_web.ps1`; do not use file://. After deployment use Ctrl+F5/private window and test six selections, Start/Return, weapon keys, ordinary/Boss retry and actual JSON download. HTTP/hash checks do not prove interactive behavior.
+1. A compliant 60-90 second video: supplied video is 99.31 seconds. Student may replace/re-record; packaging does not edit it.
+2. User confirmation of latest incognito gameplay, retry and JSON download.
+3. Historical exact values/dates for the first two reverted trials and unprovided development timings. Developer reasons already supplied; no new tests required to document those reasons.
+4. Any missing runtime asset provenance/license evidence.
+5. Pre-test threshold timing deficiency remains disclosed; it cannot be repaired by backdating. One paired tester and the incomplete final response limit conclusions, not a missing invented result.
 
-Video suggestion (student recording required): show Start and selected combination, core action/score, failure and one-key retry, A/B change, F1 parameters and T download in 60–90 seconds. Do not present engineering events as real playtest outcomes.
+## Canvas game link
 
-## Evidence still required from the student
+https://people.duke.edu/~wz204/everfront/
 
-Provide thresholds and any real pre-test commit; tester identities as anonymous codes plus in/out-of-course status; actual loop and A/B notes; real export paths; Lab A/Rep 3; omitted development history/timings; video; final judgment and Lab C action. The student replied “keep existing” during this audit, confirming existing design rather than supplying these missing results. No missing fact has been filled by inference.
+Upload the standalone PROTOTYPE.md, BUILD_LOG.md and compliant video as requested by Canvas, plus source ZIP or repository link and real JSON evidence. The video presently supplied is retained but marked noncompliant. No Canvas submission is made automatically.
