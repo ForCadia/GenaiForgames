@@ -2,7 +2,7 @@ extends CanvasLayer
 
 const SPECS := {
 	"jump_speed": ["Jump speed (px/s)", 720.0, 450.0, 950.0, 0.01],
-	"gravity": ["Gravity (px/s2)", 1250.0, 800.0, 2000.0, 25.0],
+	"gravity": ["Gravity (px/s2)", preload("res://game_data.gd").PLAYER.gravity, 800.0, 2000.0, 0.01],
 	"stomp_speed": ["Stomp bounce (px/s)", 470.0, 200.0, 700.0, 10.0],
 	"slide_time": ["Minimum slide (s)", 0.7, 0.1, 1.2, 0.05],
 	"guard_drain": ["Guard drain (/s)", 66.67, 25.0, 120.0, 0.01],

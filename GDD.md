@@ -25,4 +25,6 @@ The rifle and piercer have finite magazines with infinite reserve. The piercer b
 
 ## Lab B scope
 
+Authorized revision on 2026-10-14: retain jump_speed=720, set default gravity=1250/1.1. Ideal ground-to-ground airtime targets 110% of the historical baseline; actual fixed-step measurements are documented in PROTOTYPE.md. Lower gravity also increases peak height. Historical human exports remain 1250-gravity evidence and are not retroactively changed. Numeric verdict thresholds remain pending.
+
 Preserve the existing loop. The student confirmed the experiment: whether players retry after one-hit death, and whether checkpoint versus campaign restart changes willingness. Hypothesis: checkpoint restart encourages more continued attempts. A restores the current segment/full Boss entry; B restores campaign entry. The static start screen chooses A/B and Original / Slow / Fast Reload, default A + Original. These parameter modes prepare experiments and do not constitute test results. Keep / Pivot / Kill thresholds and evidence are pending; refer to PROTOTYPE.md. Do not add story, unlocks, meta-progression, new levels or juice effects. Cosmetic particle toggle affects only existing decorative particles; hostile Boss projectiles are gameplay objects and remain visible. Original Lab A / Rep 3 material remains missing.

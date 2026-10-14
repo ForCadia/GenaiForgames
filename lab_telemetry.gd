@@ -1,6 +1,6 @@
 extends RefCounted
 
-const VERSION := "lab-b-0.3"
+const VERSION := "lab-b-0.4"
 var session_id := ""
 var run_id := ""
 var events: Array[Dictionary] = []

@@ -9,7 +9,7 @@ const PLAYER_X := 190.0
 const CAMPAIGN_SEGMENT_COUNT := 4
 
 const PLAYER := {
-	"gravity": 1250.0,
+	"gravity": 1250.0 / 1.1,
 	"jump_speed": 720.0,
 	"standing_half_width": 19.0,
 	"standing_height": 92.0,

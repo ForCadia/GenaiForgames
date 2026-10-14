@@ -1,5 +1,13 @@
 # Lab B — Build log
 
+## 2026-10-14 — authorized 110% ideal-airtime implementation
+
+Tool: Codex / Godot / PowerShell / Python standard library. Prompt: keep jump strength 720, change gravity from 1250 to 1250/1.1, synchronize defaults/panel/docs, validate actual effect and export Web without changing existing JSON. Implemented only the gravity gameplay change in game_data.gd; panel reads that constant and uses 0.01 increments, avoiding the former 25-unit quantization. Restore defaults and all named modes share the exact internal value. Revision lab-b-0.4 distinguishes new snapshots from historical 1250-gravity sessions.
+
+Actual verification: added tests/airtime_smoke.gd calling the real player update at fixed 60/120 Hz with identical ground-to-ground jumps and no hostile objects. Initially fixed a GDScript inferred-type error; then discovered the test was still on the paused start screen, so simulated input did not jump. Corrected the test to start through the normal game flow, without modifying gameplay to satisfy it. At 60 Hz: old 1.183333 s / 213.402771 px, new 1.300000 s / 234.098480 px, ratio 1.09859155. At 120 Hz: old 1.166667 s / 210.364594 px, new 1.283333 s / 231.097107 px, ratio 1.10. These are engineering simulation measurements, not human results or browser timing. Lower gravity also increases peak height. Report stored only in ignored tmp/airtime-measurement.json.
+
+Airtime, gameplay, Lab B controls, six start modes/A-B/session filtering, player HUD, spikes and Boss checks passed. Web release and ZIP regenerated successfully; only the ignored nested tmp-project warning appeared. Synced AGENTS/GDD/README/PROTOTYPE; historical trials and unknown results stay pending. Seven existing human JSON hashes unchanged. No automatic Duke upload or telemetry upload. Interactive browser verification of the new revision remains pending. Time spent: TODO.
+
 ## 2026-10-14 — student iteration decisions and airtime-target audit
 
 Tool: Codex / Git / PowerShell / Python standard library. Prompt: update PROTOTYPE question to whether checkpoint respawn encourages retry, hypothesis yes, keep thresholds unconfirmed; document increased-speed trial reverted, higher-jump trial reverted, and retained slight airtime increase targeting 110% of default. Inspected current jump/gravity/scroll implementation, all available Git refs for the relevant source paths and seven supplied human session parameter snapshots before editing documentation.

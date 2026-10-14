@@ -17,6 +17,7 @@ godot --headless --path . --editor --quit
 godot --headless --path . --script res://tests/gameplay_smoke.gd -- --lab-test
 godot --headless --path . --script res://tests/lab_b_smoke.gd -- --lab-test
 godot --headless --path . --script res://tests/start_modes_smoke.gd -- --lab-test
+godot --headless --path . --script res://tests/airtime_smoke.gd -- --lab-test
 New-Item -ItemType Directory -Force build/web
 godot --headless --path . --export-release Web build/web/index.html
 python -m http.server 8000 --directory build/web
@@ -51,7 +52,7 @@ No AI-service requests or API keys in game code. Telemetry is local only. Do not
 
 The student selected restart location as the A/B variable: A checkpoint (full Boss encounter on Boss death), B campaign entry on every death. F2/F3 and the existing panel select modes; preserve 1/2/3 weapons. All switches reset cleanly to campaign entry. Default is A + Original. The latest parameter choices are only Original / Slow / Fast Reload (plus Custom displayed after a manual panel edit). The earlier four presets are superseded.
 
-Original defaults are verified at commit 613233e and against game_data.gd. Preserve all existing 12 numbers and their defaults; the added reload_multiplier defaults to 1.0. Slow changes only scroll_multiplier 1.5→1.275. Fast Reload changes only reload_multiplier 1.0→0.8. Keep panel selections, menu labels and telemetry parameter_mode consistent. JSON experiment_preset is an alias using the same names.
+Historical defaults are verified at commit 613233e. Student-authorized lab-b-0.4 changes only gravity from 1250 to 1250.0/1.1 (1136.363636...), preserving jump_speed=720 and other defaults. Panel gravity derives from game_data.gd and uses a 0.01 step; internal defaults retain full expression precision. Original now means this revised baseline. All three named modes share that gravity; Slow only changes scroll_multiplier 1.5→1.275, Fast Reload only changes reload_multiplier 1.0→0.8. Existing human JSON remains unchanged with historical gravity 1250: do not pool versions as identical settings. JSON experiment_preset remains a parameter_mode alias. No extra independent airtime mechanism was added.
 
 Only Start creates a run while on the menu; gate held input/clicks before gameplay. Return records administrative_return_to_start and retains session/data. Preset and mode changes record administrative_parameter_change / administrative_variant_switch without fake failures/retries. The first retry event-dispatch time must be preserved during the animation lock; rapid rate uses failure_to_input_seconds. failure_to_restart_seconds separately measures when play is ready. Per-variant denominators are actual deaths, including abandoned deaths. Empty rates are null/N/A. See PROTOTYPE.md for score restoration and analysis definitions.
 

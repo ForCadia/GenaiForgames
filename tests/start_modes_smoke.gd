@@ -46,7 +46,7 @@ func _run() -> void:
 		"rifle_cadence": GameData.WEAPONS[0].cadence, "piercer_cadence": GameData.WEAPONS[1].cadence,
 		"scroll_multiplier": GameData.SCROLL_MULTIPLIER, "laser_gate_speed": 315.0,
 		"reload_multiplier": 1.0, "particles_enabled": true}
-	check(ui.baseline == expected, "original matches pre-experiment defaults and game constants")
+	check(ui.baseline == expected, "current default baseline matches game constants")
 	for preset in [1, 2]:
 		var changed: Array[String] = []
 		var values: Dictionary = ui.preset_values(preset)
