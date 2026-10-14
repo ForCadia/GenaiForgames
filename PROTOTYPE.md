@@ -26,7 +26,7 @@ Deadline: **2026-10-14 23:59** (confirm course timezone). Telemetry must be read
 
 Submission audit on **2026-10-14**: the student reconfirmed the existing question/hypothesis and mechanisms. Git contains notebook commits `1b50804` and `8d0bc3e`, both dated 2026-10-04, but the Card's thresholds were placeholders in both and remain unconfirmed. There is no complete pre-playtest Card commit in the available history. First external playtest date and any separate precommit evidence: **TODO — student input**. Do not backdate a threshold or imply the placeholder met the requirement. If external testing already happened, disclose this timing gap rather than retroactively claiming preregistration.
 
-No real JSON is present in this checkout's `telemetry/` as of this audit. Testers, measured loops, A/B results, video and verdict remain **TODO**. Engineering smoke-test events are excluded from playtest evidence. English UI/JSON labels are Original / Slow / Fast Reload / Custom; earlier Chinese exports, if supplied, map to the corresponding modes, and must still be filtered by identical parameter snapshots. Build `lab-b-0.3` makes the current engineering revision distinguishable.
+At the initial audit no real JSON was present. Later on 2026-10-14, six student-confirmed human session exports were received in `telemetry/`; their measured session results are now listed in Playtest Log. Participant mapping, measured iteration decisions, controlled A/B attribution, video and verdict remain **TODO**. Engineering smoke-test events are excluded from playtest evidence. English UI/JSON labels are Original / Slow / Fast Reload / Custom; earlier Chinese exports, if supplied, map to the corresponding modes, and must still be filtered by identical parameter snapshots. Build `lab-b-0.3` makes the current engineering revision distinguishable.
 
 Defaults verified against game_data.gd, main.gd and lab_panel.gd at git commit **613233e**, before experimental presets. Baseline is copied from authored defaults at startup, never from current sliders. The existing twelve numbers remain; a single reload multiplier is added to the same panel.
 
@@ -85,35 +85,92 @@ Parameter experiments use **A only**, start from Original, change one number and
 
 Third manual loop: select Original, keep A, change only Jump speed to 755.14; HUD/JSON show Custom. Frame-stepped physics means the 10% height change is approximate. Three parameter modes are not three actual iterations. After real testing, record dates, measured results, sample sizes and actual files.
 
-## A/B Comparison — actual results pending
+## Variant Comparison - parameter matches verified; player pairing pending
 
-**Original only**, same tester tries both variants. Alternate A→B and B→A across testers. Begin each exposure at campaign entry; use Return to start to select the other variant within the same session, or F2/F3 for a clean reset. Observe equal durations (suggested three minutes per exposure; confirm the actual test protocol), watch silently, then ask “What were you trying to do?” Export before the next tester.
+A = checkpoint restart (full Boss encounter); B = campaign restart. Actual filename numbering is **1=Original, 2=Slow, 3=Fast Reload**, except A1's outcomes are **Custom**. Compare complete parameter dictionaries, not names alone. Different session IDs neither prove nor disprove the same person. No confirmed within-person A/B pair is established until the student supplies the file-to-player mapping.
 
-| Measure | A / Checkpoint actual | B / Campaign actual | Difference / notes |
-|---|---|---|---|
-| Testers / sessions / exposure order counts | | | |
-| Actual failures | | | |
-| Successful retries / rate | | | |
-| Input ≤10 s / rapid retry rate | | | |
-| Typical failure-to-input / failure-to-ready | | | |
-| Median completed run duration | | | |
-| Person-level willingness / denominator | | | |
-| Confusion, quits, order effects | | | |
-| Actual JSON references | | | |
-| Preferred mode, margin and uncertainty | | | |
+| Candidate files | Outcome snapshots | Same tester / actual exposure order | Recorded A vs B failures; retries | Eligibility / missing evidence |
+|---|---|---|---|---|
+| [A1.json](telemetry/A1.json) / [B1.json](telemetry/B1.json) | Different | 待确认 | 4 vs 2; 4 vs 2 | Not eligible: Custom vs Original; need a clean Original-A record and confirmed pairing. |
+| [A2.json](telemetry/A2.json) / [B2.json](telemetry/B2.json) | Identical | 待确认 | 2 vs 3; 2 vs 3 | All parameter values match (Slow); eligible only after same-person mapping. Not the planned Original-only comparison. |
+| [A3.json](telemetry/A3.json) / [B3.json](telemetry/B3.json) | Identical | 待确认 | 8 vs 1; 8 vs 1 | All parameter values match (Fast Reload); eligible only after same-person mapping. Not the planned Original-only comparison. |
+
+All files have 100% observed retry and <=10 s first-input rates, based on their actual deaths; therefore these exported rates alone show no difference. This is descriptive evidence, not a controlled or person-level conclusion. Exposure duration, progress and sample sizes differ; B1/B2 also have an open final run. The file timestamps order these sessions A1 -> A2 -> A3 -> B1 -> B2 -> B3, but player mapping and actual within-person order remain pending. Alternating orders are a future protocol, not a claim that it happened here.
+
+Formal planned comparison remains **Original only** with identical snapshots and the same people; A1 has no death/victory under Original. Collect clean Original-A evidence before comparing to B1, and confirm the participant mapping. Summarize existing observations/feedback only; no additional questionnaire is needed.
+
+| Missing comparison evidence | Status |
+|---|---|
+| Confirmed same-person pairs / participant denominator / order | 待确认 |
+| Clean Original-A outcome records comparable to B1 | Missing from these six files |
+| Outside-class status, observed confusion/quits and actual feedback | 待确认 |
+| Preference, uncertainty and final Keep/Pivot/Kill interpretation | 待确认; no verdict inferred from rates |
 
 ## Playtest Log
 
-At least six actual testers, at least two outside the course. These are empty slots, not claimed participants. Use different testers across parameter rounds; within A/B each tester experiences both modes. Save actual JSON exports in telemetry/.
+### Participant log - one row per confirmed person
 
-| Tester ID | In course? (≥2 outside required) | Actual date / round / A-B order / parameter mode | Observation / stuck location | Confusion / answer | Retry / quit behavior | Session ID / actual JSON |
-|---|---|---|---|---|---|---|
-| Pending 1 | | | | | | |
-| Pending 2 | | | | | | |
-| Pending 3 | | | | | | |
-| Pending 4 | | | | | | |
-| Pending 5 | | | | | | |
-| Pending 6 | | | | | | |
+The student confirmed all six files are human-played exports. Player identifiers, whether multiple sessions belong to one person, course membership and feedback are absent from JSON. **Six sessions are not six confirmed testers.** The temporary row below is an unresolved mapping placeholder, not a participant or a claim that all files came from one person. Replace it with one row per real tester and combine that person's files once the student supplies the mapping. Six actual people, including two outside class, remain unverified. No new questionnaire is required.
+
+| Tester ID | Date | Outside class? | Played configuration | Corresponding JSON | Stuck point / observation | Player feedback | Retry behavior |
+|---|---|---|---|---|---|---|---|
+| 待确认 (file-to-player mapping unresolved) | 2026-10-14 from event timestamps | 待确认 | Session configurations below; attribution 待确认 | [A1.json](telemetry/A1.json), [A2.json](telemetry/A2.json), [A3.json](telemetry/A3.json), [B1.json](telemetry/B1.json), [B2.json](telemetry/B2.json), [B3.json](telemetry/B3.json) | Human observation 待确认; event-derived causes/locations below | 待确认 | Actual per-file counts below; participant aggregation 待确认 |
+
+### Verified session evidence - not participant rows
+
+JSON schema 2 / version lab-b-0.2; six distinct session IDs. Dates/times below are **2026-10-14 America/New_York (EDT, UTC-04:00)**, converted from UTC JSON timestamps. Range is first through last recorded event, not active gameplay duration; export time comes from exported_at, not filesystem metadata.
+
+| JSON | First-last event (EDT) | Export (EDT) | Actual configuration | Started runs | Complete outcome runs | Administrative ends | Open runs | Deaths | Victories | Successful retries / deaths |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| [A1.json](telemetry/A1.json) | 16:58:27-17:00:03 | 17:00:06 | A / Custom (Original initially; three edits) | 8 | 5 | 3 | 0 | 4 | 1 | 4/4 (100%) |
+| [A2.json](telemetry/A2.json) | 17:00:49-17:02:33 | 17:02:35 | A / Slow | 3 | 3 | 0 | 0 | 2 | 1 | 2/2 (100%) |
+| [A3.json](telemetry/A3.json) | 17:02:56-17:05:19 | 17:05:21 | A / Fast Reload | 9 | 9 | 0 | 0 | 8 | 1 | 8/8 (100%) |
+| [B1.json](telemetry/B1.json) | 17:05:41-17:06:47 | 17:06:48 | B / Original | 3 | 2 | 0 | 1 | 2 | 0 | 2/2 (100%) |
+| [B2.json](telemetry/B2.json) | 17:07:14-17:07:45 | 17:07:46 | B / Slow | 4 | 3 | 0 | 1 | 3 | 0 | 3/3 (100%) |
+| [B3.json](telemetry/B3.json) | 17:08:15-17:09:40 | 17:09:41 | B / Fast Reload | 2 | 2 | 0 | 0 | 1 | 1 | 1/1 (100%) |
+
+Complete outcome = run_end with failure=true or cause=victory. Administrative endings are counted separately and excluded from outcome-duration statistics. B1 and B2 each have an unfinished final run: no invented run_end/duration, and both are excluded from completed-time calculations. A1's first three endings are administrative parameter changes; its five completed outcomes are Custom. The other five files retain their named snapshots. No raw events have been changed.
+
+| JSON | Complete outcome n | Total active duration (s) | Mean (s) | Median (s) | Complete score_delta range |
+|---|---:|---:|---:|---:|---|
+| [A1.json](telemetry/A1.json) | 5 | 86.180 | 17.236 | 2.367 | 0-3000 |
+| [A2.json](telemetry/A2.json) | 3 | 92.280 | 30.760 | 7.400 | 100-3400 |
+| [A3.json](telemetry/A3.json) | 9 | 127.920 | 14.213 | 7.833 | 0-2000 |
+| [B1.json](telemetry/B1.json) | 2 | 59.898 | 29.949 | 29.949 | 200-1200 |
+| [B2.json](telemetry/B2.json) | 3 | 20.599 | 6.866 | 6.916 | 100-100 |
+| [B3.json](telemetry/B3.json) | 2 | 79.297 | 39.649 | 39.649 | 200-3800 |
+
+Scores are per-run gains (score_delta), not comparable cumulative checkpoint totals. Mean/median include both deaths and victories; checkpoint resumes and unequal progress alter attempt lengths. These descriptive numbers cannot by themselves isolate restart preference.
+
+### Recorded obstacles and configuration details
+
+These are **event-derived facts**, not invented observations or statements by the player. Segment indices are zero-based: segment_3 means the fourth authored segment.
+
+| JSON | Recorded causes of death | Failure checkpoint(s) | Actual snapshot / restart evidence |
+|---|---|---|---|
+| [A1.json](telemetry/A1.json) | HEAVY TURRET LASER x4 | segment_3 x4 | guard_delay 0.7 vs 0.75; piercer_cadence 0.51 vs 0.52; reload_multiplier 0.99 vs 1.0. All four retries return to segment_3, score 700. |
+| [A2.json](telemetry/A2.json) | HOSTILE FIRE x1; GROUND SPIKES // UNBLOCKABLE x1 | segment_0 x2 | Only scroll_multiplier=1.275 differs from Original. Both retries return to segment_0. |
+| [A3.json](telemetry/A3.json) | HOSTILE FIRE x5; TURRET COLLISION x1; GROUND SPIKES // UNBLOCKABLE x1; BOSS HIGH PARTICLE x1 | segment_0 x6; segment_2 x1; boss x1 | Only reload_multiplier=0.8 differs from Original. Includes segment_2 checkpoint retry and full Boss restart. |
+| [B1.json](telemetry/B1.json) | HOSTILE FIRE x1; HEAVY TURRET LASER x1 | segment_0 x1; segment_3 x1 | Original snapshot. segment_3 death retries at segment_0 with score 0; final run open. |
+| [B2.json](telemetry/B2.json) | GROUND SPIKES // UNBLOCKABLE x3 | segment_0 x3 | Only scroll_multiplier=1.275 differs from Original. All retries at campaign entry; final run open. |
+| [B3.json](telemetry/B3.json) | HOSTILE FIRE x1 | segment_0 x1 | Only reload_multiplier=0.8 differs from Original. One segment_0 death and campaign-entry retry; later victory. |
+
+### Retry timing - willingness and game response are separate
+
+failure_to_input_seconds measures death to first retry input (including player waiting). input_to_restart_seconds measures first input to ready gameplay. failure_to_restart_seconds measures the entire death-to-ready interval. Each counts successfully retried failed_run_id once; denominators below are actual failures, not people. Rounding is only for display; raw JSON retains full values. Telemetry captures the first input and does not establish the total number of keys physically pressed.
+
+| JSON | First-input delay min / median / max (s) | Input-to-ready median / max (s) | Death-to-ready max (s) | First input <=10 s / deaths | Ready <=2 s after input / retries | Ready <=2 s after death / retries |
+|---|---|---|---:|---|---|---|
+| [A1.json](telemetry/A1.json) | 0.100 / 0.600 / 0.750 | 0.001 / 0.267 | 0.751 | 4/4 | 4/4 | 4/4 |
+| [A2.json](telemetry/A2.json) | 0.483 / 3.558 / 6.634 | 0.000 / 0.000 | 6.634 | 2/2 | 2/2 | 1/2 |
+| [A3.json](telemetry/A3.json) | 0.033 / 0.450 / 7.667 | 0.002 / 0.333 | 7.668 | 8/8 | 8/8 | 7/8 |
+| [B1.json](telemetry/B1.json) | 0.800 / 0.817 / 0.833 | 0.001 / 0.001 | 0.834 | 2/2 | 2/2 | 2/2 |
+| [B2.json](telemetry/B2.json) | 0.466 / 0.467 / 0.650 | 0.001 / 0.001 | 0.651 | 3/3 | 3/3 | 3/3 |
+| [B3.json](telemetry/B3.json) | 0.467 / 0.467 / 0.467 | 0.001 / 0.001 | 0.468 | 1/1 | 1/1 | 1/1 |
+
+Across these exports: **20/20 successful retries have input-to-ready <=2 s (maximum 0.333 s)**; **18/20 have death-to-ready <=2 s**. A2 has one 6.634 s death-to-ready interval and A3 one 7.668 s interval, primarily before first input (6.634 and 7.667 s). Do not use the 20/20 first-input-within-10-s result as evidence of a death-to-ready-under-2-s requirement. The separate input-to-ready fields provide response-time evidence for the recorded attempts only. A3's 0.033 s input waited 0.333 s to restart; this animation wait is not player hesitation.
+
+The six exports do not establish six distinct people, two outside-class participants, three completed single-variable iterations, a confirmed within-person comparison or a final verdict. Player mapping, outside-class identity, actual observations and feedback: **待确认**. Existing real feedback can be entered directly; if none was recorded, say so rather than creating a questionnaire answer.
 
 ## Verdict
 
