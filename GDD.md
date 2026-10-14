@@ -6,7 +6,9 @@ Lab A source received on **2026-10-14** from `E:/bledderfile for helss/desktop/G
 
 Supporting originals: [Lab A evaluation](design_sources/LabA_Zhu_Evaluation.docx), [Lab A brainstorm log](design_sources/LabA_Zhu_Log.docx) (document date September 18, 2026), and [W5 debt/explainability journal](design_sources/Debt_Explainability_Journal_W5_revised.docx) (recorded September 22, 2026). These are preserved unchanged. The journal is not rewritten. Their historical claims are attributed to the supplied sources; none is converted into invented Lab B testing evidence.
 
-**Rep 3 GDD / sprint plan remains missing.** No file in the supplied directory is identified as Rep 3 or contains a Rep 3 sprint plan. Evaluation “Part 3” is concept clustering, not Rep 3. Supply the separate Rep 3 material or confirm which existing source is intended to serve that role; do not silently rename Lab A as Rep 3. The existing demo inventory below remains the basis for current implementation claims. Reference assignment: `Lab_B_Playable_Prototype (Final).pdf`, read previously on 2026-10-04.
+**Week 4 production-rep GDD and sprint plan found** in Downloads on 2026-10-14: [W4_Zhu_Submission.pdf](design_sources/W4_Zhu_Submission.pdf), 23 pages, cover “The Front Never Stops — Week 4 Production Rep | Full GDD and Two Week Sprint Plan”, William Zhu, September 27, 2026. The same project title/author, Week 4 clue, complete GDD and two-week plan identify the project material requested as Assignment 3 / Rep 3. Its cover uses “Agentic AI for Game Production”; it does not explicitly print “Assignment 3” or “590.03”, so those labels are not presented as a literal document heading. This discovery supersedes the earlier source-missing status, rather than renaming the Lab A source.
+
+Companion [W4_Zhu_Journal.pdf](design_sources/W4_Zhu_Journal.pdf), three pages, identifies the same project/GDD production rep and contains the student's explainability answers and translated reflections. Both PDFs are copied unchanged from `C:/Users/lenovo/Downloads`; hashes are in design_sources/README.md. The original full GDD, complete plan, review and prompt archive remain available in the source PDF; the reconciled summary below does not replace or rewrite those originals. Current implementation claims continue to follow actual code and evidence. Reference assignment: `Lab_B_Playable_Prototype (Final).pdf`, read previously on 2026-10-04.
 
 ## Lab A design — source-preserving summary
 
@@ -53,7 +55,66 @@ The evaluation source compares The Front Never Stops, The Screen Is the Weapon a
 
 The September 18 log records two ideation passes with GPT 5.6 Sol: one uses anti-reference constraints/design levers, the other preserves Contra's identity. The September 22 journal records ChatGPT Pro 5.6 for one-page GDD structure/wording/brainstorming, student review and revisions, and about three hours for that task. This is a supplied historical estimate, **not elapsed time invented for current Codex work**.
 
-## Original plan versus current prototype
+## Week 4 / requested Rep 3 — historical full GDD
+
+Source pages 1–7: scaffold and eleven GDD sections; document owner/human-review date September 27, 2026. The scaffold was AI-proposed and selected by William, not represented as independently student-authored. It evolves the existing playable **four-stage campaign plus Boss**, superseding the earlier Lab A 6–8-segment target for this production plan.
+
+| W4 design area | Historical source specification / boundary |
+|---|---|
+| Concept and experience | Fixed horizontal position, pattern learning, lethal errors, readable warning/action/result; use each retry to improve |
+| Core loop | Read warnings; jump/slide/stomp/shield; aim/shoot/swap/reload; resolve armor/score/death; advance or checkpoint retry |
+| Controls and shield | Bindings were to be copied from build. Reported shield use about 1.5 s, recharge delay 0.75 s, exhaustion lockout about 0.5 s; explicitly not proven balance targets |
+| Spike rule | Body contact is lethal; frontal shield collision can destroy a spike first. Retaining shield clearance was a human-approved decision, not a presumed bug |
+| Weapons | AR magazine 24 / penetration 1; AP magazine 5 / penetration 3; unlimited reserve with reload. Grenade slot/effect reported present but no obtainable pickups in the baseline |
+| Armor details | Light turret damaged then destroyed; heavy rejects AR, AP removes armor before a finishing hit. Old Lab A universal armor/stomp rules were not assumed verified |
+| Boss | Reported four health and two armor layers; after armor breaks, weak point stays exposed. Ground bombs prompt jump, high particles prompt crouch; full encounter reset. Existing-parameter balance considered, no new phases/regenerating armor |
+| Progression | Stage 1 light turrets/spikes; 2 laser gates; 3 repeated turrets/gates; 4 combined threats; then Boss. Stages 5/6 defined but inactive |
+| Sprint content | Scene grenade pickup integration, shield/checkpoint checks, shareable build, essential audio, unfamiliar-player test; Boss tuning optional |
+| Presentation | Three parallax layers, combat/player animations, HUD/reticle/score effects. Audio streams not reported configured; essential audio and provenance were tasks, not delivered results |
+| Technology / risks | Engine/version/build metadata not confirmed in the W4 report. Reset/collision errors, redundant grenade use, scope/ownership and untested readability were observable risks |
+| Success / cuts | Preserve runnable campaign and consistent resets; observe explainable responses to repeated threats. Defer Boss tuning first; further cuts require human decisions |
+
+Historical human decisions on source page 10: retain shield spike clearance to avoid frustrating progression blocks; add scene-only grenade collection for more room for action; balance the existing Boss; use flexible sessions rather than rigid daily quotas; defer Boss tuning first; arrange an unfamiliar tester. Capacity/dates were confirmed; exact grenade capacity, Boss effect and checkpoint pickup/inventory reset (D1) remained unresolved, and Boss tuning choice (D2) could be deferred. Source plans are not automatic instructions to implement those features now.
+
+### Two-week sprint plan — reproduced as a plan, not completion evidence
+
+Source pages 8–9: **September 28–October 11, 2026**, owned by William Zhu. Planned Week 1: T1–T7; Week 2: T8–T11. Human-confirmed minimum capacity **20 hours**, without a fixed daily maximum or two-hour quota. **16 estimated task hours + 4 shared reserve hours (20%)**. The source explicitly labels task estimates **UNSOURCED**; they are not actual recorded work times. Shared reserve is available at any task, not only at the end. Each task should fit within two workdays; that is a sizing rule, not a daily hours limit.
+
+| Task | Planned estimate | Dependency | Original acceptance / deliverable |
+|---|---:|---|---|
+| T1 Baseline and rules | 1.5 h | None | Run campaign/checkpoint/Boss reset; record engine/version/build steps; verify existing grenade effect; resolve D1; arrange tester or record unconfirmed slot |
+| T2 Shield verification | 1 h | T1 | Check bullets, shield-front/body spike contact, gates and depleted energy; list reproducible mismatches separately |
+| T3 Pickup and activation | 1.5 h | T1; D1 resolved | Scene pickups connect to existing grenade action; no automatic respawn supply; verify collection/use |
+| T4 Inventory and reset | 1.5 h | T3; D1 resolved | Functional HUD count, selected capacity, checkpoint inventory/pickup policy, no duplicate collection |
+| T5 Shareable build | 1 h | T2–T4 | Package/run outside editor, verify launch/restart, record commands and artifact path |
+| T6 Essential audio | 2.5 h | T1; checked assets | Locate files and provenance, then wire fire/reload/armor-break/death audio; report missing assets before integration |
+| T7 Boss baseline / optional tuning | 1 h | T4; D1 Boss effect resolved | Record armor-break/exposed timing; compare any retained small parameter change; tuning is first deferral |
+| T8 External playtest | 2 h | T5; tester confirmed | Observe unfamiliar player's responses/deaths/confusion/grenade use/Boss exposure; do not claim unreached content tested |
+| T9 Priority repairs | 2 h | T2/T8 findings | Fix highest-impact reproducible issue within budget; list remaining work, split/re-estimate if needed |
+| T10 Final build / regression | 1 h | T9; retained changes | Package/check four stages, Boss victory, checkpoint death, Boss reset and fresh campaign; record build ID/failures |
+| T11 GDD / evidence update | 1 h | T8–T10 | Match GDD to actual build; save observations/timings/known issues/scope changes |
+| Shared contingency | 4 h | Available throughout | Use when blocked, record use and revise remaining estimates; not a completed task or actual spent time |
+
+T3/T4 separate activation from reset work; T5 supplies T8's build; T6 is not a mandatory serial dependency for Boss or testing. If grenade foundations are missing, re-estimate rather than label new development as integration. The AI-proposed observation protocol checks death explanations and repeated-pattern responses; its two-hour budget includes setup/notes, not compulsory two-hour player exposure. If a tester cannot reach Boss, preserve the result and disclose missing coverage instead of inventing it or adding an unplanned level select.
+
+### Review provenance and historical limits
+
+Source pages 10–13 and appendix: GPT-6 Astra draft/assembly and Doubao 2.1 review are disclosed. The human retained flexible capacity and chose Boss tuning as first cut; AI revised split tasks, explicit packaging and shared reserve. The hypothetical three-month-late postmortem in the review is **a scenario, not an actual delay or proof of missing code**. The original prompt/review setup qualifications remain visible in the PDF. The companion Journal reports its own task time as two hours; neither that nor the sprint estimates is substituted for current BUILD_LOG timings. It is retained without rewriting student answers.
+
+### W4 plan versus current checked project
+
+| Historical item | Current implementation / evidence boundary |
+|---|---|
+| Four stages, two firearms, shield, full Boss reset | Existing baseline preserved; A checkpoint and B campaign modes now coexist. Keep A is the later Lab B decision, not a September W4 claim |
+| Shield can destroy spike before lethal body collision | main.gd checks the guard hitbox first, removes a hit spike and consumes energy; lethal body contact remains separate. This supports the W4 rule without adding code |
+| Grenade scene pickups and inventory/reset integration | Grenade action/collection code exists; current active game_data timeline has no pickup event. Planned normal acquisition/capacity/reset completion is not claimed |
+| Boss exposed-phase concern / optional balancing | Existing Boss retained; exact completion of T7 or its historical change is not established by this source alone |
+| Engine/version/build metadata unknown in W4 | Now verified Godot 4.7.2, native single-threaded Web export and Duke workflow; historical metadata gap can be filled with current facts, not backdated |
+| Shareable build / tests / evidence | Later Web exports, engineering checks and seven human sessions are documented in BUILD_LOG/PROTOTYPE; they do not prove T1–T11 were performed on the September schedule |
+| Audio / source permissions | Historical audio task and runtime asset provenance remain unverified here; no TODO removed without source or delivery evidence |
+| Physics / lab question | Later lab-b-0.4 gravity=1250/1.1 and Keep A are separate authorized Lab B changes; old human snapshots and W4 design are preserved |
+
+## Original Lab A plan versus current prototype
 
 | Area | Lab A plan | Verified current scope / evidence boundary |
 |---|---|---|
@@ -78,12 +139,12 @@ The rifle and piercer have finite magazines with infinite reserve. The piercer b
 | Lab A concept and design intent | Supplied in original PDF and evaluation; summarized above |
 | Target player and intended experience | Supplied in PDF sidebar |
 | Original core action and loop | Supplied in diagram/callouts; summarized above |
-| Rep 3 GDD in full | Pending |
-| Rep 3 planned scope, sprint and changes | Pending |
+| Requested Rep 3 / W4 full GDD | Supplied: W4_Zhu_Submission.pdf, pages 1–7; archived unchanged. Cover does not print the numeric assignment/course code |
+| Rep 3 / W4 planned scope, sprint and changes | Supplied: source pages 8–13 plus archive; historical plan, not proof of completion |
 | Asset origin / license | PDF disclosure supplied; full runtime sprite/audio provenance still pending |
 
 ## Lab B scope
 
 Authorized revision on 2026-10-14: retain jump_speed=720, set default gravity=1250/1.1. Ideal ground-to-ground airtime targets 110% of the historical baseline; actual fixed-step measurements are documented in PROTOTYPE.md. Lower gravity also increases peak height. Historical human exports remain 1250-gravity evidence and are not retroactively changed. Numeric verdict thresholds remain pending.
 
-Preserve the existing loop. Question: does checkpoint respawn make players more willing to retry? Hypothesis: yes. A restores the current segment/full Boss entry; B restores campaign entry. The static start screen chooses A/B and Original / Slow / Fast Reload, default A + Original. The final student choice is **Keep A**, separate from the limited P04 paired evidence, which does not establish increased willingness. Numeric thresholds were not set before testing and are not backfilled; see PROTOTYPE.md. Do not add story, unlocks, meta-progression, new levels or juice effects. Cosmetic particle toggle affects existing decoration only; hostile Boss projectiles remain visible. Lab A sources are now preserved; Rep 3 source remains pending.
+Preserve the existing loop. Question: does checkpoint respawn make players more willing to retry? Hypothesis: yes. A restores the current segment/full Boss entry; B restores campaign entry. The static start screen chooses A/B and Original / Slow / Fast Reload, default A + Original. The final student choice is **Keep A**, separate from the limited P04 paired evidence, which does not establish increased willingness. Numeric thresholds were not set before testing and are not backfilled; see PROTOTYPE.md. Do not add story, unlocks, meta-progression, new levels or juice effects. Cosmetic particle toggle affects existing decoration only; hostile Boss projectiles remain visible. Lab A and W4 production-rep sources are now preserved; missing runtime provenance, historical implementation results or dates remain pending.

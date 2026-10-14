@@ -18,7 +18,7 @@ This bundle is a technical submission draft, **not a claim that all assignment e
 | Variant comparison | **TODO** same testers in A/B, actual results and order records. |
 | Six testers / two outside class | **TODO** anonymous IDs, dates, course membership and observations. |
 | Verdict, about one page | **TODO** student's evidence-based Keep/Pivot/Kill and first Lab C change; last section stays pending. |
-| Lab A / Rep 3 | Lab A PDF and supporting originals received from student and archived in design_sources/; GDD.md summarizes original design and current scope separately. **TODO: Rep 3 GDD/sprint plan**, not identified in supplied directory. |
+| Lab A / Rep 3 | Lab A originals plus Downloads W4_Zhu_Submission.pdf / W4_Zhu_Journal.pdf archived unchanged in design_sources/. W4 contains full project GDD and two-week sprint plan, now summarized in GDD.md. Cover uses Week 4 Production Rep rather than the numeric assignment/course label; historical implementation outcomes/provenance still require separate evidence. |
 | Video, 60–90 seconds | **TODO** recording/file/link. |
 | Development history | Existing actual log preserved; unprovided work/timings remain TODO. |
 

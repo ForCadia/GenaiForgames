@@ -1,5 +1,13 @@
 # Lab B — Build log
 
+## 2026-10-14 — Downloads W4 production GDD and sprint plan found
+
+Tool: Codex / PDF skill / pypdf / temporary pypdfium2/Pillow / Python / PowerShell. Prompt: search Downloads for Assignment 3 / Rep 3 / Creating a GDD and Sprint Plan Using AI, with W4 clue; list candidates first, preserve originals, reconcile confirmed sources without editing game code. Read-only recursive filename scan found W4_Zhu_Submission.pdf, W4_Zhu_Journal.pdf, Lab A DOCX candidates and a GAMEDSGN syllabus among 60 supported-format files. Prioritized W4 sources and read the full relevant GDD/sprint/decision/review sections, with rendered cover and sprint tables inspected.
+
+Identity: main 23-page PDF names the same project and author, September 27 2026, Week 4 Production Rep / Full GDD and Two Week Sprint Plan. Three-page Journal names the same project and rep. This confirms the requested project's W4 material; cover does not literally print Assignment 3 or 590.03, so the document labels were retained honestly. No ambiguous competing project candidate found. Copied both originals byte-identically into design_sources/, verified hashes and updated source inventory.
+
+Updated GDD.md with eleven-section production design, September 28–October 11 plan, human-confirmed minimum 20-hour capacity, 16 UNSOURCED estimated task hours plus four shared reserve hours, T1–T11 estimates/dependencies/acceptance, scope/cuts/decisions and review qualifications. Compared shield/spike and inactive pickup behavior to actual code without changes. Distinguished historical plan and hypothetical postmortem from current results; preserved unresolved runtime license, grenade-rule completion and historical execution evidence. Removed only the now-resolved source-missing TODO, updating submission checklist. Original Downloads files and existing Lab A copies unchanged; no gameplay edit, rebuild, deployment or telemetry upload. Time spent: TODO.
+
 ## 2026-10-14 — original Lab A GDD received and reconciled
 
 Tool: Codex / PDF skill / pypdf / Python XML/ZIP / PowerShell. Student supplied E:/bledderfile for helss/desktop/GENAI_03/w4 as the GDD location. Read the full one-page LabA_Zhu_GDD.pdf and three supporting DOCX files; rendered/inspected the PDF. Temporary pypdfium2 rendering initially lacked Pillow; installed both only under ignored tmp/pdf-render, not as game dependencies. Did not edit the original PDF/DOCX or student debt journal.
