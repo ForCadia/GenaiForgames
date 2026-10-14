@@ -1,6 +1,6 @@
 # Human export validation - 2026-10-14
 
-Source: C:/Users/lenovo/Downloads/A1.json through B3.json. The student explicitly confirmed these are human-played records in chat. Follow-up on 2026-10-14 confirmed six different people, one per file, all outside class. Notebook IDs P01–P06 follow A1/A2/A3/B1/B2/B3 respectively; feedback is recorded in PROTOTYPE.md. These identity/class-membership facts are student-supplied, not inferred from JSON. None of the six people has both A and B exports in this set. Files are copied byte-for-byte, not relabeled or synthesized. No tester_type was added to raw JSON; this document records the student-reported provenance. No uploads performed.
+Source: C:/Users/lenovo/Downloads/A1.json through B3.json. The student explicitly confirmed these are human-played records in chat. Follow-up on 2026-10-14 confirmed six different people, one per file, all outside class. Notebook IDs P01–P06 follow A1/A2/A3/B1/B2/B3 respectively; feedback is recorded in PROTOTYPE.md. These identity/class-membership facts are student-supplied, not inferred from JSON. The initial six files had no within-person pair; the later B1playA1 follow-up establishes P04's Original B-then-A pair, described below. Files are copied byte-for-byte, not relabeled or synthesized. No tester_type was added to raw JSON; this document records the student-reported provenance. No uploads performed.
 
 All six parse as schema 2, lab-b-0.2, with distinct session IDs and required raw event fields. Actual deaths and successful retries, excluding administrative ends:
 
@@ -14,12 +14,14 @@ All six parse as schema 2, lab-b-0.2, with distinct session IDs and required raw
 | B3.json | B / Fast Reload | 1 | 1 | 1 | 1 | 0 |
 
 Important limits:
+
+Follow-up received: B1playA1.json is P04's second session, A / Original, with full parameter snapshots identical to B1. P04 now has one within-person B-then-A pair; the other original pairings remain different people. Four completed deaths and three retries, with the fourth death about two seconds before export: the ten-second response window is right-censored. Do not treat 3/4 vs B1's 2/2 as a settled willingness difference. New SHA256: b08f94f85413028f00ba0d477d767f5a07cec925ceedb5634fae5ce8b3dc3845. All original six hashes below remain unchanged. Seven sessions still represent six people.
 - Actual 2=Slow and 3=Fast Reload, opposite the previously requested labels. Retain original filenames; analyze actual snapshots, not suffixes.
 - A1's failed runs use guard_delay=0.7 (default 0.75), piercer_cadence=0.51 (default 0.52), reload_multiplier=0.99 (default 1.0). It is not a valid Original-A comparison to B1. Its initial Original run ended administratively, not in death.
 - Every recorded death was retried, including within 10 seconds. Observed rates are 100% for these exported sessions; this does not demonstrate equal population willingness or participant counts. First-input delays range 0.033 to 7.667 seconds. Three requests occurred during the death lock; ready time is separately recorded.
 - A1 has four segment_3 -> segment_3 retries. A3 has segment_2 -> segment_2 and boss -> boss retries. B1 has segment_3 -> segment_0 with score zero. B Boss-death reset is not exercised in these exports.
 - B1/B2 have an unfinished final run. Exclude it from completed-duration/death statistics, do not invent run_end.
-- The student separately confirmed six people, all outside class, and provided observations/feedback now in PROTOTYPE.md. These sessions still do not establish three chronological one-variable iterations or same-person A/B exposure. Completed pre-test Card evidence remains missing; no additional questionnaire is requested. Derived session statistics and timing definitions are in PROTOTYPE.md.
+- The student separately confirmed six people, all outside class, and provided observations/feedback now in PROTOTYPE.md. These sessions do not establish three chronological one-variable iterations. The follow-up establishes one same-person A/B exposure pair, not six paired participants. Completed pre-test Card evidence remains missing; no additional questionnaire is requested. Derived session statistics and timing definitions are in PROTOTYPE.md.
 
 Original byte hashes:
 

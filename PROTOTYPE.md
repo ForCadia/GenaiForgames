@@ -87,23 +87,24 @@ Third manual loop: select Original, keep A, change only Jump speed to 755.14; HU
 
 ## Variant Comparison - parameter matches verified; player pairing pending
 
-A = checkpoint restart (full Boss encounter); B = campaign restart. Actual filename numbering is **1=Original, 2=Slow, 3=Fast Reload**, except A1's outcomes are **Custom**. Compare complete parameter dictionaries, not names alone. On 2026-10-14 the student confirmed six different players, one per file, all outside class. Thus these exports contain **no same-person A/B pair**. Matching settings allow descriptive between-person comparisons only; they do not fulfill the planned within-person comparison.
+A = checkpoint restart (full Boss encounter); B = campaign restart. Actual filename numbering is **1=Original, 2=Slow, 3=Fast Reload**, except A1's outcomes are **Custom**. Compare complete parameter dictionaries, not names alone. On 2026-10-14 the student confirmed six different players, one per file, all outside class. A later student-attributed export, B1playA1.json, supplies P04's Original-A exposure. P04 now has one verified within-person **B then A** pair with identical parameters. The other original candidate pairs remain between-person only; this is not a six-person paired comparison.
 
 | Candidate files | Outcome snapshots | Same tester / actual exposure order | Recorded A vs B failures; retries | Eligibility / missing evidence |
 |---|---|---|---|---|
+| [B1playA1.json](telemetry/B1playA1.json) / [B1.json](telemetry/B1.json) | Identical Original | Yes: P04, B then A | 4 vs 2; 3 vs 2 | One within-person pair; unequal exposure, open B run and recent unretried A death limit inference. |
 | [A1.json](telemetry/A1.json) / [B1.json](telemetry/B1.json) | Different | No: P01 / P04 | 4 vs 2; 4 vs 2 | Not eligible: Custom vs Original and different people; need clean Original-A and within-person pairing. |
 | [A2.json](telemetry/A2.json) / [B2.json](telemetry/B2.json) | Identical | No: P02 / P05 | 2 vs 3; 2 vs 3 | Slow settings match, but different people; descriptive only, not planned Original-only comparison. |
 | [A3.json](telemetry/A3.json) / [B3.json](telemetry/B3.json) | Identical | No: P03 / P06 | 8 vs 1; 8 vs 1 | Fast Reload settings match, but different people; descriptive only, not planned Original-only comparison. |
 
-All files have 100% observed retry and <=10 s first-input rates, based on their actual deaths; therefore these exported rates alone show no difference. This is descriptive evidence, not a controlled conclusion. Exposure duration, progress, player experience and sample sizes differ; B1/B2 also have an open final run. The file timestamps order these sessions A1 -> A2 -> A3 -> B1 -> B2 -> B3 across different people. There is no recorded within-person exposure order. Alternating orders are a future protocol, not a claim that it happened here. P06's reported perception of no difference has an unspecified referent; it does not establish that P06 played both variants.
+The initial six files have 100% observed retry and <=10 s first-input rates. The new P04 Original-A file has 3/4 (75%) at export, versus 2/2 (100%) in P04 Original-B. The A file was exported about two seconds after its last death, before the ten-second response window ended; treat the remaining response as right-censored, not proof of refusal. Do not read the descriptive -25 percentage-point difference as a settled effect. This is descriptive evidence, not a controlled conclusion. Exposure duration, progress, player experience and sample sizes differ; B1/B2 also have an open final run. The file timestamps order these sessions A1 -> A2 -> A3 -> B1 -> B2 -> B3 across different people. P04 later played A at 17:21:20-17:22:47 EDT after B at 17:05:41-17:06:47; the same-person order is B then A. Alternating orders are a future protocol, not a claim that it happened here. P06's reported perception of no difference has an unspecified referent; it does not establish that P06 played both variants.
 
-Formal planned comparison remains **Original only** with identical snapshots and the same people; A1 has no death/victory under Original. Collect clean Original-A evidence and opposite-variant exposures from the same players before claiming the planned comparison is complete. Summarize existing observations/feedback only; no additional questionnaire is needed.
+Formal planned comparison remains **Original only** with identical snapshots and the same people. B1playA1 supplies clean Original-A outcomes for P04; the old A1 Custom file remains excluded. Additional paired participants, balanced exposure durations and full response windows are needed for stronger inference. Summarize existing observations/feedback only; no additional questionnaire is needed.
 
 | Missing comparison evidence | Status |
 |---|---|
-| Same-person A/B pairs / order | None in the supplied exports; additional exposures required |
+| Same-person A/B pairs / order | One: P04, B1 then B1playA1; no paired exports for the other five testers |
 | Confirmed participant denominator / outside-class count | Six different people; all six outside class, student-confirmed |
-| Clean Original-A outcome records comparable to B1 | Missing from these six files |
+| Clean Original-A outcome records comparable to B1 | B1playA1.json, four completed deaths, identical parameters and version to B1 |
 | Existing observations / feedback | Entered in participant log; no quit observation supplied |
 | Preference, uncertainty and final Keep/Pivot/Kill interpretation | 待确认; no verdict inferred from rates |
 
@@ -118,13 +119,13 @@ The student confirmed on 2026-10-14 that these files correspond to **six differe
 | P01 | 2026-10-14 | Yes, student-confirmed | A / Custom; Original initially, then three edits | [A1.json](telemetry/A1.json) | 不熟练操作；遥测记录第四段重型炮塔激光死亡 4 次 | 没有教程 | 4 次失败、4 次重试，首次按键均 <=10 s；完整局 5、行政结束 3 |
 | P02 | 2026-10-14 | Yes, student-confirmed | A / Slow | [A2.json](telemetry/A2.json) | 跳跃／地刺是卡点；遥测记录地刺死亡 1 次、敌弹死亡 1 次 | 跳跃滞空不足，地刺太大、跳不过去 | 2 次失败、2 次重试，首次按键均 <=10 s；完整局 3 |
 | P03 | 2026-10-14 | Yes, student-confirmed | A / Fast Reload | [A3.json](telemetry/A3.json) | 不熟练操作；遥测包含普通关卡及 Boss 死亡 | 内容过多，感觉 overwhelming | 8 次失败、8 次重试，首次按键均 <=10 s；完整局 9 |
-| P04 | 2026-10-14 | Yes, student-confirmed | B / Original | [B1.json](telemetry/B1.json) | 学生描述为类似游戏的熟练玩家；遥测包含第四段死亡后回到整局开头 | 觉得很好 | 2 次失败、2 次重试，首次按键均 <=10 s；完整局 2，最后 1 局未结束 |
+| P04 | 2026-10-14 | Yes, student-confirmed | B / Original then A / Original | [B1.json](telemetry/B1.json), [B1playA1.json](telemetry/B1playA1.json) | 类似游戏的熟练玩家；A 模式下因放松而连续死亡 | B：觉得很好；A：不够刺激，但放松后容易连续死亡 | B: 2/2 retries, 2 complete and 1 open run; A: 3/4 retries at export, 4 complete deaths, final response window incomplete |
 | P05 | 2026-10-14 | Yes, student-confirmed | B / Slow | [B2.json](telemetry/B2.json) | 地刺问题；遥测记录第一段地刺死亡 3 次 | 仍是地刺问题；其他反馈未记录 | 3 次失败、3 次重试，首次按键均 <=10 s；完整局 3，最后 1 局未结束 |
 | P06 | 2026-10-14 | Yes, student-confirmed | B / Fast Reload | [B3.json](telemetry/B3.json) | 具体卡点未记录；遥测记录敌弹死亡 1 次 | 认为没什么区别；比较对象未明确 | 1 次失败、1 次重试，首次按键 <=10 s；完整局 2 |
 
 ### Verified session evidence - not participant rows
 
-JSON schema 2 / version lab-b-0.2; six distinct session IDs. Dates/times below are **2026-10-14 America/New_York (EDT, UTC-04:00)**, converted from UTC JSON timestamps. Range is first through last recorded event, not active gameplay duration; export time comes from exported_at, not filesystem metadata.
+JSON schema 2 / version lab-b-0.2; seven distinct session IDs from six student-confirmed people. B1playA1 is a second exposure for P04, not a seventh tester. Dates/times below are **2026-10-14 America/New_York (EDT, UTC-04:00)**, converted from UTC JSON timestamps. Range is first through last recorded event, not active gameplay duration; export time comes from exported_at, not filesystem metadata.
 
 | JSON | First-last event (EDT) | Export (EDT) | Actual configuration | Started runs | Complete outcome runs | Administrative ends | Open runs | Deaths | Victories | Successful retries / deaths |
 |---|---|---|---|---:|---:|---:|---:|---:|---:|---|
@@ -134,6 +135,7 @@ JSON schema 2 / version lab-b-0.2; six distinct session IDs. Dates/times below a
 | [B1.json](telemetry/B1.json) | 17:05:41-17:06:47 | 17:06:48 | B / Original | 3 | 2 | 0 | 1 | 2 | 0 | 2/2 (100%) |
 | [B2.json](telemetry/B2.json) | 17:07:14-17:07:45 | 17:07:46 | B / Slow | 4 | 3 | 0 | 1 | 3 | 0 | 3/3 (100%) |
 | [B3.json](telemetry/B3.json) | 17:08:15-17:09:40 | 17:09:41 | B / Fast Reload | 2 | 2 | 0 | 0 | 1 | 1 | 1/1 (100%) |
+| [B1playA1.json](telemetry/B1playA1.json) | 17:21:20-17:22:47 | 17:22:49 | A / Original (P04) | 4 | 4 | 0 | 0 | 4 | 0 | 3/4 (75% at export; last death response window incomplete) |
 
 Complete outcome = run_end with failure=true or cause=victory. Administrative endings are counted separately and excluded from outcome-duration statistics. B1 and B2 each have an unfinished final run: no invented run_end/duration, and both are excluded from completed-time calculations. A1's first three endings are administrative parameter changes; its five completed outcomes are Custom. The other five files retain their named snapshots. No raw events have been changed.
 
@@ -145,6 +147,7 @@ Complete outcome = run_end with failure=true or cause=victory. Administrative en
 | [B1.json](telemetry/B1.json) | 2 | 59.898 | 29.949 | 29.949 | 200-1200 |
 | [B2.json](telemetry/B2.json) | 3 | 20.599 | 6.866 | 6.916 | 100-100 |
 | [B3.json](telemetry/B3.json) | 2 | 79.297 | 39.649 | 39.649 | 200-3800 |
+| [B1playA1.json](telemetry/B1playA1.json) | 4 | 84.564 | 21.141 | 16.049 | 300-600 |
 
 Scores are per-run gains (score_delta), not comparable cumulative checkpoint totals. Mean/median include both deaths and victories; checkpoint resumes and unequal progress alter attempt lengths. These descriptive numbers cannot by themselves isolate restart preference.
 
@@ -160,6 +163,7 @@ These are **event-derived facts**, not invented observations or statements by th
 | [B1.json](telemetry/B1.json) | HOSTILE FIRE x1; HEAVY TURRET LASER x1 | segment_0 x1; segment_3 x1 | Original snapshot. segment_3 death retries at segment_0 with score 0; final run open. |
 | [B2.json](telemetry/B2.json) | GROUND SPIKES // UNBLOCKABLE x3 | segment_0 x3 | Only scroll_multiplier=1.275 differs from Original. All retries at campaign entry; final run open. |
 | [B3.json](telemetry/B3.json) | HOSTILE FIRE x1 | segment_0 x1 | Only reload_multiplier=0.8 differs from Original. One segment_0 death and campaign-entry retry; later victory. |
+| [B1playA1.json](telemetry/B1playA1.json) | GROUND SPIKES // UNBLOCKABLE x1; HOSTILE FIRE x2; TURRET COLLISION x1 | segment_0 x1; segment_2 x2; segment_3 x1 | Original; identical full snapshot to B1. Two recorded retries return to segment_2 with entry score 400. Last death not retried before export. |
 
 ### Retry timing - willingness and game response are separate
 
@@ -173,10 +177,11 @@ failure_to_input_seconds measures death to first retry input (including player w
 | [B1.json](telemetry/B1.json) | 0.800 / 0.817 / 0.833 | 0.001 / 0.001 | 0.834 | 2/2 | 2/2 | 2/2 |
 | [B2.json](telemetry/B2.json) | 0.466 / 0.467 / 0.650 | 0.001 / 0.001 | 0.651 | 3/3 | 3/3 | 3/3 |
 | [B3.json](telemetry/B3.json) | 0.467 / 0.467 / 0.467 | 0.001 / 0.001 | 0.468 | 1/1 | 1/1 | 1/1 |
+| [B1playA1.json](telemetry/B1playA1.json) | 0.183 / 0.367 / 0.549 | 0.001 / 0.184 | 0.550 | 3/4 at export | 3/3 | 3/3 |
 
-Across these exports: **20/20 successful retries have input-to-ready <=2 s (maximum 0.333 s)**; **18/20 have death-to-ready <=2 s**. A2 has one 6.634 s death-to-ready interval and A3 one 7.668 s interval, primarily before first input (6.634 and 7.667 s). Do not use the 20/20 first-input-within-10-s result as evidence of a death-to-ready-under-2-s requirement. The separate input-to-ready fields provide response-time evidence for the recorded attempts only. A3's 0.033 s input waited 0.333 s to restart; this animation wait is not player hesitation.
+Across all seven exports: **23/23 successful retries have input-to-ready <=2 s (maximum 0.333 s)**; **21/23 have death-to-ready <=2 s**. A2 has one 6.634 s death-to-ready interval and A3 one 7.668 s interval, primarily before first input (6.634 and 7.667 s). Do not use the initial six files' 20/20 first-input-within-10-s result as evidence of a death-to-ready-under-2-s requirement. The separate input-to-ready fields provide response-time evidence for the recorded attempts only. A3's 0.033 s input waited 0.333 s to restart; this animation wait is not player hesitation.
 
-Participant mapping, outside-class status and existing observations/feedback are now student-confirmed above: six distinct people and six outside class. JSON alone would not establish those facts. Three completed single-variable iterations, a same-person A/B comparison and a final verdict remain incomplete; player-level experience differs between records. No extra questionnaire or invented observation has been added.
+Participant mapping, outside-class status and existing observations/feedback are now student-confirmed above: six distinct people and six outside class. JSON alone would not establish those facts. Three completed single-variable iterations and a final verdict remain incomplete. One same-person Original A/B comparison is now recorded for P04, with the exposure and censoring limits above; player-level experience differs between records. No extra questionnaire or invented observation has been added.
 
 ## Verdict
 

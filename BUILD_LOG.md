@@ -1,5 +1,11 @@
 # Lab B — Build log
 
+## 2026-10-14 — P04 Original-A follow-up export
+
+Tool: Codex / Python standard library / PowerShell. Prompt: inspect the new Downloads JSON after the student said the B1 tester also played A1, with feedback that it felt less exciting and relaxing led to repeated deaths. Found B1playA1.json; parsed schema 2 / lab-b-0.2, verified every run is A / checkpoint / Original and its complete parameter dictionary matches B1. Preserved a byte-identical copy in telemetry/ and attributed it to existing P04, not a new tester.
+
+Actual results: four started/completed runs, four deaths, three successful retries, no administrative endings or open runs. Completed-duration total 84.563511 s, mean 21.140878 s, median 16.049472 s. Recorded first-input delays 0.183/0.549/0.367 s; maximum input-to-ready 0.184 s. Last death was at 17:22:47 EDT and export 17:22:49, so the ten-second response window is incomplete; 3/4 retry rate is only the observed export-time value. Updated participant log, P04 B-then-A comparison, seven-session metrics and reported feedback; no population effect, preference verdict or refusal inferred. No raw JSON changes or uploads. Time spent: TODO.
+
 ## 2026-10-14 — student-confirmed participant mapping and feedback
 
 Tool: Codex / repository document edits. Student provided notes for A1/A2/A3/B1/B2/B3 and replied yes to clarification that they are six different people and B2/B3 are outside class (A1/A2/A3/B1 had already been marked yes). Recorded six outside-class participants using notebook-only anonymous IDs P01–P06 in filename order, one row each. Added the supplied control/tutorial, jump/spike, overwhelming-content, experienced-player positive feedback and perceived-no-difference summaries. Unspecified details remain unrecorded rather than inferred; P06's comparison referent is unknown. No extra questionnaire created.
