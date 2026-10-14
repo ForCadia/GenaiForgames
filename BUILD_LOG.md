@@ -1,5 +1,11 @@
 # Lab B — Build log
 
+## 2026-10-14 — final student Keep choice and evidence-based Verdict
+
+Tool: Codex / Python standard library / PowerShell. Prompt: final choice is Keep A; compare P04 Original B1 and B1playA1 honestly, note one paired tester, do not count the soon-after-death export as abandonment, do not backfill thresholds, and make continued challenge tuning Lab C's first step. Re-read source documents and raw exports, confirmed full parameter snapshots match, and recomputed counts/durations/three retry timing fields before editing.
+
+Updated Variant Comparison with a detailed paired table and limited conclusion: B deaths/retries 2/2, A 4/3 with its final response right-censored about two seconds after death; captured median first-input delay B 0.8165 s vs A 0.367 s. A responses are faster descriptively, but increased willingness is not established. Differing exposure, B-before-A order and only P04 paired limit inference. Filled the final approximately one-page Verdict with the student's Keep A decision separate from those findings and the supplied less-exciting/relaxing feedback. Lab C retains A and tunes challenge intensity; no extra gameplay change or chosen tuning value added. Card now states numeric thresholds were not set before testing, without backdating completion. Raw JSON unchanged, no upload or rebuild. Time spent: TODO.
+
 ## 2026-10-14 — authorized 110% ideal-airtime implementation
 
 Tool: Codex / Godot / PowerShell / Python standard library. Prompt: keep jump strength 720, change gravity from 1250 to 1250/1.1, synchronize defaults/panel/docs, validate actual effect and export Web without changing existing JSON. Implemented only the gravity gameplay change in game_data.gd; panel reads that constant and uses 0.01 increments, avoiding the former 25-unit quantization. Restore defaults and all named modes share the exact internal value. Revision lab-b-0.4 distinguishes new snapshots from historical 1250-gravity sessions.

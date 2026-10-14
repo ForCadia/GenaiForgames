@@ -16,11 +16,11 @@ Deadline: **2026-10-14 23:59** (confirm course timezone). Telemetry must be read
 | Single A/B variable | Restart location; original parameters, enemies, art, failure screen, score rules and inputs held constant |
 | Primary metric | Successful retries whose first input is within 10 s / actual failures of the corresponding variant |
 | Secondary metrics | Total retry rate; failure-to-input / failure-to-ready time; median duration; tester-level willingness, confusion and quits |
-| Keep threshold | **Student confirmation pending** |
-| Pivot threshold | **Student confirmation pending** |
-| Kill threshold | **Student confirmation pending** |
+| Keep threshold | Not set before testing; no retrospective numeric threshold. Final student design choice: Keep A. |
+| Pivot threshold | Not set before testing; no retrospective numeric threshold. |
+| Kill threshold | Not set before testing; no retrospective numeric threshold. |
 | A/B order | Same tester plays both; alternate A→B and B→A between testers; Original only |
-| Completed Card commit hash / date | Pending completion and commit |
+| Completed Card commit hash / date | No complete pre-test Card with numeric thresholds found; this post-test decision does not repair that timing gap. |
 
 ## Original baseline and three parameter modes
 
@@ -108,7 +108,7 @@ The test uses actual main.gd _update_player(), starts through the normal Start f
 
 Source: tests/airtime_smoke.gd; generated engineering report tmp/airtime-measurement.json. Peak height increases as a physical consequence of lower gravity. New human feedback/iteration outcome remains pending; old human sessions use 1250 and cannot validate this new revision. Do not mix versions in A/B analysis. Historical date/values for the student's earlier trials remain pending even though this current implementation is now verified.
 
-## Variant Comparison - parameter matches verified; player pairing pending
+## Variant Comparison - P04 paired evidence and limits
 
 A = checkpoint restart (full Boss encounter); B = campaign restart. Actual filename numbering is **1=Original, 2=Slow, 3=Fast Reload**, except A1's outcomes are **Custom**. Compare complete parameter dictionaries, not names alone. On 2026-10-14 the student confirmed six different players, one per file, all outside class. A later student-attributed export, B1playA1.json, supplies P04's Original-A exposure. P04 now has one verified within-person **B then A** pair with identical parameters. The other original candidate pairs remain between-person only; this is not a six-person paired comparison.
 
@@ -129,7 +129,29 @@ Formal planned comparison remains **Original only** with identical snapshots and
 | Confirmed participant denominator / outside-class count | Six different people; all six outside class, student-confirmed |
 | Clean Original-A outcome records comparable to B1 | B1playA1.json, four completed deaths, identical parameters and version to B1 |
 | Existing observations / feedback | Entered in participant log; no quit observation supplied |
-| Preference, uncertainty and final Keep/Pivot/Kill interpretation | 待确认; no verdict inferred from rates |
+| Final design choice / data conclusion | Student chose Keep A; higher retry willingness not established; see paired analysis and final Verdict |
+
+### P04: Original B then Original A
+
+One paired tester, P04, played [B1.json](telemetry/B1.json) (B / Campaign) followed by [B1playA1.json](telemetry/B1playA1.json) (A / Checkpoint). Both are lab-b-0.2 / Original, jump_speed=720, gravity=1250; **all gameplay parameter snapshot fields match**. This pair predates the later lab-b-0.4 gravity adjustment, so it cannot measure that adjustment. Player attribution and feedback are student-confirmed; dates/counts/times are from the unchanged exports.
+
+| Measure | B / Campaign: B1 | A / Checkpoint: B1playA1 | Interpretation |
+|---|---:|---:|---|
+| Started / completed outcome runs | 3 / 2 | 4 / 4 | B's final open run excluded from completed duration |
+| Actual deaths / successful retries | 2 / 2 | 4 / 3 | A's last death has an incomplete response window, not an abandonment |
+| Raw retry rate at export | 2/2 = 100% | 3/4 = 75% | Descriptive only; the apparent -25 pp is not evidence of lower willingness |
+| First input within 10 s | 2 captured retries | 3 captured retries | All successful retries satisfy the metric; last A response unknown |
+| Active completed-duration sum | 59.898 s | 84.564 s | Unequal exposure; death count is not a normalized difficulty measure |
+| Mean / median completed duration | 29.949 / 29.949 s | 21.141 / 16.049 s | Different restart locations/progress; not a preference score |
+| First-input delay median / range | 0.817 / 0.800-0.833 s | 0.367 / 0.183-0.549 s | A responses were faster in these few observed retries; this suggests faster response, not a proven increase in willingness |
+| Input-to-ready median / maximum | 0.001 / 0.001 s | 0.001 / 0.184 s | A includes death-lock waiting; response time is distinct from first-input delay |
+| Death-to-ready maximum, successful retries | 0.834 s | 0.550 s | All five successful retries ready within 2 s; this uses explicit ready times, not the 10 s willingness metric |
+| Relevant restart evidence | segment_3 death resumes segment_0, score 0 | Two segment_2 deaths resume segment_2, score 400 | Observed behavior agrees with restart-location definitions |
+| Student-reported player feedback | Experienced genre player; thought it was good | Less exciting; relaxing led to repeated deaths | A may reduce perceived stakes; a challenge-tuning concern, not a measured population effect |
+
+A's last death is recorded at 17:22:47 EDT, with export at 17:22:49. The roughly two-second follow-up is shorter than the ten-second response window. Its response is **right-censored / not observed yet**; do not classify it as refusal, quitting or abandonment, and do not invent a later retry. Keep the raw 4-death/3-retry count, while declining to interpret the missing response as a negative choice.
+
+**Data conclusion:** the hypothesis “checkpoint respawn makes players more willing to retry” is not established by this pair. P04 retried every death for which a response was observed in both modes; A showed faster first inputs, but no demonstrated higher retry proportion. One player, B-before-A order, unequal exposure and the incomplete final response limit inference. Learning, familiarity, fatigue or checkpoint position could affect the differences; none is measured as the cause. The student's final **Keep A** choice is separate from that conclusion. Numeric Keep/Pivot/Kill thresholds were not set before testing and are not being invented afterward.
 
 ## Playtest Log
 
@@ -204,8 +226,18 @@ failure_to_input_seconds measures death to first retry input (including player w
 
 Across all seven exports: **23/23 successful retries have input-to-ready <=2 s (maximum 0.333 s)**; **21/23 have death-to-ready <=2 s**. A2 has one 6.634 s death-to-ready interval and A3 one 7.668 s interval, primarily before first input (6.634 and 7.667 s). Do not use the initial six files' 20/20 first-input-within-10-s result as evidence of a death-to-ready-under-2-s requirement. The separate input-to-ready fields provide response-time evidence for the recorded attempts only. A3's 0.033 s input waited 0.333 s to restart; this animation wait is not player hesitation.
 
-Participant mapping, outside-class status and existing observations/feedback are now student-confirmed above: six distinct people and six outside class. JSON alone would not establish those facts. Three completed single-variable iterations and a final verdict remain incomplete. One same-person Original A/B comparison is now recorded for P04, with the exposure and censoring limits above; player-level experience differs between records. No extra questionnaire or invented observation has been added.
+Participant mapping, outside-class status and existing observations/feedback are now student-confirmed above: six distinct people and six outside class. JSON alone would not establish those facts. Historical iteration values/reasons/effects remain partially missing; the final student design decision is recorded below. One same-person Original A/B comparison is recorded for P04, with the exposure and censoring limits above; player-level experience differs between records. No extra questionnaire or invented observation has been added.
 
 ## Verdict
 
-**Pending real evidence and student judgment.** After testing, write approximately one page stating Keep / Pivot / Kill, compare actual metrics with the precommitted thresholds, cite sample sizes and JSON, connect observations to metrics, discuss uncertainty and state the first Lab C change. No pre-test conclusion is written. Keep this section last.
+**Keep: retain A / Checkpoint respawn.** This is my final design choice, confirmed on 2026-10-14, rather than a claim that A won the experiment. The question was whether checkpoint respawn makes players more willing to retry, and my hypothesis was yes. No numeric Keep/Pivot/Kill thresholds were established before testing. I will not retroactively invent thresholds, declare that one was met, or portray this post-test decision as a completed pre-test Prototype Card.
+
+The directly paired evidence is one tester, P04: [B1.json](telemetry/B1.json) followed by [B1playA1.json](telemetry/B1playA1.json). Both used Original parameters in lab-b-0.2, with jump strength 720 and gravity 1250; their complete parameter dictionaries match. B recorded two deaths and two retries, while A recorded four deaths and three retries. B also contains an open final run, which is excluded from completed-duration statistics. A's last death occurred about two seconds before export, so its retry response had not received the full ten-second observation window. That missing response is not evidence of abandonment. The raw export-time rates, 100% for B and 75% for A, must therefore not be treated as a settled advantage for B or a failure of A.
+
+Among captured responses, P04's median death-to-first-input delay was approximately 0.817 seconds in B and 0.367 seconds in A. That is a real descriptive difference suggesting faster response in the A exposure. It does not show a higher probability of choosing to retry: P04 continued after every death for which a response was actually observed in either mode. All five successful retries returned to play within two seconds of death, using the recorded ready-time fields. Input-to-ready delay is a separate measure, at most 0.001 seconds in B and 0.184 seconds in A; it should not be confused with the player's waiting before pressing a key. The ten-second first-input metric is not proof of a two-second restart requirement.
+
+Accordingly, the data do **not establish** the hypothesis that checkpoints increase willingness to retry. There is only one paired participant, always B before A, with unequal exposure and different progress/restart locations. Mean completed duration was 29.949 seconds in B versus 21.141 in A, and A had more deaths, but these counts and durations cannot isolate preference or difficulty. Familiarity, order and checkpoint position could contribute; their effects were not independently measured. The other five testers' records and feedback do not enlarge the within-person paired sample, and the old Custom A1 file is excluded from this Original comparison.
+
+P04's feedback gives a useful design tension. This experienced player thought B was good, but described A as less exciting and said relaxing led to repeated deaths. I choose to keep checkpoint recovery despite the uncertain willingness result, while treating the reduced excitement as a concrete problem for the next stage. This is a design commitment, not a manufactured endorsement by the data. The later lab-b-0.4 gravity change is also outside these human records; its engineering airtime measurements cannot substitute for player feedback about the new build.
+
+**Lab C's first step is to keep A and continue tuning challenge intensity in response to “not exciting enough.”** Preserve the checkpoint rule while evaluating a single challenge parameter at a time, with other settings held constant. Define numeric decision criteria before the next measured comparison, use matched exposures and balanced A/B orders if B is retained for evaluation, and allow the full retry-response window before export. This keeps the chosen recovery structure while testing whether challenge can regain tension without mistaking repeated deaths for unwillingness or declaring a winner from one person's incomplete record.
