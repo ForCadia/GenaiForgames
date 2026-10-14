@@ -1,5 +1,11 @@
 # Lab B — Build log
 
+## 2026-10-14 — student-confirmed participant mapping and feedback
+
+Tool: Codex / repository document edits. Student provided notes for A1/A2/A3/B1/B2/B3 and replied yes to clarification that they are six different people and B2/B3 are outside class (A1/A2/A3/B1 had already been marked yes). Recorded six outside-class participants using notebook-only anonymous IDs P01–P06 in filename order, one row each. Added the supplied control/tutorial, jump/spike, overwhelming-content, experienced-player positive feedback and perceived-no-difference summaries. Unspecified details remain unrecorded rather than inferred; P06's comparison referent is unknown. No extra questionnaire created.
+
+Updated Variant Comparison: A2/B2 and A3/B3 have matching settings but different players, so neither is the planned within-person comparison; A1/B1 also differ in parameters. Player experience is a possible confound, not an inferred result. No Keep/Pivot/Kill decision made. Preserved raw JSON and the calculated timing/count tables; verified hashes, six unique notebook rows and Verdict last. No gameplay change, upload or manufactured feedback. Time spent: TODO.
+
 ## 2026-10-14 — session-derived Playtest Log and comparison
 
 AI tool: Codex / Python standard library / PowerShell. Prompt: populate Playtest Log from the six human JSON files, ask once for participant mapping/outside-class identity/observations/feedback, preserve raw records and distinguish input latency from game response. Read the JSON, telemetry/VALIDATION.md and existing project documents first. Asked the student for one row per actual person with their files and any existing notes; no new questionnaire created. Participant mapping has not yet been provided, so no six-person or within-person claim is made.

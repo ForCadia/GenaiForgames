@@ -1,6 +1,6 @@
 # Human export validation - 2026-10-14
 
-Source: C:/Users/lenovo/Downloads/A1.json through B3.json. The student explicitly confirmed these are human-played records in chat. Tester count, anonymous identities, course membership and exposure pairing remain unconfirmed. Files are copied byte-for-byte, not relabeled or synthesized. No tester_type was added to raw JSON; this document records the student-reported provenance. No uploads performed.
+Source: C:/Users/lenovo/Downloads/A1.json through B3.json. The student explicitly confirmed these are human-played records in chat. Follow-up on 2026-10-14 confirmed six different people, one per file, all outside class. Notebook IDs P01–P06 follow A1/A2/A3/B1/B2/B3 respectively; feedback is recorded in PROTOTYPE.md. These identity/class-membership facts are student-supplied, not inferred from JSON. None of the six people has both A and B exports in this set. Files are copied byte-for-byte, not relabeled or synthesized. No tester_type was added to raw JSON; this document records the student-reported provenance. No uploads performed.
 
 All six parse as schema 2, lab-b-0.2, with distinct session IDs and required raw event fields. Actual deaths and successful retries, excluding administrative ends:
 
@@ -19,7 +19,7 @@ Important limits:
 - Every recorded death was retried, including within 10 seconds. Observed rates are 100% for these exported sessions; this does not demonstrate equal population willingness or participant counts. First-input delays range 0.033 to 7.667 seconds. Three requests occurred during the death lock; ready time is separately recorded.
 - A1 has four segment_3 -> segment_3 retries. A3 has segment_2 -> segment_2 and boss -> boss retries. B1 has segment_3 -> segment_0 with score zero. B Boss-death reset is not exercised in these exports.
 - B1/B2 have an unfinished final run. Exclude it from completed-duration/death statistics, do not invent run_end.
-- These sessions cannot by themselves establish three chronological one-variable iterations, same-person A/B exposure or six people including two outside class. Participant mapping, existing observations/feedback and completed pre-test Card evidence remain required; no additional questionnaire is requested. Derived session statistics and timing definitions are in PROTOTYPE.md.
+- The student separately confirmed six people, all outside class, and provided observations/feedback now in PROTOTYPE.md. These sessions still do not establish three chronological one-variable iterations or same-person A/B exposure. Completed pre-test Card evidence remains missing; no additional questionnaire is requested. Derived session statistics and timing definitions are in PROTOTYPE.md.
 
 Original byte hashes:
 

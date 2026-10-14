@@ -26,7 +26,7 @@ Deadline: **2026-10-14 23:59** (confirm course timezone). Telemetry must be read
 
 Submission audit on **2026-10-14**: the student reconfirmed the existing question/hypothesis and mechanisms. Git contains notebook commits `1b50804` and `8d0bc3e`, both dated 2026-10-04, but the Card's thresholds were placeholders in both and remain unconfirmed. There is no complete pre-playtest Card commit in the available history. First external playtest date and any separate precommit evidence: **TODO — student input**. Do not backdate a threshold or imply the placeholder met the requirement. If external testing already happened, disclose this timing gap rather than retroactively claiming preregistration.
 
-At the initial audit no real JSON was present. Later on 2026-10-14, six student-confirmed human session exports were received in `telemetry/`; their measured session results are now listed in Playtest Log. Participant mapping, measured iteration decisions, controlled A/B attribution, video and verdict remain **TODO**. Engineering smoke-test events are excluded from playtest evidence. English UI/JSON labels are Original / Slow / Fast Reload / Custom; earlier Chinese exports, if supplied, map to the corresponding modes, and must still be filtered by identical parameter snapshots. Build `lab-b-0.3` makes the current engineering revision distinguishable.
+At the initial audit no real JSON was present. Later on 2026-10-14, six student-confirmed human session exports were received in `telemetry/`; their measured session results are now listed in Playtest Log. Participant mapping and existing feedback were subsequently student-confirmed in Playtest Log; measured iteration decisions, controlled within-person A/B evidence, video and verdict remain **TODO**. Engineering smoke-test events are excluded from playtest evidence. English UI/JSON labels are Original / Slow / Fast Reload / Custom; earlier Chinese exports, if supplied, map to the corresponding modes, and must still be filtered by identical parameter snapshots. Build `lab-b-0.3` makes the current engineering revision distinguishable.
 
 Defaults verified against game_data.gd, main.gd and lab_panel.gd at git commit **613233e**, before experimental presets. Baseline is copied from authored defaults at startup, never from current sliders. The existing twelve numbers remain; a single reload multiplier is added to the same panel.
 
@@ -87,34 +87,40 @@ Third manual loop: select Original, keep A, change only Jump speed to 755.14; HU
 
 ## Variant Comparison - parameter matches verified; player pairing pending
 
-A = checkpoint restart (full Boss encounter); B = campaign restart. Actual filename numbering is **1=Original, 2=Slow, 3=Fast Reload**, except A1's outcomes are **Custom**. Compare complete parameter dictionaries, not names alone. Different session IDs neither prove nor disprove the same person. No confirmed within-person A/B pair is established until the student supplies the file-to-player mapping.
+A = checkpoint restart (full Boss encounter); B = campaign restart. Actual filename numbering is **1=Original, 2=Slow, 3=Fast Reload**, except A1's outcomes are **Custom**. Compare complete parameter dictionaries, not names alone. On 2026-10-14 the student confirmed six different players, one per file, all outside class. Thus these exports contain **no same-person A/B pair**. Matching settings allow descriptive between-person comparisons only; they do not fulfill the planned within-person comparison.
 
 | Candidate files | Outcome snapshots | Same tester / actual exposure order | Recorded A vs B failures; retries | Eligibility / missing evidence |
 |---|---|---|---|---|
-| [A1.json](telemetry/A1.json) / [B1.json](telemetry/B1.json) | Different | 待确认 | 4 vs 2; 4 vs 2 | Not eligible: Custom vs Original; need a clean Original-A record and confirmed pairing. |
-| [A2.json](telemetry/A2.json) / [B2.json](telemetry/B2.json) | Identical | 待确认 | 2 vs 3; 2 vs 3 | All parameter values match (Slow); eligible only after same-person mapping. Not the planned Original-only comparison. |
-| [A3.json](telemetry/A3.json) / [B3.json](telemetry/B3.json) | Identical | 待确认 | 8 vs 1; 8 vs 1 | All parameter values match (Fast Reload); eligible only after same-person mapping. Not the planned Original-only comparison. |
+| [A1.json](telemetry/A1.json) / [B1.json](telemetry/B1.json) | Different | No: P01 / P04 | 4 vs 2; 4 vs 2 | Not eligible: Custom vs Original and different people; need clean Original-A and within-person pairing. |
+| [A2.json](telemetry/A2.json) / [B2.json](telemetry/B2.json) | Identical | No: P02 / P05 | 2 vs 3; 2 vs 3 | Slow settings match, but different people; descriptive only, not planned Original-only comparison. |
+| [A3.json](telemetry/A3.json) / [B3.json](telemetry/B3.json) | Identical | No: P03 / P06 | 8 vs 1; 8 vs 1 | Fast Reload settings match, but different people; descriptive only, not planned Original-only comparison. |
 
-All files have 100% observed retry and <=10 s first-input rates, based on their actual deaths; therefore these exported rates alone show no difference. This is descriptive evidence, not a controlled or person-level conclusion. Exposure duration, progress and sample sizes differ; B1/B2 also have an open final run. The file timestamps order these sessions A1 -> A2 -> A3 -> B1 -> B2 -> B3, but player mapping and actual within-person order remain pending. Alternating orders are a future protocol, not a claim that it happened here.
+All files have 100% observed retry and <=10 s first-input rates, based on their actual deaths; therefore these exported rates alone show no difference. This is descriptive evidence, not a controlled conclusion. Exposure duration, progress, player experience and sample sizes differ; B1/B2 also have an open final run. The file timestamps order these sessions A1 -> A2 -> A3 -> B1 -> B2 -> B3 across different people. There is no recorded within-person exposure order. Alternating orders are a future protocol, not a claim that it happened here. P06's reported perception of no difference has an unspecified referent; it does not establish that P06 played both variants.
 
-Formal planned comparison remains **Original only** with identical snapshots and the same people; A1 has no death/victory under Original. Collect clean Original-A evidence before comparing to B1, and confirm the participant mapping. Summarize existing observations/feedback only; no additional questionnaire is needed.
+Formal planned comparison remains **Original only** with identical snapshots and the same people; A1 has no death/victory under Original. Collect clean Original-A evidence and opposite-variant exposures from the same players before claiming the planned comparison is complete. Summarize existing observations/feedback only; no additional questionnaire is needed.
 
 | Missing comparison evidence | Status |
 |---|---|
-| Confirmed same-person pairs / participant denominator / order | 待确认 |
+| Same-person A/B pairs / order | None in the supplied exports; additional exposures required |
+| Confirmed participant denominator / outside-class count | Six different people; all six outside class, student-confirmed |
 | Clean Original-A outcome records comparable to B1 | Missing from these six files |
-| Outside-class status, observed confusion/quits and actual feedback | 待确认 |
+| Existing observations / feedback | Entered in participant log; no quit observation supplied |
 | Preference, uncertainty and final Keep/Pivot/Kill interpretation | 待确认; no verdict inferred from rates |
 
 ## Playtest Log
 
 ### Participant log - one row per confirmed person
 
-The student confirmed all six files are human-played exports. Player identifiers, whether multiple sessions belong to one person, course membership and feedback are absent from JSON. **Six sessions are not six confirmed testers.** The temporary row below is an unresolved mapping placeholder, not a participant or a claim that all files came from one person. Replace it with one row per real tester and combine that person's files once the student supplies the mapping. Six actual people, including two outside class, remain unverified. No new questionnaire is required.
+The student confirmed on 2026-10-14 that these files correspond to **six different human testers, all six outside class**. P01–P06 are anonymous notebook identifiers assigned to the file mapping, not names embedded in JSON. Dates/configuration/counts come from raw telemetry; outside-class status, observations and feedback come from the student's chat replies. Feedback below is a faithful summary of that reply, not a fabricated verbatim quote or extra questionnaire. Each real tester has one row.
 
 | Tester ID | Date | Outside class? | Played configuration | Corresponding JSON | Stuck point / observation | Player feedback | Retry behavior |
 |---|---|---|---|---|---|---|---|
-| 待确认 (file-to-player mapping unresolved) | 2026-10-14 from event timestamps | 待确认 | Session configurations below; attribution 待确认 | [A1.json](telemetry/A1.json), [A2.json](telemetry/A2.json), [A3.json](telemetry/A3.json), [B1.json](telemetry/B1.json), [B2.json](telemetry/B2.json), [B3.json](telemetry/B3.json) | Human observation 待确认; event-derived causes/locations below | 待确认 | Actual per-file counts below; participant aggregation 待确认 |
+| P01 | 2026-10-14 | Yes, student-confirmed | A / Custom; Original initially, then three edits | [A1.json](telemetry/A1.json) | 不熟练操作；遥测记录第四段重型炮塔激光死亡 4 次 | 没有教程 | 4 次失败、4 次重试，首次按键均 <=10 s；完整局 5、行政结束 3 |
+| P02 | 2026-10-14 | Yes, student-confirmed | A / Slow | [A2.json](telemetry/A2.json) | 跳跃／地刺是卡点；遥测记录地刺死亡 1 次、敌弹死亡 1 次 | 跳跃滞空不足，地刺太大、跳不过去 | 2 次失败、2 次重试，首次按键均 <=10 s；完整局 3 |
+| P03 | 2026-10-14 | Yes, student-confirmed | A / Fast Reload | [A3.json](telemetry/A3.json) | 不熟练操作；遥测包含普通关卡及 Boss 死亡 | 内容过多，感觉 overwhelming | 8 次失败、8 次重试，首次按键均 <=10 s；完整局 9 |
+| P04 | 2026-10-14 | Yes, student-confirmed | B / Original | [B1.json](telemetry/B1.json) | 学生描述为类似游戏的熟练玩家；遥测包含第四段死亡后回到整局开头 | 觉得很好 | 2 次失败、2 次重试，首次按键均 <=10 s；完整局 2，最后 1 局未结束 |
+| P05 | 2026-10-14 | Yes, student-confirmed | B / Slow | [B2.json](telemetry/B2.json) | 地刺问题；遥测记录第一段地刺死亡 3 次 | 仍是地刺问题；其他反馈未记录 | 3 次失败、3 次重试，首次按键均 <=10 s；完整局 3，最后 1 局未结束 |
+| P06 | 2026-10-14 | Yes, student-confirmed | B / Fast Reload | [B3.json](telemetry/B3.json) | 具体卡点未记录；遥测记录敌弹死亡 1 次 | 认为没什么区别；比较对象未明确 | 1 次失败、1 次重试，首次按键 <=10 s；完整局 2 |
 
 ### Verified session evidence - not participant rows
 
@@ -170,7 +176,7 @@ failure_to_input_seconds measures death to first retry input (including player w
 
 Across these exports: **20/20 successful retries have input-to-ready <=2 s (maximum 0.333 s)**; **18/20 have death-to-ready <=2 s**. A2 has one 6.634 s death-to-ready interval and A3 one 7.668 s interval, primarily before first input (6.634 and 7.667 s). Do not use the 20/20 first-input-within-10-s result as evidence of a death-to-ready-under-2-s requirement. The separate input-to-ready fields provide response-time evidence for the recorded attempts only. A3's 0.033 s input waited 0.333 s to restart; this animation wait is not player hesitation.
 
-The six exports do not establish six distinct people, two outside-class participants, three completed single-variable iterations, a confirmed within-person comparison or a final verdict. Player mapping, outside-class identity, actual observations and feedback: **待确认**. Existing real feedback can be entered directly; if none was recorded, say so rather than creating a questionnaire answer.
+Participant mapping, outside-class status and existing observations/feedback are now student-confirmed above: six distinct people and six outside class. JSON alone would not establish those facts. Three completed single-variable iterations, a same-person A/B comparison and a final verdict remain incomplete; player-level experience differs between records. No extra questionnaire or invented observation has been added.
 
 ## Verdict
 
