@@ -1,5 +1,13 @@
 # Lab B — Build log
 
+## 2026-10-14 — student iteration decisions and airtime-target audit
+
+Tool: Codex / Git / PowerShell / Python standard library. Prompt: update PROTOTYPE question to whether checkpoint respawn encourages retry, hypothesis yes, keep thresholds unconfirmed; document increased-speed trial reverted, higher-jump trial reverted, and retained slight airtime increase targeting 110% of default. Inspected current jump/gravity/scroll implementation, all available Git refs for the relevant source paths and seven supplied human session parameter snapshots before editing documentation.
+
+Evidence: current defaults are jump_speed=720, gravity=1250, scroll_multiplier=1.5; initial baseline already has these values. Panel implementation preserves them, later history changes precision/presets/UI. No available committed trial/revert values or independent hang-time implementation found. Every supplied run_start still uses jump/gravity 720/1250; Slow alone has scroll 1.275. Student-reported revert/retain decisions were recorded, while unknown trial dates/values/reasons/results remain pending. The prior 755.14 manual-jump proposal is identified as a plan, not historical evidence. No measurement of +10% airtime exists in these exports.
+
+Recorded ideal calculation separately from measurement: at fixed initial speed, T=2v/g gives baseline 1.152 s, 110% target 1.2672 s, gravity 1250/1.1 about 1136.364 (minus 9.09%). Minus 10% gravity would yield about +11.11% ideal airtime, and also affect height. No physics method selected, parameter changed, game rebuilt or deployed. Only PROTOTYPE.md and this log updated; raw JSON preserved. Time spent: TODO.
+
 ## 2026-10-14 — P04 Original-A follow-up export
 
 Tool: Codex / Python standard library / PowerShell. Prompt: inspect the new Downloads JSON after the student said the B1 tester also played A1, with feedback that it felt less exciting and relaxing led to repeated deaths. Found B1playA1.json; parsed schema 2 / lab-b-0.2, verified every run is A / checkpoint / Original and its complete parameter dictionary matches B1. Preserved a byte-identical copy in telemetry/ and attributed it to existing P04, not a new tester.

@@ -9,8 +9,8 @@ Deadline: **2026-10-14 23:59** (confirm course timezone). Telemetry must be read
 | Field | Student decision / remaining entry |
 |---|---|
 | Focus | Willingness to retry after one-hit death |
-| Question | 一击死亡后，玩家是否愿意立即重试？重启位置是否影响这种意愿？ |
-| Hypothesis | 从当前检查点重启，比从整局开头重启更容易让玩家继续尝试。 |
+| Question | 检查点重生是否会让玩家更愿意重试？ |
+| Hypothesis | 会。（学生确认；尚非测试结论。） |
 | A / checkpoint | Current segment entry; Boss death restarts the full Boss encounter |
 | B / campaign | Every death, including Boss, restarts segment 0 |
 | Single A/B variable | Restart location; original parameters, enemies, art, failure screen, score rules and inputs held constant |
@@ -73,17 +73,29 @@ Summaries are session-wide across parameter modes. Formal A/B should stay Origin
 
 Every event includes session_id, run_id, timestamp, version, variant, restart_mode, parameter_mode, experiment_preset alias, segment/checkpoint, Boss flag and full parameter snapshot. Administrative change events include new choices while the ending attempt retains its old snapshot. All raw events remain available.
 
-## Loop Log — prepared, not completed iterations
+## Loop Log — student-reported iterations and evidence limits
 
-Parameter experiments use **A only**, start from Original, change one number and keep the panel closed during play. Use fresh testers across rounds. Results and keep/revert decisions remain blank.
+On 2026-10-14 the student supplied these three actual iteration decisions. That is the report date, **not an invented date for when the experiments happened**. Trial dates, historical trial values, reversal reasons and measured effects not supplied remain **待补**. These rows replace the earlier proposed Slow / Fast Reload / manual-jump experiment plan; that proposal was not evidence of completed historical iterations. The named game modes still exist and have not been removed or changed.
 
-| Loop / actual date | Baseline → planned value | Reason / expected effect, not observed | Actual sessions / JSON | Actual metric / sample size / result | Keep / revert |
+| Iteration / actual trial date | Student-reported change | Verified numerical / implementation evidence | Revert / retain decision | Reason and actual playtest effect | Trial JSON / historical evidence |
 |---|---|---|---|---|---|
-| 1 / | scroll_multiplier 1.5→1.275; Slow | Reduce scrolling pressure 15%; expect more reaction time and possibly more retries | | | |
-| 2 / | reload_multiplier 1.0→0.8; Fast Reload | Reduce reload downtime 20%; expect fewer empty-weapon delays and possibly more retries | | | |
-| 3 / | Manual jump_speed 720→755.14; gravity 1250 unchanged | Earlier jump experiment retained as a manual option. Ideal h=v²/(2g): 207.36→approximately 228.0946 px (~10%); expect easier spike clearance | | | |
+| 1 / 待补 | 尝试提高速度 | Exact increased value: 待补. Current default scroll_multiplier=1.5; first-segment authored scroll 220 gives 330 px/s. main.gd _scroll() multiplies authored segment/Boss speed by the panel multiplier. This identifies the current mechanism, not the historical trial's exact edit. | 撤销（学生确认）；current default remains 1.5 | 撤销原因、试玩效果及测量数据：待补 | Available history has no committed higher-speed trial/revert. Slow exports A2/B2 use 1.275, a decrease, and do not prove this increase trial. Trial export/commit: 待补. |
+| 2 / 待补 | 尝试提高跳跃高度 | Exact historical value/method: 待补. Current jump_speed=720 px/s, gravity=1250 px/s². main.gd applies initial velocity -jump_speed and per-frame gravity. Higher jump_speed is a possible mechanism, not a verified account of how this trial was made. | 撤销（学生确认）；current defaults remain 720/1250 | 撤销原因、试玩效果及测量数据：待补 | The prior notebook's 755.14 was a proposed manual value for approximately +10% ideal height, not proof it was used. No matching committed trial/revert or supplied human snapshot found. |
+| 3 / 待补 | 最终保留略微增加滞空时间，目标为默认值的 110% | **Target T_new/T_default=1.10, not a measured gain.** Exact implemented parameter values/method: 待补. Current code has no separate hang-time/apex-delay parameter; committed defaults and all seven supplied human session snapshots still use jump_speed=720, gravity=1250. | 保留该方向（学生确认）；当前仓库中实现证据待补，不能写为已验证上线 | 目标为略微增加滞空；实际效果、实测时长、采用该方向的其他原因：待补 | No available commit or supplied export confirms a changed flight duration. Need the actual changed code/config or historical version plus an airtime measurement before claiming implementation or achieved 10%. |
 
-Third manual loop: select Original, keep A, change only Jump speed to 755.14; HUD/JSON show Custom. Frame-stepped physics means the 10% height change is approximate. Three parameter modes are not three actual iterations. After real testing, record dates, measured results, sample sizes and actual files.
+### Code and Git check for these records
+
+Checked current game_data.gd, lab_panel.gd, main.gd, all seven telemetry JSON files and all available Git refs for those source paths. Baseline commit `23e8fa2` already contains jump_speed=720, gravity=1250, SCROLL_MULTIPLIER=1.5. Commit `8cf90c7` exposes these same values on the panel; `66f367d` changes widget precision and introduces Slow=1.275, without changing the Original jump/gravity defaults. `7fcb40b` translates UI. None of these commits establishes the student's higher-speed / higher-jump trial values or a retained airtime change. Trials may have occurred in uncommitted or unavailable work; their absence from this history is not a claim they never happened. No dates or historical commits have been reconstructed.
+
+All supplied run_start snapshots have jump_speed=720 and gravity=1250. Their scroll multiplier is 1.5 except Slow sessions A2/B2 (1.275). Run duration is not jump airtime, and these exports contain no jump-takeoff/landing timing sufficient to measure a 10% flight-duration gain. The existing 13 panel controls contain jump speed and gravity, but no independent airtime control. This documentation update does not change code, presets, physics or published builds.
+
+### Airtime target is distinct from gravity reduction
+
+For an ideal jump returning to its launch height, with constant downward gravity and no obstacle/stomp interaction, **T=2v/g**. Using the current defaults v=720 and g=1250 gives **T_ideal=1.152 s**; the stated 110% target would be **1.2672 s** in that ideal model. These are calculations, **not frame-stepped game measurements**.
+
+If v alone is held fixed and constant gravity is the chosen mechanism, reaching that ideal target requires g_new=1250/1.10≈1136.364 px/s², a **9.09% reduction**. Reducing gravity by 10% instead gives 1125 and an ideal duration ratio 1/0.9≈1.1111 (about +11.11%), so it must not be labeled the same change. Reducing gravity with fixed initial speed also increases ideal jump height; it would not automatically isolate airtime after withdrawing a height increase. No implementation method is selected or applied here. Actual tuning values, height behavior and measured flight time remain 待补; frame integration and collision handling can differ from the ideal model.
+
+Keep / Pivot / Kill **numeric thresholds remain unconfirmed**. The retention decision for the airtime direction is not a measured 10% result or a final prototype verdict. Future measured iterations should isolate one variable, keep A/B parameters identical within a comparison and keep the panel closed during play.
 
 ## Variant Comparison - parameter matches verified; player pairing pending
 
