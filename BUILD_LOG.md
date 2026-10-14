@@ -1,5 +1,9 @@
 # Lab B — Build log
 
+## 2026-10-14 — developer-supplied reversal reasons
+
+Tool: Codex / document edits. Student confirmed the real reason for reverting both increased speed and increased jump height: developer play felt below expectations, so defaults were restored; no quantitative results recorded. Filled both Loop Log reasons accordingly and explicitly attributed them to developer experience, not external tester evidence. Historical trial values/dates remain unknown; no new testing, invented measurement, gameplay change or telemetry modification. Time spent: TODO.
+
 ## 2026-10-14 — final student Keep choice and evidence-based Verdict
 
 Tool: Codex / Python standard library / PowerShell. Prompt: final choice is Keep A; compare P04 Original B1 and B1playA1 honestly, note one paired tester, do not count the soon-after-death export as abandonment, do not backfill thresholds, and make continued challenge tuning Lab C's first step. Re-read source documents and raw exports, confirmed full parameter snapshots match, and recomputed counts/durations/three retry timing fields before editing.
