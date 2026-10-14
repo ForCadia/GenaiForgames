@@ -1,5 +1,11 @@
 # Lab B — Build log
 
+## 2026-10-14 — latest Web deployment; browser verification blocked
+
+Tool: Codex / Godot / PowerShell / Python HTTP checks / browser-control API. Prompt: deploy latest Web and verify play/retry/JSON in a private window. This explicit deployment instruction overrides the older build-only scope note. Re-exported current lab-b-0.4 source with the existing no-thread Web preset, including gravity 1250/1.1; rebuilt ZIP, then ran deploy_duke.ps1 to Z:/public_html/everfront. Script reported Deployment succeeded and checked required-file hashes. Public cache-bypassed HTTP checks returned 200 with matching local SHA256 for index.html, index.js, index.wasm and index.pck; WASM MIME is application/wasm. Original telemetry and design sources were not uploaded.
+
+Browser-control initialization failed twice before any interactive action: first trusted Node process exited unexpectedly; retry diagnostics reported node_repl kernel exited (code=1), Windows sandbox helper_unknown_error / setup refresh had errors. No incognito game launch, failure/retry interaction or actual JSON download was verified in this turn. These remain manual checks; HTTP matches and earlier engine smoke tests are not reported as private-window verification. No downloaded test JSON or fabricated result created. Existing user changes preserved. Time spent: TODO.
+
 ## 2026-10-14 — Downloads W4 production GDD and sprint plan found
 
 Tool: Codex / PDF skill / pypdf / temporary pypdfium2/Pillow / Python / PowerShell. Prompt: search Downloads for Assignment 3 / Rep 3 / Creating a GDD and Sprint Plan Using AI, with W4 clue; list candidates first, preserve originals, reconcile confirmed sources without editing game code. Read-only recursive filename scan found W4_Zhu_Submission.pdf, W4_Zhu_Journal.pdf, Lab A DOCX candidates and a GAMEDSGN syllabus among 60 supported-format files. Prioritized W4 sources and read the full relevant GDD/sprint/decision/review sections, with rendered cover and sprint tables inspected.
