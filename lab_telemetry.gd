@@ -1,6 +1,6 @@
 extends RefCounted
 
-const VERSION := "lab-b-0.2"
+const VERSION := "lab-b-0.3"
 var session_id := ""
 var run_id := ""
 var events: Array[Dictionary] = []
@@ -109,7 +109,7 @@ func document() -> Dictionary:
 	return {"schema_version": 2, "version": VERSION, "session_id": session_id,
 		"exported_at": Time.get_datetime_string_from_system(true) + "Z",
 		"retry_definition": "unique failed runs retried / actual failures of the same variant; quick retry uses failure_to_input_seconds <= 10; administrative resets excluded",
-		"duration_definition": "active gameplay seconds, excluding tuning panel pauses",
+		"duration_definition": "active gameplay seconds, excluding start screen, tuning panel pauses and input-release gates",
 		"variant_summary": variant_statistics(), "events": events}
 
 func persist() -> bool:

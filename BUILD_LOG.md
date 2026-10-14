@@ -1,5 +1,17 @@
 # Lab B — Build log
 
+## 2026-10-14 — submission audit and independent bundle
+
+AI tool: Codex; PowerShell/Python, Git and local Godot 4.7.2. Key prompt: inspect Lab B requirements first, consolidate student questions, repair only essential technical issues and prepare a separate submission directory. Read AGENTS.md, GDD.md, PROTOTYPE.md, BUILD_LOG.md and restart/tuning/telemetry source before edits. Student replied "keep existing", reconfirming design; no new thresholds, tester facts, JSON paths, original GDD, video or verdict were supplied.
+
+Evidence audit: all four documents exist; telemetry/ contains only README, with zero real JSON. Available Prototype Card history is 1b50804 and 8d0bc3e (2026-10-04); both retain pending thresholds. No complete pre-playtest Card commit was found, and first external test date is unknown. Three loops and comparison/tester/verdict structures exist but actual results are empty. Do not backdate or claim these requirements completed. Remote main was b74aace when queried; the local English UI revision 7fcb40b and this audit are newer. Existing user README/project.godot changes and missing Windows PCK were preserved.
+
+Actual modifications: synchronized document labels with Original / Slow / Fast Reload / Custom while retaining the student's question/hypothesis and empty results. Added explicit Git-evidence gap and missing-material checklist. Assigned telemetry revision lab-b-0.3 and clarified that duration excludes menu, panel and input-release gates; no gameplay numbers changed. Repaired an intermittently failing engineering test: a SceneTree frame-time timer could finish before the intended 30 ms real wait, whereas retry latency uses monotonic wall time. The assertion now waits for that same clock; no artificial delay was added to gameplay. Added tools/package_lab_b.py for a fresh independent bundle, working-copy source ZIP including hidden .git, deployable Web files, docs, actual telemetry directory and hash manifest. Automated JSON is not packaged as real playtest data.
+
+Actual verification: engine --version confirmed 4.7.2.stable.official.ed1daf0bf. Gameplay, Lab B panel/live parameters, six start combinations/A-B/administrative filtering, player HUD, Boss, shield, turrets, laser gates, ground spikes and visuals all passed (10 smoke scripts). Independently parsed JSON and checked required fields, current revision, retry times and raw-event A/B denominators; Web resource sizes and ZIP integrity passed. Native Compatibility start/panel capture passed; inspected the English UI. Web release export succeeded with the existing no-thread templates; only the ignored nested tmp project warning appeared. No runtime HTTP/AI service calls found in game scripts. These checks are engineering evidence, not human testing or three completed loops.
+
+Delivery status: new build/bundle remains local in this task; existing Duke workflow retained. Earlier today the English build was uploaded and public HTML/PCK hashes matched, but this audit's lab-b-0.3 build has not been deployed. A fresh interactive browser check, actual JSON download, real six-person tests/loops/comparison, original Lab A/Rep 3, video, thresholds and verdict remain TODO. No new tester data, historical dates/commits or verdict invented. No network upload of telemetry performed. Time spent: TODO — student entry; not inferred.
+
 ## 2026-10-04 — existing Duke deployment adaptation
 
 Tool: Codex / PowerShell. Key prompt: student supplied “Unity 重新 Build → PowerShell 运行上传脚本” and the Duke CIFS destination.

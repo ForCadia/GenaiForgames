@@ -99,7 +99,9 @@ func _run() -> void:
 	game._die("CHECK_A_SEGMENT")
 	request_retry(game)
 	var pressed_at: int = game.lab.retry_pressed_at
-	await create_timer(0.03).timeout
+	# The metric uses monotonic wall time, not a potentially inflated first-frame delta.
+	while Time.get_ticks_msec() - pressed_at < 30:
+		await create_timer(0.01).timeout
 	game._process(0.36)
 	check(game.state == "playing" and game.segment == 2 and not game.boss_mode, "A ordinary checkpoint")
 	check(game.score == 400 and game.stats.unarmored == 4 and game.ammo == [17, 4] and game.weapon_index == 1 and game.distance == 5000.0, "A restores checkpoint score/ammo/weapon/distance")

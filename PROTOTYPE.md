@@ -19,14 +19,18 @@ Deadline: **2026-10-14 23:59** (confirm course timezone). Telemetry must be read
 | Keep threshold | **Student confirmation pending** |
 | Pivot threshold | **Student confirmation pending** |
 | Kill threshold | **Student confirmation pending** |
-| A/B order | Same tester plays both; alternate A→B and B→A between testers; 原版 only |
+| A/B order | Same tester plays both; alternate A→B and B→A between testers; Original only |
 | Completed Card commit hash / date | Pending completion and commit |
 
 ## Original baseline and three parameter modes
 
+Submission audit on **2026-10-14**: the student reconfirmed the existing question/hypothesis and mechanisms. Git contains notebook commits `1b50804` and `8d0bc3e`, both dated 2026-10-04, but the Card's thresholds were placeholders in both and remain unconfirmed. There is no complete pre-playtest Card commit in the available history. First external playtest date and any separate precommit evidence: **TODO — student input**. Do not backdate a threshold or imply the placeholder met the requirement. If external testing already happened, disclose this timing gap rather than retroactively claiming preregistration.
+
+No real JSON is present in this checkout's `telemetry/` as of this audit. Testers, measured loops, A/B results, video and verdict remain **TODO**. Engineering smoke-test events are excluded from playtest evidence. English UI/JSON labels are Original / Slow / Fast Reload / Custom; earlier Chinese exports, if supplied, map to the corresponding modes, and must still be filtered by identical parameter snapshots. Build `lab-b-0.3` makes the current engineering revision distinguishable.
+
 Defaults verified against game_data.gd, main.gd and lab_panel.gd at git commit **613233e**, before experimental presets. Baseline is copied from authored defaults at startup, never from current sliders. The existing twelve numbers remain; a single reload multiplier is added to the same panel.
 
-| Parameter | 原版 | 慢速 | 快速换弹 |
+| Parameter | Original | Slow | Fast Reload |
 |---|---:|---:|---:|
 | jump_speed (px/s) | 720 | 720 | 720 |
 | gravity (px/s²) | 1250 | 1250 | 1250 |
@@ -43,15 +47,15 @@ Defaults verified against game_data.gd, main.gd and lab_panel.gd at git commit *
 | reload_multiplier | 1.0 | 1.0 | **0.8** |
 | Cosmetic particles | On | On | On |
 
-慢速 reduces scrolling world speed 15%: first segment 330→280.5 px/s; Boss 277.5→235.875 px/s. Event times and independently moving laser gate stay unchanged. 快速换弹 uses one independent multiplier: rifle 1.2→0.96 s, piercer 1.8→1.44 s, including animation and HUD progress. No other numbers or scoring rules change. The former Baseline / Loop 1 / Loop 2 / Loop 3 names are replaced by 原版 / 慢速 / 快速换弹; manual edits show 自定义. JSON experiment_preset is a compatibility alias of parameter_mode.
+Slow reduces scrolling world speed 15%: first segment 330→280.5 px/s; Boss 277.5→235.875 px/s. Event times and independently moving laser gate stay unchanged. Fast Reload uses one independent multiplier: rifle 1.2→0.96 s, piercer 1.8→1.44 s, including animation and HUD progress. No other numbers or scoring rules change. The former Baseline / Loop 1 / Loop 2 / Loop 3 names are replaced by Original / Slow / Fast Reload; manual edits show Custom. JSON experiment_preset is a compatibility alias of parameter_mode.
 
 ## Controls and session protocol
 
-Default **A + 原版**. The start screen pauses world, enemies, timers and animations. No run exists or accumulates time until clicking 开始游戏. That button applies the chosen complete combination once and starts at campaign entry. There are six combinations; held inputs and the start click are gated until release.
+Default **A + Original**. The start screen pauses world, enemies, timers and animations. No run exists or accumulates time until clicking START. That button applies the chosen complete combination once and starts at campaign entry. There are six combinations; held inputs and the start click are gated until release.
 
 F1 opens the existing panel; F2 selects A, F3 selects B; 1/2/3 retain weapon slots. R / Space / Fire retries directly without returning to the menu and retains the current named mode or custom values. A mode switch restarts from campaign entry with administrative_variant_switch. A parameter selection/edit causes exactly one administrative_parameter_change reset; selecting the same A/B mode is a no-op.
 
-返回开始界面 ends an active run with administrative_return_to_start, retains session/data and remembers the last selected options. Starting again applies the selected full named mode, not leftover custom sliders. For 自定义, the menu remembers the last named selection and states that starting will reapply it. New tester archives/exports the old session and returns to the menu with zero runs in a new session; downloads must be saved and checked before handing over. Automated artifacts stay in ignored tmp/, never telemetry/.
+Return to start ends an active run with administrative_return_to_start, retains session/data and remembers the last selected options. Starting again applies the selected full named mode, not leftover custom sliders. For Custom, the menu remembers the last named selection and states that starting will reapply it. New tester archives/exports the old session and returns to the menu with zero runs in a new session; downloads must be saved and checked before handing over. Automated artifacts stay in ignored tmp/, never telemetry/.
 
 ## Restoration and measurement definitions
 
@@ -65,25 +69,25 @@ retry_requested records the first gameplay input dispatch time, including during
 
 Per-variant denominator = actual run_end events with failure=true. Numerator = unique failed runs followed by a successful retry. Rapid numerator requires first input ≤10 s. Administrative resets, victories and tester changes are excluded. A real death abandoned by switching/returning remains a failure with no retry. Allow the intended response window before exporting.
 
-Summaries are session-wide across parameter modes. Formal A/B should stay 原版; if mixed, filter raw events by parameter_mode and identical snapshots. Rates are run-based, not percentages of people. Person-level willingness requires one row per tester/session and an explicit person denominator. Missing rates are null in JSON / N/A on HUD.
+Summaries are session-wide across parameter modes. Formal A/B should stay Original; if mixed, filter raw events by parameter_mode and identical snapshots. Rates are run-based, not percentages of people. Person-level willingness requires one row per tester/session and an explicit person denominator. Missing rates are null in JSON / N/A on HUD.
 
 Every event includes session_id, run_id, timestamp, version, variant, restart_mode, parameter_mode, experiment_preset alias, segment/checkpoint, Boss flag and full parameter snapshot. Administrative change events include new choices while the ending attempt retains its old snapshot. All raw events remain available.
 
 ## Loop Log — prepared, not completed iterations
 
-Parameter experiments use **A only**, start from 原版, change one number and keep the panel closed during play. Use fresh testers across rounds. Results and keep/revert decisions remain blank.
+Parameter experiments use **A only**, start from Original, change one number and keep the panel closed during play. Use fresh testers across rounds. Results and keep/revert decisions remain blank.
 
 | Loop / actual date | Baseline → planned value | Reason / expected effect, not observed | Actual sessions / JSON | Actual metric / sample size / result | Keep / revert |
 |---|---|---|---|---|---|
-| 1 / | scroll_multiplier 1.5→1.275; 慢速 | Reduce scrolling pressure 15%; expect more reaction time and possibly more retries | | | |
-| 2 / | reload_multiplier 1.0→0.8; 快速换弹 | Reduce reload downtime 20%; expect fewer empty-weapon delays and possibly more retries | | | |
+| 1 / | scroll_multiplier 1.5→1.275; Slow | Reduce scrolling pressure 15%; expect more reaction time and possibly more retries | | | |
+| 2 / | reload_multiplier 1.0→0.8; Fast Reload | Reduce reload downtime 20%; expect fewer empty-weapon delays and possibly more retries | | | |
 | 3 / | Manual jump_speed 720→755.14; gravity 1250 unchanged | Earlier jump experiment retained as a manual option. Ideal h=v²/(2g): 207.36→approximately 228.0946 px (~10%); expect easier spike clearance | | | |
 
-Third manual loop: select 原版, keep A, change only Jump speed to 755.14; HUD/JSON show 自定义. Frame-stepped physics means the 10% height change is approximate. Three parameter modes are not three actual iterations. After real testing, record dates, measured results, sample sizes and actual files.
+Third manual loop: select Original, keep A, change only Jump speed to 755.14; HUD/JSON show Custom. Frame-stepped physics means the 10% height change is approximate. Three parameter modes are not three actual iterations. After real testing, record dates, measured results, sample sizes and actual files.
 
 ## A/B Comparison — actual results pending
 
-**原版 only**, same tester tries both variants. Alternate A→B and B→A across testers. Begin each exposure at campaign entry; use Return to start to select the other variant within the same session, or F2/F3 for a clean reset. Observe equal durations (three minutes per exposure follows the assignment protocol), watch silently, then ask “What were you trying to do?” Export before the next tester.
+**Original only**, same tester tries both variants. Alternate A→B and B→A across testers. Begin each exposure at campaign entry; use Return to start to select the other variant within the same session, or F2/F3 for a clean reset. Observe equal durations (suggested three minutes per exposure; confirm the actual test protocol), watch silently, then ask “What were you trying to do?” Export before the next tester.
 
 | Measure | A / Checkpoint actual | B / Campaign actual | Difference / notes |
 |---|---|---|---|
