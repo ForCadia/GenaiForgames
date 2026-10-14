@@ -1,5 +1,11 @@
 # Lab B — Build log
 
+## 2026-10-14 — original Lab A GDD received and reconciled
+
+Tool: Codex / PDF skill / pypdf / Python XML/ZIP / PowerShell. Student supplied E:/bledderfile for helss/desktop/GENAI_03/w4 as the GDD location. Read the full one-page LabA_Zhu_GDD.pdf and three supporting DOCX files; rendered/inspected the PDF. Temporary pypdfium2 rendering initially lacked Pillow; installed both only under ignored tmp/pdf-render, not as game dependencies. Did not edit the original PDF/DOCX or student debt journal.
+
+Copied four source files byte-for-byte to design_sources/ with SHA256 provenance. Expanded GDD.md with the original title/author/Version 3.0/September 20 document date, concept, audience, loop, armor, Boss, scope, presentation and AI disclosure; attributed selection rationale and historical AI-use estimates to supplied originals. Distinguished original 6–8 segment/minute targets from the current four-segment/Boss prototype and marked unverified proposed features/licenses honestly. Lab A material is now supplied; no identified Rep 3 GDD/sprint plan found (evaluation Part 3 is a cluster map, not Rep 3). Kept that gap pending. Updated GDD's Lab B status to the student's Keep A decision without claiming the data proves A superior. Excluded design_sources from future Web exports. No gameplay change, rebuild, deployment, telemetry upload or invented history. Source hashes verified. Time spent: TODO.
+
 ## 2026-10-14 — developer-supplied reversal reasons
 
 Tool: Codex / document edits. Student confirmed the real reason for reverting both increased speed and increased jump height: developer play felt below expectations, so defaults were restored; no quantitative results recorded. Filled both Loop Log reasons accordingly and explicitly attributed them to developer experience, not external tester evidence. Historical trial values/dates remain unknown; no new testing, invented measurement, gameplay change or telemetry modification. Time spent: TODO.
