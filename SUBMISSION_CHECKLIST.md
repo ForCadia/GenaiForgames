@@ -39,7 +39,7 @@ Assignment reference actually read in full: C:/Users/lenovo/Downloads/Lab_B_Play
 | Live AI / API keys (p.6) | 通过 | No runtime AI or API-key calls found; historical mood references and offline assistant use are separately disclosed. |
 | Own work / CC0 assets / no purchased game templates (pp.1,6) | 证据不足 | Original source disclosures and Noto OFL license retained; full current sprite/audio permissions/origin not proven. Do not equate disclosure with CC0/compliance. |
 | Out-of-scope menus/art/content (pp.1,2) | 证据不足 | Existing static mode-selection start screen exceeds literal restart-only menu scope; non-greybox art lacks complete provenance. No new unrelated system/level added in this review; no silent scope pass. |
-| 60-90 s final video (p.5) | 证据不足 | Processed final video not located. Old Desktop EverFront file reprobed at 99.31 s and deliberately not included as compliant final video; no clipping or substitution. |
+| 60-90 s final video (p.5) | 证据不足 | Student explicitly chose the existing long recording. EverFront-demo.mp4 is included unchanged, full decode verified; duration 99.31 s exceeds the 90 s maximum by 9.31 s. Choice does not change the PDF duration rule; no editing performed. |
 | Project ZIP including hidden .git (p.5) | 通过 | Fresh working-copy ZIP includes full original history, latest four root docs, design_sources and seven JSON; verified after log update. Caches/tmp/generated builds excluded from working files. |
 | Instructor repository access (p.5) | 不适用 | Using allowed source ZIP with hidden .git submission option; repository link may be supplemental. No instructor invite performed or claimed. |
 | Separate PROTOTYPE/BUILD_LOG/JSON (p.5) | 通过 | Standalone final documents and telemetry directory match project source; relative telemetry references work. |
@@ -48,7 +48,7 @@ Assignment reference actually read in full: C:/Users/lenovo/Downloads/Lab_B_Play
 
 ## Actual desktop submission contents
 
-EverFront-project-with-git.zip; standalone PROTOTYPE.md and BUILD_LOG.md; telemetry/ with seven original JSON plus provenance notes; this checklist; SUBMIT.txt; MANIFEST.json and FINAL_VERIFICATION.txt. VIDEO_PENDING.txt explicitly records that no compliant processed final video could be located. No old 99.31-second file is misrepresented as final. Source ZIP includes design_sources/ and the four root Markdown files; temporary caches/video tools, .godot and unrelated generated builds are excluded. User pending project.godot edits are preserved as the current working-copy source, with Git history intact.
+EverFront-project-with-git.zip; standalone PROTOTYPE.md and BUILD_LOG.md; telemetry/ with seven original JSON plus provenance notes; this checklist; SUBMIT.txt; MANIFEST.json and FINAL_VERIFICATION.txt. EverFront-demo.mp4 is the student-selected 99.31-second original; VIDEO_INFO.txt records the duration and unchanged copy. It is not claimed to meet the 60-90 second rule. Source ZIP includes design_sources/ and the four root Markdown files; temporary caches/video tools, .godot and unrelated generated builds are excluded. User pending project.godot edits are preserved as the current working-copy source, with Git history intact.
 
 ## Resolved user confirmation
 
@@ -56,6 +56,6 @@ The student confirms latest incognito gameplay, single-key restart and JSON down
 
 ## Remaining gaps are not fulfilled merely by disclosure
 
-Requested (Final)(1) assignment reference not found; compliant processed final video not located; pre-test numeric thresholds/Card timing incomplete; first two trial values/dates/measured results missing; standard three-minute protocol and parameter-round history not established; some build-log elapsed-effort entries unknown; asset provenance/CC0 and strict scope compliance incomplete. P04's n=1 paired comparison is present but weak; the final A death is right-censored, not abandonment. Student Keep A remains a design decision rather than proven superiority.
+Requested (Final)(1) assignment reference not found; chosen long video exceeds the duration maximum; pre-test numeric thresholds/Card timing incomplete; first two trial values/dates/measured results missing; standard three-minute protocol and parameter-round history not established; some build-log elapsed-effort entries unknown; asset provenance/CC0 and strict scope compliance incomplete. P04's n=1 paired comparison is present but weak; the final A death is right-censored, not abandonment. Student Keep A remains a design decision rather than proven superiority.
 
 No gameplay changed; no original file edited; no Canvas submission performed.

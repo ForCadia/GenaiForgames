@@ -1,5 +1,9 @@
 # Lab B — Build log
 
+## 2026-10-14 — student selects the long video
+
+Tool: Codex / Python / FFmpeg / local document packaging. Student asked for clarification of evidence gaps and explicitly chose the existing long video. Use the prior selected Desktop EverFront InPrivate recording, 99.31 s, without trimming or editing; duration remains 9.31 s over the PDF limit, not a claimed compliant clip. Updated checklist and Desktop package instructions from missing-video to included student-selected long original. Rechecked full decode and byte-identical copy in the fresh timestamped Desktop directory, leaving earlier output directories and source video untouched. Explained that missing trial numbers, three-minute-protocol records, effort estimates and asset permissions are limits of recorded evidence, not rejection of the developer's subjective reasons or an instruction to redo every test. Latest incognito play/retry/download remain user-confirmed passed. No gameplay modification or Canvas submission. Time spent: TODO.
+
 ## 2026-10-14 — final requirement audit and Desktop delivery
 
 Tool: Codex / PDF skill / pypdf / temporary PDF renderer and FFmpeg / PowerShell / Git / Python. Prompt: re-read assignment and actual files, use user-confirmed incognito checks, locate final video without using the old 99.31 s version, and assemble Lab_B_Final_Submission on the real Desktop without overwriting or submitting Canvas. Read all six pages of the available Downloads Lab_B_Playable_Prototype (Final).pdf (SHA256 8d456d777a7f39f19fde0594e19d66dd0040e6fe5e14fc0fe6bec43ef11e15c5) and inspected rendered requirement pages. The specifically named (Final)(1) PDF was not found, so exact-version coverage is not invented.
