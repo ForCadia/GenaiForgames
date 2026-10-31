@@ -2,6 +2,8 @@ extends RefCounted
 
 # Offline active-segment RMS calibration; preserve source files and timing.
 const GAINS_DB := {
+	"ui_click.wav": -3.0,
+	"ui_error.wav": -4.12,
 	"armor_ricochet.wav": -8.43,
 	"boss_bomb_countdown.wav": 28.13,
 	# Its high crest factor needs extra gain; the Master limiter catches peaks.

@@ -253,5 +253,6 @@ func _load_name() -> void:
 	if game.enter_named_session(name_input.text):
 		profile_notice.hide()
 	else:
+		get_node("/root/UIAudio").reject()
 		profile_notice.text = "请输入名字" if name_input.text.strip_edges().is_empty() else "存档无法读取，原有进度未更改"
 		profile_notice.show()

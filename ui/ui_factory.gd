@@ -35,9 +35,7 @@ static func button(parent: Node, text: String, action: Callable, secondary := fa
 	parent.add_child(node)
 	var audio := node.get_node_or_null("/root/UIAudio")
 	if audio:
-		node.mouse_entered.connect(audio.tick)
-		node.focus_entered.connect(audio.tick)
-		node.pressed.connect(audio.confirm)
+		audio.bind_button(node)
 	return node
 
 static func bar(parent: Node, width: float, variant := "ProgressBar") -> ProgressBar:
