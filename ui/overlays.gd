@@ -57,15 +57,29 @@ func rebuild() -> void:
 		F.button(content, S.CONTROLS, func(): controls_open = true; rebuild())
 		F.button(content, S.RETURN_TITLE, func(): game.return_to_start(), true)
 	elif shown == "dead":
-		F.label(content, "// SIGNAL LOST", "AmberLabel")
-		F.label(content, S.DEATH, "TitleLabel").modulate = UIPalette.RED
-		F.label(content, S.death_cause(game.banner), "LargeLabel")
+		var text_panel := PanelContainer.new()
+		content.add_child(text_panel)
+		var frame := StyleBoxFlat.new()
+		frame.bg_color = Color(0.025, 0.04, 0.065, 0.88)
+		frame.border_color = UIPalette.PANEL_EDGE_HI
+		frame.set_border_width_all(1)
+		frame.border_width_top = 3
+		frame.shadow_color = Color(0, 0, 0, 0.5)
+		frame.shadow_size = 6
+		for side in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]: frame.set_content_margin(side, 18)
+		text_panel.add_theme_stylebox_override("panel", frame)
+		text_panel.gui_input.connect(_background_input)
+		var text := F.box(text_panel)
+		text.add_theme_constant_override("separation", 12)
+		F.label(text, "// SIGNAL LOST", "AmberLabel")
+		F.label(text, S.DEATH, "TitleLabel").modulate = UIPalette.RED
+		F.label(text, S.death_cause(game.banner), "LargeLabel")
 		var destination := "BOSS ENCOUNTER" if game.boss_mode and game.restart_mode == "checkpoint" else ("CHECKPOINT %02d / %s" % [game.segment + 1, S.STAGES[game.segment]] if game.restart_mode == "checkpoint" else "CAMPAIGN ENTRY")
-		F.label(content, "RESTART FROM " + destination, "MutedLabel")
-		add_stats()
+		F.label(text, "RESTART FROM " + destination, "MutedLabel")
+		add_stats(text)
+		F.label(text, "R / SPACE / FIRE TO RETRY", "MutedLabel")
 		F.button(content, S.RETRY, func(): game._request_retry("ui_button"))
 		F.button(content, S.RETURN_TITLE, func(): game.return_to_start(), true)
-		F.label(content, "R / SPACE / FIRE TO RETRY", "MutedLabel")
 	else:
 		F.label(content, "// SECTOR SECURED", "AmberLabel")
 		F.label(content, S.VICTORY, "LargeLabel")
@@ -98,9 +112,10 @@ func rebuild() -> void:
 	fade = create_tween()
 	fade.tween_property(panel, "modulate:a", 1.0, 0.2)
 
-func add_stats() -> void:
-	F.label(content, "SCORE  %06d" % game.score, "LargeLabel")
-	F.label(content, "TIME  %02d:%02d    DEATHS  %02d" % [int(game.run_elapsed) / 60, int(game.run_elapsed) % 60, game.run_deaths], "MutedLabel")
+func add_stats(parent: Node = null) -> void:
+	var target: Node = parent if parent != null else content
+	F.label(target, "SCORE  %06d" % game.score, "LargeLabel")
+	F.label(target, "TIME  %02d:%02d    DEATHS  %02d" % [int(game.run_elapsed) / 60, int(game.run_elapsed) % 60, game.run_deaths], "MutedLabel")
 
 func _background_input(event: InputEvent) -> void:
 	if shown == "dead" and event.is_action_pressed("fire"):
