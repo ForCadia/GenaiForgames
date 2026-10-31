@@ -268,7 +268,7 @@ func _fire() -> void:
 	var origin := player_visual.muzzle_world_position()
 	var to_target := aim - origin
 	var direction: Vector2 = to_target.normalized() if to_target.length_squared() > 0.001 else player_visual.shot_direction()
-	shots.append({"pos": origin, "previous": origin, "velocity": direction * _weapon().projectile_speed, "penetration": _weapon().penetration, "color": _weapon().color})
+	shots.append({"pos": origin, "previous": origin, "velocity": direction * _weapon().projectile_speed, "penetration": _weapon().penetration, "color": _weapon().color, "style": _weapon().projectile_style})
 	ammo[weapon_index] -= 1
 	_refresh_player_ui()
 	shot_left = float(lab_panel.values.rifle_cadence if weapon_index == 0 else lab_panel.values.piercer_cadence)
@@ -848,13 +848,26 @@ func _draw() -> void:
 		var threat_color: Color = bullet.get("color", RED)
 		draw_circle(bullet.pos, bullet.radius + 8, Color(threat_color, 0.12))
 		draw_circle(bullet.pos, bullet.radius, threat_color)
-	for bullet in shots: draw_line(bullet.pos, bullet.pos - bullet.velocity.normalized() * 22, bullet.color, 4)
+	for bullet in shots: _draw_player_shot(bullet)
 	for particle in particles: draw_circle(particle.pos, 3, Color(particle.color, clampf(particle.life * 2, 0, 1)))
 	if state == "playing": _draw_reticle()
 	_draw_hud()
 	for label in floaters: draw_string(ThemeDB.fallback_font, label.pos, label.text, HORIZONTAL_ALIGNMENT_CENTER, 300, 14, Color(label.color, clampf(label.life * 2, 0, 1)))
 	if state == "dead": _draw_death()
 	if state == "victory": _draw_victory()
+
+func _draw_player_shot(bullet: Dictionary) -> void:
+	var direction: Vector2 = bullet.velocity.normalized()
+	var tip: Vector2 = bullet.pos
+	var color: Color = bullet.color
+	if bullet.get("style", "bullet") == "laser":
+		var tail := tip - direction * 56.0
+		draw_line(tail, tip, Color(color, 0.22), 8.0)
+		draw_line(tail, tip, color, 4.0)
+		draw_line(tail, tip, Color("d5efff"), 1.5)
+	else:
+		draw_line(tip - direction * 14.0, tip, color, 4.0)
+		draw_circle(tip, 2.0, Color("ffe0a3"))
 
 func _draw_reticle() -> void:
 	draw_arc(aim, 11, 0, TAU, 20, _slot_color(), 2)

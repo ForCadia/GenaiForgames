@@ -36,12 +36,12 @@ const WEAPONS := [
 	{
 		"id": "rifle", "name": "ASSAULT RIFLE", "magazine": 24,
 		"cadence": 0.105, "penetration": 1, "reload": 1.2,
-		"projectile_speed": 1020.0, "color": Color("63e6f2")
+		"projectile_speed": 1020.0, "color": Color("ff9638"), "projectile_style": "bullet"
 	},
 	{
 		"id": "piercer", "name": "PIERCER", "magazine": 5,
 		"cadence": 0.52, "penetration": 3, "reload": 1.8,
-		"projectile_speed": 1280.0, "color": Color("ffcf70")
+		"projectile_speed": 1280.0, "color": Color("389cff"), "projectile_style": "laser"
 	},
 ]
 
