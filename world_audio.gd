@@ -1,6 +1,7 @@
 extends Node
 
 const SOUNDS := {
+	"armor_ricochet": preload("res://assets/sfx/armor_ricochet.wav"),
 	"light_turret_fire": preload("res://assets/sfx/light_turret_fire.wav"),
 	"heavy_turret_fire": preload("res://assets/sfx/heavy_turret_fire.wav"),
 	"heavy_turret_charge": preload("res://assets/sfx/heavy_turret_charge.wav"),

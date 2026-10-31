@@ -34,6 +34,7 @@ var lab_panel: CanvasLayer
 var retry_requested := false
 var restart_mode := "checkpoint"
 var developer_mode := false
+var boss_test_mode := false
 var start_screen: CanvasLayer
 var music: AudioStreamPlayer
 var weapon_audio: Node
@@ -108,6 +109,7 @@ func _ready() -> void:
 	add_child(lab_panel)
 	boss_actor.bomb_requested.connect(_on_boss_bomb_requested)
 	boss_actor.particle_requested.connect(_on_boss_particle_requested)
+	boss_actor.barrage_requested.connect(_on_boss_barrage_requested)
 	boss_actor.feedback.connect(_on_boss_feedback)
 	boss_actor.weak_point_hit.connect(_boss_damage)
 	boss_actor.form_changed.connect(_on_boss_form_changed)
@@ -514,7 +516,9 @@ func _update_shots(delta: float) -> void:
 func _hit_enemy(enemy: Dictionary, bullet: Dictionary) -> void:
 	if enemy.armor > 0:
 		if bullet.penetration >= enemy.armor: enemy.armor = 0; _emit(enemy.pos, YELLOW, 23, 245); _notify("ARMOR BROKEN", YELLOW)
-		else: _emit(bullet.pos, WHITE, 13, 220); _notify("RICOCHET // USE PIERCER", WHITE)
+		else:
+			world_audio.play_cue("armor_ricochet")
+			_emit(bullet.pos, WHITE, 13, 220); _notify("RICOCHET // USE PIERCER", WHITE)
 		return
 	enemy.hp -= 1
 	if enemy.hp <= 0: _kill_enemy(enemy)
@@ -589,9 +593,13 @@ func _start_boss(preserve_motion := false) -> void:
 	banner = "BOSS CHECKPOINT // BREAK ARMOR, THEN ATTACK"; banner_time = 2.2
 
 func _update_boss(delta: float) -> void:
+	# Finish the descent before releasing the low three-shot attack. Bombs and
+	# barrage waves stay in the upper-right flight region.
+	boss_actor.attack_position_ready = absf(boss_actor.position.y - BOSS_ATTACK_Y) < 1.0 if boss_actor.wants_low_flight() else boss_actor.position.y <= BOSS_IDLE_Y + 1.0
 	boss_actor.advance(delta, _player_center())
-	var target_y := BOSS_ATTACK_Y if boss_actor.wants_low_flight() else BOSS_IDLE_Y + sin(segment_time * 0.8) * 22.0
-	boss_actor.position = Vector2(785.0, move_toward(boss_actor.position.y, target_y, BOSS_FLIGHT_SPEED * delta))
+	var flight_target := Vector2(785.0 + sin(segment_time * 0.7) * 65.0, 265.0 + cos(segment_time * 0.9) * 75.0)
+	if boss_actor.wants_low_flight(): flight_target = Vector2(785.0, BOSS_ATTACK_Y)
+	boss_actor.position = boss_actor.position.move_toward(flight_target, BOSS_FLIGHT_SPEED * delta)
 	for i in range(boss_bombs.size() - 1, -1, -1):
 		var bomb := boss_bombs[i]
 		if not is_instance_valid(bomb):
@@ -635,8 +643,23 @@ func _on_boss_particle_requested(origin: Vector2) -> void:
 		projectile.launch(origin, direction)
 		boss_particles.append(projectile)
 
+func _on_boss_barrage_requested(origin: Vector2, wave: int) -> void:
+	if state != "playing" or not boss_mode: return
+	world_audio.play_cue("boss_particle_fire", -1.0, boss_actor)
+	# A broad fan crosses the playfield; smaller rounds leave readable gaps.
+	for ray in range(18):
+		var projectile: BossParticle = BOSS_PARTICLE_SCENE.instantiate()
+		projectile.speed = 300.0
+		projectile.lifetime = 4.0
+		projectile.scale = Vector2.ONE * 0.45
+		boss_attack_root.add_child(projectile)
+		var angle := deg_to_rad(95.0 + ray * 10.0 + (wave - 1) * 3.0)
+		projectile.launch(origin, Vector2.from_angle(angle))
+		boss_particles.append(projectile)
+
 func _on_boss_feedback(origin: Vector2, color: Color, message: String) -> void:
-	_emit(origin, color, 18, 230)
+	if not message.begins_with("BOSS TELEGRAPH"):
+		_emit(origin, color, 18, 230)
 	_notify(message, color, GD.BOSS.telegraph_time if message.begins_with("BOSS TELEGRAPH") else 0.9)
 
 func _on_boss_form_changed(form: EyeballBoss.BossForm) -> void:
@@ -699,7 +722,11 @@ func _reset_campaign() -> void:
 	score = 0
 	stats = {"unarmored": 0, "light": 0, "heavy": 0, "flyer": 0}
 	state = "playing"
-	_start_segment(0)
+	if boss_test_mode:
+		segment = GD.CAMPAIGN_SEGMENT_COUNT - 1
+		_start_boss()
+	else:
+		_start_segment(0)
 	_update_parallax()
 
 func _start_lab_run() -> void:
@@ -737,8 +764,9 @@ func _gate_gameplay_input() -> void:
 	lab_panel.release_pending = not lab_panel.expanded
 	lab_panel.release_frames = 1
 
-func start_game(mode := "checkpoint", parameter_index := 0, development := false) -> void:
+func start_game(mode := "checkpoint", parameter_index := 0, development := false, boss_only := false) -> void:
 	if state != "start": return
+	boss_test_mode = boss_only
 	developer_mode = development
 	lab.set_enabled(developer_mode)
 	if developer_mode:
@@ -763,6 +791,7 @@ func return_to_start() -> void:
 	lab.clear_pending_retry()
 	retry_requested = false
 	state = "start"
+	boss_test_mode = false
 	_clear_world()
 	lab_panel.expanded = false
 	lab_panel.panel.hide()

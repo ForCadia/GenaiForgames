@@ -3,6 +3,7 @@ extends Node2D
 
 signal bomb_requested(target_x: float)
 signal particle_requested(origin: Vector2)
+signal barrage_requested(origin: Vector2, wave: int)
 signal feedback(origin: Vector2, color: Color, message: String)
 signal weak_point_hit()
 signal form_changed(form: BossForm)
@@ -19,6 +20,7 @@ enum AttackState {
 	TELEGRAPH,
 	BOMB_ATTACK,
 	PARTICLE_ATTACK,
+	BARRAGE_ATTACK,
 	RECOVERY,
 	ARMOR_BREAK,
 	DEAD,
@@ -30,6 +32,7 @@ enum AttackState {
 @export var armor_break_time := 0.55
 @export var hit_radius := 88.0
 @export var particle_spread_degrees := 6.0
+@export var barrage_wave_interval := 0.75
 
 @onready var visual: Sprite2D = $Visual
 @onready var hurtbox: Area2D = $Hurtbox
@@ -39,6 +42,9 @@ var attack_state: AttackState = AttackState.IDLE
 var state_time := 0.0
 var idle_frame_time := 0.0
 var next_attack_is_bomb := true
+var next_attack_is_barrage := false
+var barrage_wave := 0
+var attack_position_ready := true
 var combat_enabled := false
 var target_x := 440.0
 
@@ -52,6 +58,9 @@ func reset_for_battle(enabled: bool) -> void:
 	state_time = 1.15
 	idle_frame_time = 0.0
 	next_attack_is_bomb = true
+	next_attack_is_barrage = false
+	barrage_wave = 0
+	attack_position_ready = true
 	combat_enabled = enabled
 	visible = enabled
 	_set_hurtbox_enabled(enabled)
@@ -80,10 +89,16 @@ func advance(delta: float, player_position: Vector2) -> void:
 				state_time = telegraph_time
 				if not next_attack_is_bomb: sound_requested.emit("boss_particle_charge", telegraph_time)
 				visual.frame = _form_row() * 8 + (2 if next_attack_is_bomb else 4)
-				feedback.emit(global_position + Vector2(-90, 0), Color("ff5f6d"), "BOSS TELEGRAPH // %s" % ("JUMP" if next_attack_is_bomb else "CROUCH"))
+				var hint := "DODGE // 3 WAVES" if next_attack_is_barrage else ("JUMP" if next_attack_is_bomb else "CROUCH")
+				feedback.emit(global_position + Vector2(-90, 0), Color("ff5f6d"), "BOSS TELEGRAPH // " + hint)
 		AttackState.TELEGRAPH:
-			if state_time <= 0.0:
-				if next_attack_is_bomb:
+			if state_time <= 0.0 and attack_position_ready:
+				if next_attack_is_barrage:
+					attack_state = AttackState.BARRAGE_ATTACK
+					barrage_wave = 0
+					_fire_barrage_wave()
+					return
+				elif next_attack_is_bomb:
 					attack_state = AttackState.BOMB_ATTACK
 					visual.frame = _form_row() * 8 + 3
 					bomb_requested.emit(target_x)
@@ -92,6 +107,13 @@ func advance(delta: float, player_position: Vector2) -> void:
 					visual.frame = _form_row() * 8 + 5
 					particle_requested.emit($ProjectileMuzzle.global_position)
 				state_time = 0.18
+		AttackState.BARRAGE_ATTACK:
+			if state_time <= 0.0:
+				if barrage_wave < 3:
+					_fire_barrage_wave()
+				else:
+					attack_state = AttackState.RECOVERY
+					state_time = recovery_time
 		AttackState.BOMB_ATTACK, AttackState.PARTICLE_ATTACK:
 			if state_time <= 0.0:
 				attack_state = AttackState.RECOVERY
@@ -99,7 +121,13 @@ func advance(delta: float, player_position: Vector2) -> void:
 		AttackState.RECOVERY:
 			_animate_idle()
 			if state_time <= 0.0:
-				next_attack_is_bomb = not next_attack_is_bomb
+				if next_attack_is_bomb:
+					next_attack_is_bomb = false
+				elif not next_attack_is_barrage:
+					next_attack_is_barrage = true
+				else:
+					next_attack_is_barrage = false
+					next_attack_is_bomb = true
 				attack_state = AttackState.IDLE
 				state_time = attack_interval
 		AttackState.ARMOR_BREAK:
@@ -125,6 +153,7 @@ func receive_shot(penetration: int, impact_position: Vector2) -> void:
 		weak_point_hit.emit()
 		return
 	if penetration < 3:
+		sound_requested.emit("armor_ricochet", -1.0)
 		feedback.emit(impact_position, Color("e4f8ff"), "ARMORED // USE PIERCER")
 		return
 	attack_state = AttackState.ARMOR_BREAK
@@ -146,11 +175,17 @@ func armor_layers() -> int:
 	return 2 - int(form)
 
 func wants_low_flight() -> bool:
-	return not next_attack_is_bomb and attack_state in [
+	return not next_attack_is_bomb and not next_attack_is_barrage and attack_state in [
 		AttackState.TELEGRAPH,
 		AttackState.PARTICLE_ATTACK,
 		AttackState.RECOVERY,
 	]
+
+func _fire_barrage_wave() -> void:
+	visual.frame = _form_row() * 8 + 5
+	barrage_requested.emit($ProjectileMuzzle.global_position, barrage_wave)
+	barrage_wave += 1
+	state_time = barrage_wave_interval
 
 func _form_row() -> int:
 	return int(form)

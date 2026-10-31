@@ -58,4 +58,4 @@ func start_dissipate() -> void:
 	visual.frame = 6
 
 func is_finished() -> bool:
-	return life_left <= 0.0 or position.x < -90.0 or (dissipating and impact_time <= 0.0)
+	return life_left <= 0.0 or position.x < -90.0 or position.y < -90.0 or position.y > 810.0 or (dissipating and impact_time <= 0.0)

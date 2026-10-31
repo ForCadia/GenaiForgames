@@ -3,6 +3,8 @@ extends SceneTree
 var failures: Array[String] = []
 var weak_hits := 0
 var bombs_requested := 0
+var barrage_waves: Array[int] = []
+var armor_sounds := 0
 
 func _init() -> void:
 	call_deferred("_run")
@@ -19,10 +21,14 @@ func _run() -> void:
 	boss.position = Vector2(785, 350)
 	boss.weak_point_hit.connect(func(): weak_hits += 1)
 	boss.bomb_requested.connect(func(_x: float): bombs_requested += 1)
+	boss.barrage_requested.connect(func(_origin: Vector2, wave: int): barrage_waves.append(wave))
+	boss.sound_requested.connect(func(cue: String, _duration: float):
+		if cue == "armor_ricochet": armor_sounds += 1)
 	boss.reset_for_battle(true)
 	_check(boss.armor_layers() == 2, "Boss must start with two armor layers")
 	boss.receive_shot(1, boss.position)
 	_check(boss.armor_layers() == 2, "Assault rifle must not damage double armor")
+	_check(armor_sounds == 1, "Insufficient penetration must play armor ricochet")
 	boss.receive_shot(3, boss.position)
 	boss.receive_shot(3, boss.position)
 	boss.advance(0.6, Vector2(190, 586))
@@ -47,6 +53,26 @@ func _run() -> void:
 	boss.advance(0.5, Vector2(190, 586))
 	boss.advance(boss.attack_interval, Vector2(190, 586))
 	_check(boss.wants_low_flight(), "Particle telegraph must retain its low attack altitude")
+	boss.advance(boss.telegraph_time, Vector2(190, 586))
+	boss.advance(0.2, Vector2(190, 586))
+	boss.advance(0.5, Vector2(190, 586))
+	_check(boss.next_attack_is_barrage, "Three-shot attack must cycle into the new barrage")
+	boss.advance(boss.attack_interval, Vector2(190, 586))
+	_check(not boss.wants_low_flight(), "Barrage must stay in the upper flight region")
+	boss.advance(boss.telegraph_time, Vector2(190, 586))
+	for wave in range(3): boss.advance(boss.barrage_wave_interval, Vector2(190, 586))
+	_check(barrage_waves == [0, 1, 2], "Barrage must emit exactly three waves then recover")
+	boss.advance(boss.recovery_time, Vector2(190, 586))
+	_check(boss.next_attack_is_bomb and not boss.next_attack_is_barrage, "Barrage must cycle back to bombs")
+	boss.reset_for_battle(true)
+	boss.next_attack_is_bomb = false
+	boss.next_attack_is_barrage = true
+	boss.state_time = 0.0
+	boss.advance(0.01, Vector2(190, 586))
+	boss.advance(boss.telegraph_time, Vector2(190, 586))
+	boss.receive_shot(3, boss.position)
+	boss.advance(boss.armor_break_time, Vector2(190, 586))
+	_check(barrage_waves.size() == 4, "Armor break must cancel the remaining barrage waves")
 
 	var particle_scene := load("res://BossParticle.tscn") as PackedScene
 	var particle := particle_scene.instantiate() as BossParticle
@@ -92,22 +118,23 @@ func _run() -> void:
 	await process_frame
 	game.set_process(false)
 	game._start_boss()
-	_check(game.boss.hp == 4 and game.boss.armor == 2, "Boss checkpoint must preserve original four-point weak health")
+	_check(game.boss.hp == GameData.BOSS.health and game.boss.hp > 4 and game.boss.armor == 2, "Boss must start with increased red health and two armor layers")
 	game._update_boss(1.2)
+	_check(game.particles.is_empty(), "Attack warning must not create red particles")
 	_check(absf(game.boss_actor.position.y - game.BOSS_IDLE_Y) <= 22.0, "Boss must keep its hover altitude during bomb telegraph")
 	_check(game.boss_actor.position.y + 111.0 < GameData.GROUND_Y, "Boss artwork must remain airborne above the track while attacking")
 	game.boss_actor.advance(game.boss_actor.telegraph_time, game._player_center())
 	_check(game.boss_bombs.size() == 1, "Boss release must create one bomb in the game")
 	_check(game.boss_bombs.back().global_position.is_equal_approx(game.boss_actor.global_position), "Bomb must originate at the Boss, not above the landing point")
 	game._hit_boss({"penetration": 1, "pos": Vector2(700, 350)})
-	_check(game.boss.hp == 4 and game.boss.armor == 2, "Armored rifle impact must not update the Boss health bar")
+	_check(game.boss.hp == GameData.BOSS.health and game.boss.armor == 2, "Armored rifle impact must not update the Boss health bar")
 	game._hit_boss({"penetration": 3, "pos": Vector2(700, 350)})
 	game.boss_actor.advance(0.6, Vector2(190, 586))
 	game._hit_boss({"penetration": 3, "pos": Vector2(700, 350)})
 	game.boss_actor.advance(0.6, Vector2(190, 586))
-	_check(game.boss.hp == 4 and game.boss.armor == 0, "Two AP hits must expose without damaging the weak health")
+	_check(game.boss.hp == GameData.BOSS.health and game.boss.armor == 0, "Two AP hits must expose without damaging the weak health")
 	game._hit_boss({"penetration": 1, "pos": Vector2(700, 350)})
-	_check(game.boss.hp == 3 and game.boss.armor == 0, "Exposed damage must reuse the original Boss health logic without restoring armor")
+	_check(game.boss.hp == GameData.BOSS.health - 1 and game.boss.armor == 0, "Exposed damage must reuse the original Boss health logic without restoring armor")
 	# A full particle telegraph emits one simultaneous fan from the eye marker.
 	game._start_boss()
 	game.boss_actor.next_attack_is_bomb = false
@@ -116,6 +143,7 @@ func _run() -> void:
 	for frame in range(44):
 		game._update_boss(1.0 / 60.0)
 	_check(game.boss_particles.size() == 3, "Particle attack must emit exactly three projectiles")
+	_check(is_equal_approx(game.boss_actor.position.y, game.BOSS_ATTACK_Y), "Boss must descend before releasing the three-shot attack")
 	var muzzle: Vector2 = game.boss_actor.get_node("ProjectileMuzzle").global_position
 	_check(is_equal_approx(muzzle.y, game.boss_actor.global_position.y), "Eye muzzle must follow Boss height")
 	var lower_hits_standing := false
@@ -129,6 +157,22 @@ func _run() -> void:
 	_check(game.boss_particles[0].direction.y > 0.0 and is_zero_approx(game.boss_particles[1].direction.y) and game.boss_particles[2].direction.y < 0.0, "Fan must contain lower, center and upper directions")
 	game._start_boss()
 	_check(game.boss_particles.is_empty(), "Boss reset must clear all three projectiles")
+	var initial_position: Vector2 = game.boss_actor.position
+	for frame in range(30):
+		game.segment_time += 1.0 / 60.0
+		game._update_boss(1.0 / 60.0)
+	_check(game.boss_actor.position.distance_to(initial_position) > 10.0, "Boss must move in the upper right")
+	_check(game.boss_actor.position.x >= 720.0 and game.boss_actor.position.x <= 850.0 and game.boss_actor.position.y <= 350.0, "Upper flight must stay inside its visible region")
+	for wave in range(3): game._on_boss_barrage_requested(game.boss_actor.global_position, wave)
+	_check(game.boss_particles.size() == 54, "Three barrage waves must produce 18 rounds each")
+	for shot in game.boss_particles:
+		_check(shot.direction.x < 0.0 and shot.speed == 300.0 and shot.scale.x < 1.0, "Barrage rounds must cross the screen with smaller hitboxes")
+	game._start_boss()
+	_check(game.boss_particles.is_empty() and game.boss_actor.barrage_wave == 0, "Reset must remove barrage projectiles and progress")
+	game.world_audio.stop_all()
+	game.weapon_audio.stop_all()
+	game.music.stop()
+	await create_timer(0.2).timeout
 	game.queue_free()
 	boss.queue_free()
 	bomb.queue_free()
@@ -136,6 +180,8 @@ func _run() -> void:
 	particle.queue_free()
 	await process_frame
 	if failures.is_empty():
+		# Allow the audio thread to release stopped playbacks before shutdown.
+		await create_timer(0.1).timeout
 		print("BOSS_SMOKE_OK")
 		quit(0)
 	else:

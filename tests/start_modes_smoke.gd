@@ -218,6 +218,25 @@ func _run() -> void:
 	game._process(0.36)
 	game.return_to_start()
 	check(game.lab.events.size() == preserved_events and game.lab.run_number == preserved_runs and game.lab.session_id == preserved_session, "ordinary play preserves developer archive without mixing data")
+	game.start_screen.boss_test_button.pressed.emit()
+	check(game.boss_test_mode and game.boss_mode and game.state == "playing", "Boss test button enters Boss directly")
+	check(ui.blocked and not game.lab.enabled and not game.developer_mode, "Boss test gates held input and keeps telemetry disabled")
+	release_gate(game)
+	game._die("BOSS_TEST_RETRY")
+	request_retry(game)
+	game._process(0.36)
+	check(game.boss_mode and game.boss.hp == GameData.BOSS.health, "Boss test death retries the full Boss encounter")
+	game.boss_actor.form = EyeballBoss.BossForm.WEAK_POINT
+	game.boss.hp = 1
+	game._boss_damage()
+	check(game.state == "victory", "Boss test can finish normally")
+	game._new_run()
+	check(game.boss_test_mode and game.boss_mode and game.score == 0, "Boss test victory restart stays Boss-only")
+	game.return_to_start()
+	check(game.lab.events.size() == preserved_events and game.lab.run_number == preserved_runs, "Boss tests do not contaminate developer records")
+	game.start_screen.start_button.pressed.emit()
+	check(not game.boss_test_mode and not game.boss_mode and game.segment == 0, "Ordinary start after Boss test returns to campaign entry")
+	game.return_to_start()
 	game.start_screen.developer_button.pressed.emit()
 	check(game.lab.session_id == preserved_session and game.lab.run_number == preserved_runs + 1, "developer re-entry retains session")
 	var session: String = game.lab.session_id
@@ -230,4 +249,5 @@ func _run() -> void:
 	print("START / SIX COMBINATIONS / BASELINE / A-B RESETS / INPUT TIMING / ADMIN FILTER / JSON: ", "PASS" if failures.is_empty() else "FAIL")
 	game.queue_free()
 	await process_frame
+	await create_timer(0.1).timeout
 	quit(0 if failures.is_empty() else 1)

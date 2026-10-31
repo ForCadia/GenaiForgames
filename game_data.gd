@@ -136,7 +136,7 @@ const ENEMIES := {
 
 const BOSS := {
 	"armor_per_cycle": 2,
-	"health": 4,
+	"health": 12,
 	"attack_interval": 2.5,
 	"telegraph_time": 0.72,
 	"loop_interval": 7.0,

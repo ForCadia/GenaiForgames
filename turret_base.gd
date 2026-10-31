@@ -97,6 +97,7 @@ func take_damage(penetration: int, impact: Vector2) -> void:
 		return
 	if state != TurretState.EXPOSED:
 		if penetration < 3:
+			sound_requested.emit("armor_ricochet", -1.0)
 			feedback.emit(impact, Color.WHITE, "RICOCHET // USE PIERCER")
 			return
 		state = TurretState.BREAKING

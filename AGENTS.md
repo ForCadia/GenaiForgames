@@ -50,6 +50,8 @@ No AI-service requests or API keys in game code. Telemetry is local only. Do not
 
 ## Confirmed experiment and start screen
 
+Current Lab C Boss revision (2026-10-30): red health is 12 (formerly 4); bombs, descending three-shot spread and three-wave upper-right barrage cycle in all play modes. The menu also has **Boss 战测试** for direct Boss entry and Boss-only retries/replays, with telemetry disabled. This user-authorized combat revision is separate from historical Lab B parameters/results below; do not rewrite old tester JSON.
+
 User-authorized menu revision (2026-10-30, lab-b-0.5): the start screen has **开始游戏** and **开发模式**, without A/B or parameter selectors. Both start at A + Original. Ordinary play hides and disables lab UI, F1/F2/F3/T and telemetry recording/export. Development mode enables the existing panel, presets, variant switches and session tools. Esc returns either mode to the menu. Ordinary play must not erase or add to retained developer sessions. Gameplay numbers remain the lab-b-0.4 baseline. Experimental controls described below apply only to development mode.
 
 The student selected restart location as the A/B variable: A checkpoint (full Boss encounter on Boss death), B campaign entry on every death. F2/F3 and the existing panel select modes; preserve 1/2/3 weapons. All switches reset cleanly to campaign entry. Default is A + Original. The latest parameter choices are only Original / Slow / Fast Reload (plus Custom displayed after a manual panel edit). The earlier four presets are superseded.

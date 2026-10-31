@@ -3,6 +3,7 @@ extends CanvasLayer
 var game: Node
 var start_button: Button
 var developer_button: Button
+var boss_test_button: Button
 
 func _ready() -> void:
 	layer = 40
@@ -40,6 +41,11 @@ func _ready() -> void:
 	developer_button.custom_minimum_size.y = 40
 	developer_button.pressed.connect(func(): game.start_game("checkpoint", 0, true))
 	box.add_child(developer_button)
+	boss_test_button = Button.new()
+	boss_test_button.text = "Boss 战测试"
+	boss_test_button.custom_minimum_size.y = 40
+	boss_test_button.pressed.connect(func(): game.start_game("checkpoint", 0, false, true))
+	box.add_child(boss_test_button)
 	_add_label(box, "SPACE/W Jump   S/CTRL Slide   Mouse Aim\nLeft click Fire   Right click Guard   1/2/3 Weapons\nR Reload   R / SPACE / Left click Retry after death\nESC 返回开始界面   M 静音 / 恢复声音", 14, Color("a5bed0"))
 	_add_label(box, "开发模式：调参、A/B 切换与测试数据记录。", 13, Color("a5bed0"))
 

@@ -92,4 +92,5 @@ func _run() -> void:
 	print("GAMEPLAY AIM / ARMOR / TRANSITION SMOKE: PASS")
 	game.queue_free()
 	await process_frame
+	await create_timer(0.1).timeout
 	quit(0)

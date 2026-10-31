@@ -134,6 +134,12 @@ The 2026-10-30 menu revision (lab-b-0.5) provides **开始游戏** for ordinary 
 
 The rifle and piercer have finite magazines with infinite reserve. The piercer breaks heavy armor and Boss armor. Existing score, ammo, guard-energy and Boss-health feedback remain. Existing pixel art and animations remain; their authorship/license provenance must be supplied by the student if absent. No new art is needed for Lab B. The README's older six-segment/grenade notes describe authored data rather than the current active campaign.
 
+## Current Lab C Boss revision (2026-10-30)
+
+At the student's request, Boss red health increases from 4 to 12, with the same two armor layers. The attack cycle is bomb, descending three-shot spread, then three upper-right barrage waves. Outside the low spread, the Boss moves within x=720..850 and y=190..350; the spread waits until the Boss reaches y=520. Each barrage wave sends 18 smaller rounds across a broad forward fan at 300 px/s, with 0.75 s between waves. Attack-warning red particles are removed while the text warning and charge sound remain. These are current implementation choices for student testing, not measured Lab B outcomes or changes to historical telemetry.
+
+The start screen adds **Boss 战测试** for direct entry, full Boss retry and Boss-only replay after victory. It uses the same Boss as the campaign, default parameters and no telemetry; returning to the menu and selecting ordinary play restores campaign entry. The original developer experiment tools remain separate.
+
 ## Remaining source gaps
 
 | Item | Student content |
