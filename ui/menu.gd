@@ -292,7 +292,7 @@ func _position_menu() -> void:
 		panel.custom_minimum_size.x = 448
 		var minimum := panel.get_combined_minimum_size()
 		var width := 640.0
-		var origin := Vector2(root.size.x-width-24,24)
+		var origin := Vector2(root.size.x-width,-96)
 		var image_scale := width/1200.0
 		var head_height := minimum.y+208
 		var stand_height := maxf(0.0,root.size.y-origin.y-head_height)

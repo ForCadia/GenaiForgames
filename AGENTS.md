@@ -118,3 +118,5 @@ Latest title artwork revision (2026-10-31): title-only panel is now the user's s
 Latest title correction (2026-10-31): use the standing terminal artwork for the title at upper-right; flat screen frame supplies backgrounds for subsequent selector/build/settings/controls pages. User explicitly requests file changes only, leaving all testing to them; do not run games, automated checks or capture scripts unless asked.
 
 Latest terminal placement (2026-10-31): title monitor retains its existing upper-right origin and width; pedestal extends from the monitor's lower edge to the viewport bottom without a bottom gap. The pedestal atlas omits transparent rows beneath the actual feet. User handles testing; no runtime/capture checks for this change.
+
+Latest title offset (2026-10-31): move the title terminal another24px right and120px up: artwork origin is now (viewport_width-640,-96), positioning the actual display/controls in the upper-right rather than reserving top margin for the antenna. Pedestal still reaches the viewport bottom. File-only change, no tests.
