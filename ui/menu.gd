@@ -61,7 +61,6 @@ func _ready() -> void:
 	modes.add_theme_constant_override("separation",12)
 	fresh_guest_button = F.button(modes,"新游客 / 从零开始",func(): game.enter_guest_session(),true)
 	fresh_guest_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	F.button(modes,"开发模式",func(): game.enter_development_session(),true).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var identity := F.box(buttons,true)
 	identity.add_theme_constant_override("separation",12)
 	name_input = LineEdit.new()
@@ -89,11 +88,12 @@ func _ready() -> void:
 	tests.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	tests.offset_right = -12
 	tests.offset_bottom = -12
+	var development_entry := F.button(tests,"开发模式",func(): game.enter_development_session(),true)
 	developer_button = F.button(tests, S.DEVELOPER, func(): game.start_game("checkpoint", 0, true), true)
 	boss_test_button = F.button(tests, S.BOSS_TEST, func(): game.start_game("checkpoint", 0, false, true), true)
 	developer_button.text = "LAB / 调参"
 	boss_test_button.text = "DEV / BOSS"
-	for button in [developer_button,boss_test_button]:
+	for button in [development_entry,developer_button,boss_test_button]:
 		button.theme_type_variation = "MenuCompact"
 		button.custom_minimum_size = Vector2(112,32)
 	developer_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -206,6 +206,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if not visible or game.state != "start": return
 	fresh_guest_button.visible = game.play_profile != "development"
+	fresh_guest_button.get_parent().visible = fresh_guest_button.visible
 	wallet_label.text = "%d G" % game.progression.coins
 	match game.play_profile:
 		"guest":
