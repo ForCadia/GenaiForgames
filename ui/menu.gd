@@ -9,6 +9,7 @@ var boss_test_button: Button
 var menu: VBoxContainer
 var controls: VBoxContainer
 var settings_view: VBoxContainer
+var level_select: VBoxContainer
 var root: Control
 var drift := 0.0
 var entrance: Tween
@@ -44,7 +45,7 @@ func _ready() -> void:
 	menu.add_child(button_center)
 	var buttons := F.box(button_center)
 	buttons.custom_minimum_size.x = 400
-	start_button = F.button(buttons, S.START, func(): game.start_game())
+	start_button = F.button(buttons, S.START, func(): show_levels(true))
 	F.button(buttons, S.SETTINGS, func(): show_settings(true))
 	F.button(buttons, S.CONTROLS, func(): show_controls(true))
 	if not OS.has_feature("web"): F.button(buttons, S.QUIT, func(): get_tree().quit(), true)
@@ -67,6 +68,11 @@ func _ready() -> void:
 	settings_view.back = func(): show_settings(false)
 	panel.add_child(settings_view)
 	settings_view.hide()
+	level_select = preload("res://ui/level_select.gd").new()
+	level_select.game = game
+	level_select.back = func(): show_levels(false)
+	panel.add_child(level_select)
+	level_select.hide()
 	visibility_changed.connect(func():
 		if visible:
 			show_controls(false)
@@ -93,6 +99,7 @@ static func build_controls(parent: Node, back: Callable) -> void:
 	F.button(parent, S.BACK, back)
 
 func show_controls(value: bool) -> void:
+	if is_instance_valid(level_select): level_select.hide()
 	if is_instance_valid(settings_view): settings_view.hide()
 	menu.visible = not value
 	controls.visible = value
@@ -100,6 +107,7 @@ func show_controls(value: bool) -> void:
 	else: start_button.grab_focus()
 
 func show_settings(value: bool) -> void:
+	level_select.hide()
 	menu.visible = not value
 	controls.hide()
 	settings_view.visible = value
@@ -108,9 +116,18 @@ func show_settings(value: bool) -> void:
 		settings_view.back_button.grab_focus()
 	else: start_button.grab_focus()
 
+func show_levels(value: bool) -> void:
+	menu.visible = not value
+	controls.hide()
+	settings_view.hide()
+	level_select.visible = value
+	if value: level_select.first_button.grab_focus()
+	else: start_button.grab_focus()
+
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed("ui_cancel") and (controls.visible or settings_view.visible):
-		if settings_view.visible: show_settings(false)
+	if visible and event.is_action_pressed("ui_cancel") and (controls.visible or settings_view.visible or level_select.visible):
+		if level_select.visible: show_levels(false)
+		elif settings_view.visible: show_settings(false)
 		else: show_controls(false)
 		get_viewport().set_input_as_handled()
 

@@ -2,7 +2,7 @@ extends Node
 
 var game: Node
 var selector: OptionButton
-var pages := ["Start", "Controls", "HUD", "Reload", "Boss", "Pause", "Death", "Victory", "Developer", "Banner", "Tutorial", "BossArmor", "BossPhase2"]
+var pages := ["Start", "Controls", "HUD", "Reload", "Boss", "Pause", "Death", "Victory", "Developer", "Banner", "Tutorial", "BossArmor", "BossPhase2", "LevelSelect", "Level2", "Level3", "Endless"]
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -34,7 +34,11 @@ func show_page(index: int) -> void:
 	if index == 1:
 		game.start_screen.show_controls(true)
 		return
-	game.start_game("checkpoint", 0, false, index in [4, 11, 12])
+	if index == 13:
+		game.start_screen.show_levels(true)
+		return
+	if index == 16: game.start_endless()
+	else: game.start_game("checkpoint", 0, false, index in [4, 11, 12], 1 if index == 14 else (2 if index == 15 else 0))
 	game.lab_panel.blocked = false
 	game.lab_panel.release_pending = false
 	game.score = 2450

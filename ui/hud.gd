@@ -7,6 +7,7 @@ var game: Node
 var root: Control
 var score_label: Label
 var kills_label: Label
+var mode_label: Label
 var stage_label: BoxContainer
 var stage_styles: Array[StyleBoxFlat] = []
 var shield: ProgressBar
@@ -63,6 +64,7 @@ func _ready() -> void:
 	left.custom_minimum_size.x = P.SHIELD_WIDTH
 	score_label = F.label(left, "000000", "LargeLabel")
 	kills_label = F.label(left, "KILLS 00", "AmberLabel")
+	mode_label = F.label(left, "LEVEL 01", "MutedLabel")
 	stage_label = F.box(left, true)
 	stage_label.add_theme_constant_override("separation", 6)
 	for index in range(5):
@@ -204,12 +206,12 @@ func _process(delta: float) -> void:
 		for child in tutorial_keys.get_children():
 			tutorial_keys.remove_child(child)
 			child.queue_free()
-		for key in S.TUTORIAL_KEYS[game.segment]:
+		for key in game.current_segment().get("keys", S.TUTORIAL_KEYS[game.segment]):
 			var cap := preload("res://ui/key_cap.tscn").instantiate()
 			cap.key_text = key
 			cap.font_size = 16
 			tutorial_keys.add_child(cap)
-		tutorial_label.text = S.TUTORIALS[game.segment]
+		tutorial_label.text = str(game.current_segment().hint) if game.endless_mode or game.selected_level > 0 else S.TUTORIALS[game.segment]
 	tutorial_panel.visible = tutorial_left > 0 and not game.boss_mode
 	tutorial_panel.modulate.a = clampf(tutorial_left * 2, 0, 1)
 
@@ -227,6 +229,7 @@ func sync() -> void:
 		score_tween.tween_property(score_label, "scale", Vector2.ONE, 0.12)
 	score_label.text = "%06d" % roundi(shown_score)
 	kills_label.text = "KILLS %02d" % (game.stats.unarmored + game.stats.light + game.stats.heavy + game.stats.flyer)
+	mode_label.text = game.mode_caption()
 	var reached: int = 4 if game.boss_mode or game.state == "victory" else game.segment
 	for index in range(5):
 		var color := P.RED if index == 4 else P.CYAN
@@ -258,7 +261,7 @@ func sync() -> void:
 		banner_tween.tween_interval(1.8)
 		banner_tween.tween_property(banner_panel, "modulate:a", 0.0, 0.4)
 	banner_panel.visible = game.state == "playing" and game.banner_time > 0
-	toast_label.visible = game.state == "playing" and game.notice_time > 0
+	toast_label.visible = game.state in ["playing", "intermission"] and game.notice_time > 0
 	toast_label.text = game.notice
 	tutorial_label.visible = game.state == "playing"
 	if game.state != "playing": tutorial_panel.hide()

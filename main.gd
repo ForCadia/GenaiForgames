@@ -1,6 +1,7 @@
 extends Node2D
 
 const GD := preload("res://game_data.gd")
+const CAMPAIGNS := preload("res://campaign_data.gd")
 const LASER_GATE_SCENE := preload("res://LaserGateEnemy.tscn")
 const GROUND_SPIKES_SCENE := preload("res://GroundSpikes.tscn")
 const LIGHT_TURRET_SCENE := preload("res://LightTurret.tscn")
@@ -36,6 +37,12 @@ var retry_requested := false
 var restart_mode := "checkpoint"
 var developer_mode := false
 var boss_test_mode := false
+var selected_level := 0
+var endless_mode := false
+var endless_wave := 1
+var level_segments: Array = []
+var endless_wave_data: Dictionary = {}
+var endless_intermission := 0.0
 var start_screen: CanvasLayer
 var music: AudioStreamPlayer
 var weapon_audio: Node
@@ -105,6 +112,7 @@ var ui_paused := false
 var ui_preview := false
 var run_elapsed := 0.0
 var run_deaths := 0
+var run_record: Dictionary = {}
 var overlays: CanvasLayer
 var settings: Node
 
@@ -161,6 +169,11 @@ func _process(delta: float) -> void:
 			_retry()
 		queue_redraw()
 		return
+	if state == "intermission":
+		endless_intermission -= delta
+		if endless_intermission <= 0: _advance_endless()
+		queue_redraw()
+		return
 	if state == "victory":
 		if Input.is_action_just_pressed("restart") or Input.is_action_just_pressed("jump"):
 			_new_run()
@@ -190,7 +203,7 @@ func _process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if state != "start" and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
-		if state == "playing" and not lab_panel.expanded: set_ui_paused(not ui_paused)
+		if state in ["playing", "intermission"] and not lab_panel.expanded: set_ui_paused(not ui_paused)
 		else: return_to_start()
 		get_viewport().set_input_as_handled()
 		return
@@ -359,7 +372,7 @@ func _spawn_grenade_pickup() -> void:
 	pickups.append({"pos": Vector2(990, GD.GROUND_Y - 35), "collected": false})
 
 func _update_segment() -> void:
-	var data: Dictionary = GD.SEGMENTS[segment]
+	var data: Dictionary = current_segment()
 	if not segment_transition_pending:
 		while next_event < data.events.size() and segment_time >= data.events[next_event].at * GD.SEGMENT_PACE:
 			_spawn_event(data.events[next_event]); next_event += 1
@@ -368,7 +381,8 @@ func _update_segment() -> void:
 	# Let the outgoing enemies, obstacles, pickups and hostile rounds leave
 	# the screen instead of making them vanish mid-frame at the time limit.
 	if segment_transition_pending and enemies.is_empty() and turrets.is_empty() and laser_gates.is_empty() and ground_spikes.is_empty() and obstacles.is_empty() and pickups.is_empty() and threats.is_empty():
-		if segment == GD.CAMPAIGN_SEGMENT_COUNT - 1: _start_boss(true)
+		if endless_mode: _advance_endless()
+		elif segment == GD.CAMPAIGN_SEGMENT_COUNT - 1: _start_boss(true)
 		else: _start_segment(segment + 1, true)
 
 func _spawn_event(event: Dictionary) -> void:
@@ -622,6 +636,7 @@ func _die(cause: String) -> void:
 	run_deaths += 1
 	state = "dead"; death_delay = player_visual.death_animation_duration(); death_ui_ready = false
 	banner = cause; _emit(_player_center(), RED, 40, 300)
+	if endless_mode: overlays.record_result()
 	if boss_mode:
 		boss_actor.set_combat_enabled(false)
 		_clear_boss_attacks()
@@ -640,7 +655,8 @@ func _start_segment(index: int, preserve_motion := false) -> void:
 	if lab.active: lab.record("checkpoint_reached", {"score": score})
 	player_visual.start_scrolling()
 	if preserve_motion: player_visual.set_motion(_grounded(), crouching, weapon_index, aim, guarding, true)
-	banner = "CHECKPOINT // " + GD.SEGMENTS[index].title; banner_time = 2
+	banner = (mode_caption() if endless_mode or selected_level > 0 else "CHECKPOINT") + " // " + str(current_segment().title)
+	banner_time = 2
 
 func _start_boss(preserve_motion := false) -> void:
 	checkpoint_grenades = grenade_count
@@ -656,7 +672,7 @@ func _start_boss(preserve_motion := false) -> void:
 	boss = {"armor": GD.BOSS.armor_per_cycle, "hp": GD.BOSS.health, "phase": 1}
 	boss_actor.position = Vector2(785.0, BOSS_IDLE_Y)
 	boss_actor.reset_for_battle(true)
-	banner = "BOSS CHECKPOINT // BREAK ARMOR, THEN ATTACK"; banner_time = 2.2
+	banner = mode_caption() + " // BOSS // BREAK ARMOR"; banner_time = 2.2
 
 func _update_boss(delta: float) -> void:
 	if state != "playing": return
@@ -748,8 +764,19 @@ func _boss_damage() -> void:
 	_emit(_boss_pos(), WHITE, 45, 390)
 	if boss.hp <= 0:
 		score += GD.SCORE.boss
+		if endless_mode:
+			state = "intermission"
+			endless_intermission = 1.0
+			world_audio.stop_all()
+			world_audio.play_cue("enemy_explode")
+			weapon_audio.stop_all()
+			boss_actor.start_death()
+			_clear_boss_attacks()
+			_notify("BOSS DOWN // WAVE %02d CLEARED" % endless_wave, CYAN, 1.2)
+			return
 		lab.finish(score, "victory", player, segment, boss_mode)
 		state = "victory"
+		if not developer_mode and not boss_test_mode: overlays.record_result()
 		world_audio.stop_all()
 		world_audio.play_cue("enemy_explode")
 		weapon_audio.stop_all()
@@ -768,6 +795,10 @@ func _request_retry(action: String) -> void:
 
 func _retry() -> void:
 	if state != "dead": return
+	if endless_mode:
+		_new_run("administrative_endless_restart")
+		_gate_gameplay_input()
+		return
 	if not retry_requested: _request_retry("direct_retry")
 	retry_requested = false
 	state = "playing"
@@ -788,6 +819,11 @@ func _retry() -> void:
 	_start_lab_run()
 
 func _reset_campaign() -> void:
+	level_segments = CAMPAIGNS.segments(selected_level)
+	endless_wave = 1
+	endless_intermission = 0
+	if endless_mode: endless_wave_data = CAMPAIGNS.endless_wave(endless_wave)
+	_apply_level_look()
 	grenade_count = 0
 	retry_requested = false
 	weapon_index = 0
@@ -808,6 +844,7 @@ func _start_lab_run() -> void:
 	lab_panel.refresh_summary()
 
 func _new_run(reason := "administrative_restart") -> void:
+	run_record.clear()
 	run_elapsed = 0
 	run_deaths = 0
 	player_hud.reset_run()
@@ -841,15 +878,17 @@ func _gate_gameplay_input() -> void:
 	lab_panel.release_pending = not lab_panel.expanded
 	lab_panel.release_frames = 1
 
-func start_game(mode := "checkpoint", parameter_index := 0, development := false, boss_only := false) -> void:
+func start_game(mode := "checkpoint", parameter_index := 0, development := false, boss_only := false, level_index := 0, infinite := false) -> void:
 	if state != "start": return
 	boss_test_mode = boss_only
 	developer_mode = development
+	selected_level = 0 if development or boss_only else clampi(level_index, 0, CAMPAIGNS.LEVELS.size() - 1)
+	endless_mode = infinite and not development and not boss_only
 	lab.set_enabled(developer_mode)
 	if developer_mode:
 		set_restart_mode(mode)
 	else:
-		restart_mode = "checkpoint"
+		restart_mode = "campaign" if endless_mode else "checkpoint"
 		parameter_index = 0
 	lab_panel.mode_selector.select(0 if restart_mode == "checkpoint" else 1)
 	lab_panel.apply_preset(parameter_index, false)
@@ -874,6 +913,9 @@ func return_to_start() -> void:
 	retry_requested = false
 	state = "start"
 	boss_test_mode = false
+	selected_level = 0
+	endless_mode = false
+	_apply_level_look()
 	_clear_world()
 	boss_mode = false
 	lab_panel.expanded = false
@@ -958,7 +1000,7 @@ func _refresh_player_ui() -> void:
 	player_hud.follow_hitbox(_player_hitbox())
 func _slot_color() -> Color: return CYAN if selected_slot == 2 else _weapon().color
 func _slot_name() -> String: return "GRENADE LAUNCHER" if selected_slot == 2 else _weapon().name
-func _scroll() -> float: return (GD.BOSS.scroll if boss_mode else GD.SEGMENTS[segment].scroll) * float(lab_panel.values.scroll_multiplier)
+func _scroll() -> float: return (GD.BOSS.scroll if boss_mode else current_segment().scroll) * float(lab_panel.values.scroll_multiplier)
 func _update_parallax() -> void:
 	# The world distance already drives enemies and obstacles. Quantize only
 	# rendering offsets so the unscaled pixel art never samples half pixels.
@@ -1054,7 +1096,7 @@ func _notification(what: int) -> void:
 		lab.finish(score, "window_close", player, segment, boss_mode)
 
 func set_ui_paused(value: bool) -> void:
-	if state != "playing": return
+	if state not in ["playing", "intermission"]: return
 	ui_paused = value
 	get_tree().paused = value
 	if value:
@@ -1084,3 +1126,48 @@ func _reset_death_camera() -> void:
 	death_camera_started = false
 	death_ui_ready = false
 	get_viewport().canvas_transform = Transform2D.IDENTITY
+
+func start_level(index: int) -> void:
+	start_game("checkpoint", 0, false, false, index)
+
+func start_endless() -> void:
+	start_game("campaign", 0, false, false, 0, true)
+
+func next_level() -> void:
+	if state != "victory" or developer_mode or boss_test_mode or selected_level >= CAMPAIGNS.LEVELS.size() - 1: return
+	selected_level += 1
+	_new_run()
+	_gate_gameplay_input()
+
+func current_segment() -> Dictionary:
+	if endless_mode and not endless_wave_data.is_empty(): return endless_wave_data
+	if level_segments.is_empty(): return GD.SEGMENTS[segment]
+	return level_segments[segment]
+
+func current_stage_name() -> String:
+	return str(current_segment().title).get_slice("//", 1).strip_edges()
+
+func mode_caption() -> String:
+	if endless_mode: return "ENDLESS / WAVE %02d" % endless_wave
+	if boss_test_mode: return "BOSS TEST"
+	return "LEVEL %02d" % (selected_level + 1)
+
+func record_key() -> String:
+	if endless_mode: return "endless_best_score"
+	return "best_score" if selected_level == 0 else "level_%d_best_score" % (selected_level + 1)
+
+func _advance_endless() -> void:
+	endless_wave += 1
+	state = "playing"
+	if endless_wave % 5 == 0:
+		segment = 3
+		_start_boss(true)
+	else:
+		endless_wave_data = CAMPAIGNS.endless_wave(endless_wave)
+		_start_segment((endless_wave - 1) % 5, true)
+
+func _apply_level_look() -> void:
+	var tint: Color = CAMPAIGNS.LEVELS[selected_level].tint
+	background_layer.modulate = tint
+	middle_layer.modulate = tint
+	track_layer.modulate = tint

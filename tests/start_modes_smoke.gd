@@ -51,6 +51,7 @@ func _run() -> void:
 	check(not game.developer_mode and game.lab.events.is_empty() and game.lab.session_id.is_empty(), "menu creates no test session")
 	Input.action_press("fire")
 	game.start_screen.start_button.pressed.emit()
+	game.start_screen.level_select.first_button.pressed.emit()
 	game._process(0.02)
 	check(game.shots.is_empty() and game.ammo[0] == 24, "ordinary start click blocked")
 	Input.action_release("fire")
@@ -221,6 +222,7 @@ func _run() -> void:
 	var preserved_runs: int = game.lab.run_number
 	var preserved_session: String = game.lab.session_id
 	game.start_screen.start_button.pressed.emit()
+	game.start_screen.level_select.first_button.pressed.emit()
 	release_gate(game)
 	check(not ui.visible and game.restart_mode == "checkpoint" and ui.values == expected, "ordinary entry clears prior developer settings")
 	game._die("ORDINARY_AFTER_DEVELOPMENT")
@@ -249,6 +251,7 @@ func _run() -> void:
 	game.return_to_start()
 	check(game.lab.events.size() == preserved_events and game.lab.run_number == preserved_runs, "Boss tests do not contaminate developer records")
 	game.start_screen.start_button.pressed.emit()
+	game.start_screen.level_select.first_button.pressed.emit()
 	check(not game.boss_test_mode and not game.boss_mode and game.segment == 0, "Ordinary start after Boss test returns to campaign entry")
 	game.return_to_start()
 	game.start_screen.developer_button.pressed.emit()

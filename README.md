@@ -163,3 +163,5 @@ The Web custom templates must be **web_nothreads_debug.zip / web_nothreads_relea
 Final review update (2026-10-14): the student confirms latest private-window play, retry and JSON download passed; no repeat requested. Desktop submission checklist distinguishes verified files, user confirmations and unresolved assignment evidence. A processed final video and the requested (Final)(1) PDF could not be located in the searched paths; do not treat the old 99.31-second recording as a compliant final video.
 
 Current audio calibration and available settings: [SOUND_SETTINGS.md](SOUND_SETTINGS.md).
+
+Mission selection: START GAME opens Level 01 / Level 02 / Level 03 / ENDLESS MODE. Developer and Boss-test entries remain separate. See [LEVEL_MODES.md](LEVEL_MODES.md) for content, wave progression and retry rules.

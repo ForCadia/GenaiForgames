@@ -50,6 +50,8 @@ No AI-service requests or API keys in game code. Telemetry is local only. Do not
 
 ## Confirmed experiment and start screen
 
+User-authorized mission expansion (2026-10-31): START GAME opens a selector for Level 01 (existing four-stage campaign), Level 02 Signal Breach, Level 03 Iron Citadel and Endless. New missions use campaign_data.gd with four authored stages plus the existing Boss; game_data.gd Level 01 timings remain unchanged. Endless cycles denser authored waves, has a Boss every fifth wave, carries score/inventory between waves, and restarts from wave one on death. Mission records and endless records are separate. Developer/Boss-test entries remain Level 01 with their original telemetry rules. See LEVEL_MODES.md. This explicit request authorizes the additional missions/menu despite the older scope restriction.
+
 Latest settings revision (2026-10-31): main-menu SETTINGS and Esc → SETTINGS provide saved Master/Music/SFX volume, mute, desktop fullscreen/VSync, tutorials, reduced flash and death-camera motion toggles, plus sound preview/reset. HUD audio controls and M mute are removed. Settings are local-only in user://settings.cfg; --lab-test bypasses persistence. Music and SFX route through separate native buses and a -1 dB Master peak limiter; audio_mix.gd stores measured per-file gain calibration. Settings do not modify experiment parameters or telemetry.
 
 Latest aiming revision (2026-10-31): shoulder aiming uses the VisualRoot coordinate space and solves the actual muzzle-offset barrel line toward the reticle, without the previous arm-angle clamp. Both arm layers follow the solved rotation, including high-weapon recoil tilt and trimmed-frame muzzle correction. Death heading is MISSION FAILED.

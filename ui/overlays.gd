@@ -83,15 +83,20 @@ func rebuild() -> void:
 		F.label(text, "// SIGNAL LOST", "AmberLabel")
 		F.label(text, S.DEATH, "TitleLabel").modulate = UIPalette.RED
 		F.label(text, S.death_cause(game.banner), "LargeLabel")
-		var destination := "BOSS ENCOUNTER" if game.boss_mode and game.restart_mode == "checkpoint" else ("CHECKPOINT %02d / %s" % [game.segment + 1, S.STAGES[game.segment]] if game.restart_mode == "checkpoint" else "CAMPAIGN ENTRY")
+		var destination := "WAVE 01 / NEW ENDLESS RUN" if game.endless_mode else ("BOSS ENCOUNTER" if game.boss_mode and game.restart_mode == "checkpoint" else ("CHECKPOINT %02d / %s" % [game.segment + 1, game.current_stage_name()] if game.restart_mode == "checkpoint" else "CAMPAIGN ENTRY"))
 		F.label(text, "RESTART FROM " + destination, "MutedLabel")
 		add_stats(text)
+		if game.endless_mode:
+			F.label(text, "WAVE REACHED  %02d" % game.endless_wave, "AmberLabel")
+			var result := record_result()
+			F.label(text, "ENDLESS BEST  %06d" % result.best, "MutedLabel")
 		F.label(text, "R / SPACE / FIRE TO RETRY", "MutedLabel")
-		F.button(content, S.RETRY, func(): game._request_retry("ui_button"))
+		F.button(content, "RESTART ENDLESS [R]" if game.endless_mode else S.RETRY, func(): game._request_retry("ui_button"))
 		F.button(content, S.RETURN_TITLE, func(): game.return_to_start(), true)
 	else:
 		F.label(content, "// SECTOR SECURED", "AmberLabel")
 		F.label(content, S.VICTORY, "LargeLabel")
+		F.label(content, game.mode_caption() + " // COMPLETE", "AmberLabel")
 		var ranked: bool = not game.developer_mode and not game.boss_test_mode
 		var rank := preload("res://ui/rank_calculator.gd").calculate(game.run_deaths)
 		var rank_label := F.label(content, "RANK " + rank if ranked else S.TEST_RUN, "TitleLabel" if ranked else "AmberLabel")
@@ -107,13 +112,10 @@ func rebuild() -> void:
 			F.label(content, "HEAVY TURRETS ........ %02d" % game.stats.heavy, "MutedLabel")
 		F.label(content, "BOSS DEFEATED ........ YES", "EnergyLabel")
 		if ranked:
-			var new_record: bool = game.score > best_score
-			best_score = maxi(best_score, game.score)
-			if not game.ui_preview and not "--lab-test" in OS.get_cmdline_user_args():
-				var config := ConfigFile.new()
-				config.set_value("record", "best_score", best_score)
-				config.save("user://ui_record.cfg")
-			F.label(content, ("NEW RECORD!  " if new_record else "PERSONAL BEST  ") + "%06d" % best_score, "AmberLabel")
+			var result := record_result()
+			F.label(content, ("NEW RECORD!  " if result.new_record else "PERSONAL BEST  ") + "%06d" % result.best, "AmberLabel")
+			if game.selected_level < 2:
+				F.button(content, "NEXT MISSION", func(): game.next_level())
 		F.button(content, S.REDEPLOY, func(): game._new_run(); game._gate_gameplay_input()).grab_focus()
 		F.button(content, S.RETURN_TITLE, func(): game.return_to_start(), true)
 	if fade: fade.kill()
@@ -125,6 +127,21 @@ func add_stats(parent: Node = null) -> void:
 	var target: Node = parent if parent != null else content
 	F.label(target, "SCORE  %06d" % game.score, "LargeLabel")
 	F.label(target, "TIME  %02d:%02d    DEATHS  %02d" % [int(game.run_elapsed) / 60, int(game.run_elapsed) % 60, game.run_deaths], "MutedLabel")
+
+func record_result() -> Dictionary:
+	if not game.run_record.is_empty(): return game.run_record
+	var config := ConfigFile.new()
+	config.load("user://ui_record.cfg")
+	var key: String = game.record_key()
+	var previous := int(config.get_value("record", key, 0))
+	var best: int = maxi(previous, game.score)
+	if not game.ui_preview and not "--lab-test" in OS.get_cmdline_user_args():
+		config.set_value("record", key, best)
+		if game.endless_mode:
+			config.set_value("record", "endless_best_wave", maxi(int(config.get_value("record", "endless_best_wave", 0)), game.endless_wave))
+		config.save("user://ui_record.cfg")
+	game.run_record = {"best": best, "new_record": game.score > previous}
+	return game.run_record
 
 func _background_input(event: InputEvent) -> void:
 	if shown == "dead" and event.is_action_pressed("fire"):

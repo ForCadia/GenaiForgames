@@ -13,6 +13,7 @@ func _capture() -> void:
 	DirAccess.make_dir_recursive_absolute("res://tmp")
 	assert(root.get_texture().get_image().save_png("res://tmp/start-screen.png") == OK)
 	game.start_screen.start_button.pressed.emit()
+	game.start_screen.level_select.first_button.pressed.emit()
 	game.set_process(false)
 	await process_frame
 	await RenderingServer.frame_post_draw

@@ -55,7 +55,7 @@ func play_cue(cue: String, duration := -1.0, source: Node = null) -> void:
 		stop_for(source)
 		return
 	if not SOUNDS.has(cue): return
-	if game.state != "playing" and not (game.state == "victory" and cue == "enemy_explode"): return
+	if game.state != "playing" and not (game.state in ["victory", "intermission"] and cue == "enemy_explode"): return
 	# Keep completed actors' one-shot tails, but cancel interrupted charge cues.
 	if cue in ["heavy_turret_fire", "boss_bomb_explode", "boss_particle_fire"]: stop_for(source)
 	if voices.get_child_count() >= 24:
