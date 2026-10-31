@@ -76,18 +76,6 @@ func _ready() -> void:
 	profile_notice = F.label(buttons,"","AmberLabel")
 	profile_notice.hide()
 
-	build_button = F.button(buttons, "", func(): show_build(true))
-	build_button.custom_minimum_size.y = 48
-	var build_row := HBoxContainer.new()
-	build_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	build_button.add_child(build_row)
-	build_row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	build_row.offset_left = 16
-	build_row.offset_right = -16
-	F.label(build_row,"BUILD TREE / 构筑树","SmallLabel").size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	F.spacer(build_row)
-	wallet_label = F.label(build_row,"","AmberLabel")
-	wallet_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var secondary := HBoxContainer.new()
 	secondary.alignment = BoxContainer.ALIGNMENT_CENTER
 	secondary.add_theme_constant_override("separation", 10)
@@ -123,6 +111,8 @@ func _ready() -> void:
 	level_select.game = game
 	level_select.back = func(): show_levels(false)
 	panel.add_child(level_select)
+	build_button = level_select.build_button
+	wallet_label = level_select.wallet_label
 	level_select.hide()
 	build_view = preload("res://ui/build_tree.gd").new()
 	build_view.game = game
@@ -193,6 +183,7 @@ func show_settings(value: bool) -> void:
 	else: start_button.grab_focus()
 
 func show_levels(value: bool) -> void:
+	panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),20))
 	build_view.hide()
 	menu.visible = not value
 	_position_menu()
@@ -228,6 +219,11 @@ func _process(delta: float) -> void:
 			profile_label.text = "开发存档 / 保留当前状态，全部关卡开放"
 
 func show_build(value: bool) -> void:
+	if not value:
+		show_levels(true)
+		developer_button.get_parent().show()
+		level_select.build_button.grab_focus()
+		return
 	panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),12 if value else 20))
 	menu.visible = not value
 	_position_menu()

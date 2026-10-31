@@ -9,3 +9,5 @@ Guest and named players unlock mission 02 by clearing mission 01's Boss, mission
 The background real-game demo continues in its own memory-only instance and does not use any of these live player profiles. Settings remain shared local presentation/audio settings.
 
 Verification: player_profiles_smoke verifies Guest reset/continuation, sequential unlocks, API lock enforcement, development isolation, fresh named state, blank-name rejection, case-insensitive IDs and a named save roundtrip confined to `res://tmp`. Existing start_modes, campaign_modes, progression and settings checks passed; some checks still have exit-only ObjectDB cleanup warnings. Real-render captures checked the upper-right menu, locked selector, empty tree and named selector. No user save or historical telemetry was modified by tests.
+
+UI flow: mode/name entry -> mission selector -> Build Upgrade or mission. The selector prominently shows the active wallet and build entry; leaving the tree returns to the same selector/profile. The initial title page no longer shows upgrades or a wallet.

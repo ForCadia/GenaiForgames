@@ -4,6 +4,9 @@ const STYLE := preload("res://ui/menu_style.gd")
 const CAMPAIGNS := preload("res://campaign_data.gd")
 var game: Node
 var back: Callable
+var build_button: Button
+var wallet_label: Label
+var upgrade_hint: Label
 var first_button: Button
 var mission_buttons: Array[Button] = []
 var mode_label: Label
@@ -14,6 +17,31 @@ func _ready() -> void:
 	add_theme_constant_override("separation",12)
 	F.label(self,"SELECT MISSION","LargeLabel")
 	mode_label = F.label(self,"THREE FRONTS / ONE ENDLESS CHALLENGE","AmberLabel")
+	build_button = STYLE.primary(F.button(self,"",func(): game.start_screen.show_build(true)))
+	build_button.custom_minimum_size.y = 80
+	var margin := MarginContainer.new()
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	build_button.add_child(margin)
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for side in ["left","right"]: margin.add_theme_constant_override("margin_"+side,16)
+	for side in ["top","bottom"]: margin.add_theme_constant_override("margin_"+side,12)
+	var row := F.box(margin,true)
+	row.add_theme_constant_override("separation",16)
+	var text := F.box(row)
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	F.label(text,"构筑升级 / BUILD TREE","LargeLabel").modulate = STYLE.AMBER
+	upgrade_hint = F.label(text,"强化护盾与武器，再出击","MutedLabel")
+	var coin := TextureRect.new()
+	coin.texture = preload("res://assets/items/credit_coin.png")
+	coin.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	coin.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	coin.custom_minimum_size = Vector2(24,24)
+	coin.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(coin)
+	wallet_label = F.label(row,"","AmberLabel")
+	wallet_label.add_theme_font_size_override("font_size",18)
+	wallet_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+
 	for index in range(CAMPAIGNS.LEVELS.size()):
 		var data: Dictionary = CAMPAIGNS.LEVELS[index]
 		var button := mission_row("%02d" % (index+1),str(data.name),DESCRIPTIONS[index],func(): game.start_level(index))
@@ -48,6 +76,11 @@ func mission_row(number: String, title: String, description: String, action: Cal
 	return button
 
 func refresh() -> void:
+	wallet_label.text = "%d G" % game.progression.coins
+	var available := 0
+	for id in preload("res://build_data.gd").NODES:
+		if game.progression.can_buy(id): available += 1
+	upgrade_hint.text = "%d 项升级可购买 / 强化后再出击" % available if available > 0 else "花费金币，强化护盾与武器"
 	mode_label.text = "开发模式 / 全部关卡开放" if game.play_profile == "development" else ("游客 / 每次重新进入从零开始" if game.play_profile == "guest" else "存档：" + game.progression.profile_name.left(20))
 	for index in range(mission_buttons.size()):
 		var button := mission_buttons[index]
