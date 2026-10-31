@@ -164,11 +164,26 @@ func _run() -> void:
 	_check(game.boss_actor.position.distance_to(initial_position) > 10.0, "Boss must move in the upper right")
 	_check(game.boss_actor.position.x >= 720.0 and game.boss_actor.position.x <= 850.0 and game.boss_actor.position.y <= 350.0, "Upper flight must stay inside its visible region")
 	for wave in range(3): game._on_boss_barrage_requested(game.boss_actor.global_position, wave)
-	_check(game.boss_particles.size() == 54, "Three barrage waves must produce 18 rounds each")
+	_check(game.boss_particles.size() == 24, "Three barrage waves must produce 8 rounds each")
 	for shot in game.boss_particles:
-		_check(shot.direction.x < 0.0 and shot.speed == 300.0 and shot.scale.x < 1.0, "Barrage rounds must cross the screen with smaller hitboxes")
+		_check(shot.direction.x < 0.0 and shot.speed == 300.0 and shot.scale == Vector2.ONE, "Barrage rounds must use the normal attack size")
 	game._start_boss()
 	_check(game.boss_particles.is_empty() and game.boss_actor.barrage_wave == 0, "Reset must remove barrage projectiles and progress")
+	# Lethal hits clear both collections while _update_boss is iterating them.
+	# Multiple pending attacks must not cause access to the now-empty arrays.
+	for attack_kind in ["barrage", "bomb"]:
+		game._on_boss_barrage_requested(game._player_center(), 0)
+		if attack_kind == "bomb":
+			for index in range(2): game._on_boss_bomb_requested(GameData.PLAYER_X)
+			for planted in game.boss_bombs:
+				planted.position = Vector2(GameData.PLAYER_X, GameData.GROUND_Y)
+				planted.state = BossBomb.BombState.EXPLODING
+				planted.state_time = planted.explosion_duration
+		game._update_boss(0.0)
+		_check(game.state == "dead" and game.boss_particles.is_empty() and game.boss_bombs.is_empty(), "Lethal " + attack_kind + " must clear attacks safely")
+		game._request_retry("smoke")
+		game._process(0.36)
+		_check(game.state == "playing" and game.boss_mode and game.boss.hp == GameData.BOSS.health, "Lethal " + attack_kind + " must allow immediate Boss retry")
 	game.world_audio.stop_all()
 	game.weapon_audio.stop_all()
 	game.music.stop()

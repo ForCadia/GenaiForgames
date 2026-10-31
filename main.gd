@@ -593,6 +593,7 @@ func _start_boss(preserve_motion := false) -> void:
 	banner = "BOSS CHECKPOINT // BREAK ARMOR, THEN ATTACK"; banner_time = 2.2
 
 func _update_boss(delta: float) -> void:
+	if state != "playing": return
 	# Finish the descent before releasing the low three-shot attack. Bombs and
 	# barrage waves stay in the upper-right flight region.
 	boss_actor.attack_position_ready = absf(boss_actor.position.y - BOSS_ATTACK_Y) < 1.0 if boss_actor.wants_low_flight() else boss_actor.position.y <= BOSS_IDLE_Y + 1.0
@@ -608,6 +609,8 @@ func _update_boss(delta: float) -> void:
 		bomb.advance(delta, _scroll())
 		if bomb.try_damage(_player_hitbox()):
 			_receive(false, "BOSS BOMB")
+			# Death clears both attack arrays; do not continue this iteration.
+			if state != "playing": return
 		if bomb.is_finished():
 			bomb.queue_free()
 			boss_bombs.remove_at(i)
@@ -619,6 +622,7 @@ func _update_boss(delta: float) -> void:
 		projectile.advance(delta)
 		if projectile.try_damage(_player_hitbox()):
 			_receive(false, "BOSS HIGH PARTICLE")
+			if state != "playing": return
 		if projectile.is_finished():
 			projectile.queue_free()
 			boss_particles.remove_at(i)
@@ -646,14 +650,13 @@ func _on_boss_particle_requested(origin: Vector2) -> void:
 func _on_boss_barrage_requested(origin: Vector2, wave: int) -> void:
 	if state != "playing" or not boss_mode: return
 	world_audio.play_cue("boss_particle_fire", -1.0, boss_actor)
-	# A broad fan crosses the playfield; smaller rounds leave readable gaps.
-	for ray in range(18):
+	# Eight normal-sized rounds retain the broad fan with wider gaps.
+	for ray in range(8):
 		var projectile: BossParticle = BOSS_PARTICLE_SCENE.instantiate()
 		projectile.speed = 300.0
 		projectile.lifetime = 4.0
-		projectile.scale = Vector2.ONE * 0.45
 		boss_attack_root.add_child(projectile)
-		var angle := deg_to_rad(95.0 + ray * 10.0 + (wave - 1) * 3.0)
+		var angle := deg_to_rad(lerpf(95.0, 265.0, float(ray) / 7.0) + (wave - 1) * 3.0)
 		projectile.launch(origin, Vector2.from_angle(angle))
 		boss_particles.append(projectile)
 
