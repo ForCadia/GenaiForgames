@@ -10,7 +10,6 @@ const SOUNDS := {
 	"boss_bomb_explode": preload("res://assets/sfx/boss_bomb_explode.wav"),
 	"boss_particle_charge": preload("res://assets/sfx/heavy_turret_charge.wav"),
 	"boss_particle_fire": preload("res://assets/sfx/heavy_turret_fire.wav"),
-	"shield_open": preload("res://assets/sfx/shield_open.wav"),
 }
 const CUE_GAINS_DB := {
 	"boss_bomb_countdown": -2.0,
@@ -18,12 +17,12 @@ const CUE_GAINS_DB := {
 	"boss_particle_charge": -2.0,
 	"boss_particle_fire": -2.0,
 	"item_pickup": -4.0,
-	"shield_open": -6.0,
 }
 
 var game: Node
 var voices := Node.new()
 var drone_player := AudioStreamPlayer.new()
+var shield_player := AudioStreamPlayer.new()
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
@@ -35,6 +34,16 @@ func _ready() -> void:
 	drone_player.stream = drone_stream
 	drone_player.volume_db = -10.0
 	add_child(drone_player)
+	shield_player.stream = preload("res://assets/sfx/shield_open.wav")
+	shield_player.volume_db = -12.0
+	add_child(shield_player)
+
+func set_shield_active(active: bool) -> void:
+	# One sustained voice, tied to the actual shield rather than a button press.
+	if active and game.state == "playing":
+		if not shield_player.playing: shield_player.play()
+	else:
+		shield_player.stop()
 
 func set_drone_active(active: bool) -> void:
 	# Several gates share one ambience voice instead of stacking loud loops.
@@ -82,6 +91,7 @@ func stop_for(source: Node) -> void:
 
 func stop_all(keep_explosions := false) -> void:
 	drone_player.stop()
+	shield_player.stop()
 	for player in voices.get_children():
 		if keep_explosions and player.get_meta("explosion", false): continue
 		player.stop()

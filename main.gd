@@ -198,7 +198,6 @@ func _update_player(delta: float) -> void:
 	player_visual.set_collision_pose(crouching)
 
 	guard_lock = maxf(0, guard_lock - delta)
-	var was_guarding := guarding
 	guarding = Input.is_action_pressed("guard") and guard_energy > 0 and guard_lock <= 0
 	if guarding:
 		guard_idle = 0
@@ -211,7 +210,7 @@ func _update_player(delta: float) -> void:
 		if guard_lock <= 0 and guard_idle >= float(lab_panel.values.guard_delay):
 			guard_energy = minf(GD.GUARD.maximum, guard_energy + float(lab_panel.values.guard_regen) * delta)
 
-	if guarding and not was_guarding: world_audio.play_cue("shield_open")
+	world_audio.set_shield_active(guarding)
 	if Input.is_action_just_pressed("switch_weapon"): _switch_weapon()
 	if Input.is_action_just_pressed("weapon_slot_1"): _select_slot(0)
 	if Input.is_action_just_pressed("weapon_slot_2"): _select_slot(1)
