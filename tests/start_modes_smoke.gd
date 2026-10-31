@@ -71,6 +71,7 @@ func _run() -> void:
 	game._die("ORDINARY_DEATH")
 	request_retry(game)
 	game._process(game.player_visual.death_animation_duration())
+	game.death_camera_tween.custom_step(game.DEATH_CAMERA_DURATION + 0.01)
 	game._process(0.01)
 	check(game.state == "playing" and game.segment == 2 and game.score == 400, "ordinary checkpoint retry works")
 	check(game.lab.events.is_empty() and game.lab.run_number == 0 and not game.lab.active, "ordinary death/retry creates no test records")
@@ -138,6 +139,7 @@ func _run() -> void:
 	while Time.get_ticks_msec() - pressed_at < 30:
 		await create_timer(0.01).timeout
 	game._process(game.player_visual.death_animation_duration())
+	game.death_camera_tween.custom_step(game.DEATH_CAMERA_DURATION + 0.01)
 	game._process(0.01)
 	check(game.state == "playing" and game.segment == 2 and not game.boss_mode, "A ordinary checkpoint")
 	check(game.score == 400 and game.stats.unarmored == 4 and game.ammo == [17, 4] and game.weapon_index == 1 and game.distance == 5000.0, "A restores checkpoint score/ammo/weapon/distance")
@@ -156,6 +158,7 @@ func _run() -> void:
 	game._die("CHECK_A_BOSS")
 	request_retry(game)
 	game._process(game.player_visual.death_animation_duration())
+	game.death_camera_tween.custom_step(game.DEATH_CAMERA_DURATION + 0.01)
 	game._process(0.01)
 	check(game.boss_mode and game.boss.hp == GameData.BOSS.health and game.boss.armor == GameData.BOSS.armor_per_cycle, "A complete boss reset")
 	check(game.score == 900 and game.ammo == [12, 3], "A boss entry resources")
@@ -172,6 +175,7 @@ func _run() -> void:
 		game._die("CHECK_B")
 		request_retry(game)
 		game._process(game.player_visual.death_animation_duration())
+		game.death_camera_tween.custom_step(game.DEATH_CAMERA_DURATION + 0.01)
 		game._process(0.01)
 		check(game.segment == 0 and not game.boss_mode and game.score == 0, "B campaign reset including boss death")
 		check(game.ammo == [24, 5] and game.weapon_index == 0 and game.distance == 0, "B initial resources")
@@ -222,6 +226,7 @@ func _run() -> void:
 	game._die("ORDINARY_AFTER_DEVELOPMENT")
 	request_retry(game)
 	game._process(game.player_visual.death_animation_duration())
+	game.death_camera_tween.custom_step(game.DEATH_CAMERA_DURATION + 0.01)
 	game._process(0.01)
 	game.return_to_start()
 	check(game.lab.events.size() == preserved_events and game.lab.run_number == preserved_runs and game.lab.session_id == preserved_session, "ordinary play preserves developer archive without mixing data")
@@ -232,6 +237,7 @@ func _run() -> void:
 	game._die("BOSS_TEST_RETRY")
 	request_retry(game)
 	game._process(game.player_visual.death_animation_duration())
+	game.death_camera_tween.custom_step(game.DEATH_CAMERA_DURATION + 0.01)
 	game._process(0.01)
 	check(game.boss_mode and game.boss.hp == GameData.BOSS.health, "Boss test death retries the full Boss encounter")
 	game.boss_actor.form = EyeballBoss.BossForm.WEAK_POINT

@@ -7,7 +7,8 @@ var game: Node
 var root: Control
 var score_label: Label
 var kills_label: Label
-var stage_label: Label
+var stage_label: BoxContainer
+var stage_styles: Array[StyleBoxFlat] = []
 var shield: ProgressBar
 var shield_label: Label
 var grenade_label: Label
@@ -36,6 +37,9 @@ var intro_panel: PanelContainer
 var hints_layer: CanvasLayer
 var selected_slot_style := StyleBoxFlat.new()
 var inactive_slot_style := StyleBoxEmpty.new()
+var ammo_target := 100.0
+var displayed_reloading := false
+var reload_phase := 0.0
 
 func _ready() -> void:
 	layer = P.HUD_LAYER
@@ -60,7 +64,16 @@ func _ready() -> void:
 	left.custom_minimum_size.x = P.SHIELD_WIDTH
 	score_label = F.label(left, "000000", "LargeLabel")
 	kills_label = F.label(left, "KILLS 00", "AmberLabel")
-	stage_label = F.label(left, "■ □ □ □", "MutedLabel")
+	stage_label = F.box(left, true)
+	stage_label.add_theme_constant_override("separation", 6)
+	for index in range(5):
+		var block := Panel.new()
+		block.custom_minimum_size = Vector2(12, 12)
+		var style := StyleBoxFlat.new()
+		style.set_border_width_all(1)
+		block.add_theme_stylebox_override("panel", style)
+		stage_label.add_child(block)
+		stage_styles.append(style)
 	F.spacer(top)
 	boss_hud = preload("res://ui/boss_hud.gd").new()
 	top.add_child(boss_hud)
@@ -102,6 +115,9 @@ func _ready() -> void:
 	var hints_center := CenterContainer.new()
 	hints_root.add_child(hints_center)
 	hints_center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	hints_center.anchor_top = 0.9
+	hints_center.anchor_bottom = 1.0
+	hints_center.offset_bottom = -6
 	var hints := VBoxContainer.new()
 	hints_center.add_child(hints)
 	hints.custom_minimum_size.x = 560
@@ -189,6 +205,10 @@ func _process(delta: float) -> void:
 	if not is_instance_valid(game) or not "state" in game: return
 	sync()
 	if game.state != "playing" or game.ui_paused or game.lab_panel.blocked: return
+	if displayed_reloading:
+		ammo_bar.value = lerpf(ammo_bar.value, ammo_target, 1.0 - exp(-delta * 14.0))
+		reload_phase += delta * TAU / 1.2
+		ammo_bar.modulate.a = 0.55 + 0.45 * (0.5 + 0.5 * cos(reload_phase))
 	tutorial_left = maxf(0, tutorial_left - delta)
 	if game.segment not in seen_stages and not game.boss_mode:
 		seen_stages.append(game.segment)
@@ -219,8 +239,11 @@ func sync() -> void:
 		score_tween.tween_property(score_label, "scale", Vector2.ONE, 0.12)
 	score_label.text = "%06d" % roundi(shown_score)
 	kills_label.text = "KILLS %02d" % (game.stats.unarmored + game.stats.light + game.stats.heavy + game.stats.flyer)
-	stage_label.text = "BOSS  " + "■".repeat(game.boss.get("phase", 1)) if game.boss_mode else " ".join(range(4).map(func(i): return "■" if i <= game.segment else "□"))
-	stage_label.modulate = P.CYAN
+	var reached: int = 4 if game.boss_mode or game.state == "victory" else game.segment
+	for index in range(5):
+		var color := P.RED if index == 4 else P.CYAN
+		stage_styles[index].border_color = color if index <= reached or index == 4 else P.TEXT_DIM
+		stage_styles[index].bg_color = color if index <= reached else Color(0, 0, 0, 0)
 	shield.value = game.guard_energy
 	shield.modulate = P.RED if game.guard_lock > 0 else (P.AMBER if game.guard_energy < 25 else Color.WHITE)
 	shield_label.visible = game.guard_lock > 0
@@ -263,7 +286,15 @@ func refresh(_health: int, _max_health: int, _weapon_name: String, penetration: 
 	ammo_label.text = "%02d / %02d" % [current_ammo, capacity]
 	ammo_label.modulate = P.RED if current_ammo <= 0 else (P.AMBER if current_ammo <= capacity * 0.25 else P.TEXT)
 	penetration_label.text = "PEN " + "◆".repeat(penetration)
-	ammo_bar.value = (1.0 - reload_remaining / maxf(reload_duration, 0.001)) * 100 if reload_remaining > 0 else float(current_ammo) / maxi(capacity, 1) * 100
+	var reloading := reload_remaining > 0
+	ammo_target = (1.0 - reload_remaining / maxf(reload_duration, 0.001)) * 100 if reloading else float(current_ammo) / maxi(capacity, 1) * 100
+	if reloading and not displayed_reloading:
+		ammo_bar.value = 0
+		reload_phase = 0
+	if not reloading:
+		ammo_bar.value = ammo_target
+		ammo_bar.modulate.a = 1.0
+	displayed_reloading = reloading
 	reload_label.text = "RELOADING" if reload_remaining > 0 else "MAGAZINE"
 
 func follow_hitbox(_hitbox: Rect2) -> void:

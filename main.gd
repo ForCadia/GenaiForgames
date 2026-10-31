@@ -79,6 +79,9 @@ var boss_mode := false
 var state := "start"
 var death_delay := 0.0
 var death_ui_ready := false
+const DEATH_CAMERA_DURATION := 0.65
+var death_camera_started := false
+var death_camera_tween: Tween
 var banner := ""
 var banner_time := 0.0
 var notice := ""
@@ -147,8 +150,8 @@ func _process(delta: float) -> void:
 		var over_button := get_viewport().gui_get_hovered_control() is BaseButton
 		if Input.is_action_just_pressed("restart") or Input.is_action_just_pressed("jump") or (Input.is_action_just_pressed("fire") and not over_button):
 			_request_retry("polled_input")
-		if death_delay <= 0 and not death_ui_ready:
-			death_ui_ready = true
+		if death_delay <= 0 and not death_camera_started:
+			_start_death_camera()
 		elif death_ui_ready and retry_requested:
 			_retry()
 		queue_redraw()
@@ -856,6 +859,7 @@ func start_game(mode := "checkpoint", parameter_index := 0, development := false
 	get_tree().paused = false
 
 func return_to_start() -> void:
+	_reset_death_camera()
 	grenade_count = 0
 	ui_paused = false
 	weapon_audio.stop_all()
@@ -880,6 +884,7 @@ func return_to_start() -> void:
 	queue_redraw()
 
 func _reset_player(preserve_motion := false) -> void:
+	_reset_death_camera()
 	weapon_audio.stop_all()
 	death_delay = 0.0
 	death_ui_ready = false
@@ -1053,3 +1058,21 @@ func set_ui_paused(value: bool) -> void:
 	else:
 		lab.record("ui_resume")
 		_gate_gameplay_input()
+
+func _start_death_camera() -> void:
+	death_camera_started = true
+	var sprite := player_visual.body
+	var image := sprite.sprite_frames.get_frame_texture(&"death", sprite.sprite_frames.get_frame_count(&"death") - 1).get_image()
+	var local_center := Vector2(image.get_used_rect().get_center()) - Vector2(image.get_size()) * 0.5 + sprite.offset
+	var focus := sprite.to_global(local_center)
+	var zoom := 1.35
+	var target := Transform2D(Vector2(zoom, 0), Vector2(0, zoom), GD.VIEW_SIZE * 0.5 - focus * zoom)
+	death_camera_tween = create_tween()
+	death_camera_tween.tween_property(get_viewport(), "canvas_transform", target, DEATH_CAMERA_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	death_camera_tween.tween_callback(func(): death_ui_ready = true)
+
+func _reset_death_camera() -> void:
+	if death_camera_tween: death_camera_tween.kill()
+	death_camera_started = false
+	death_ui_ready = false
+	get_viewport().canvas_transform = Transform2D.IDENTITY

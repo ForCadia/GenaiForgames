@@ -37,6 +37,8 @@ func run() -> void:
 	game.overlays._process(0)
 	assert(not game.overlays.visible)
 	game._process(game.player_visual.death_animation_duration())
+	assert(game.death_camera_started and not game.death_ui_ready)
+	game.death_camera_tween.custom_step(game.DEATH_CAMERA_DURATION + 0.01)
 	game.overlays._process(0)
 	assert(game.state == "dead" and game.death_ui_ready and game.overlays.visible)
 	game._process(0.01)
