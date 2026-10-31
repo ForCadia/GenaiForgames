@@ -15,7 +15,7 @@ const ARM_CELL := Vector2i(192, 204)
 const BODY_BASELINES := [216, 230, 235, 214, 231]
 # Ground-contact frames place a boot on the floor. In-between airborne poses
 # retain a visible rise; only the artwork moves, never the collision root.
-const RUN_SCALE := 0.8
+const RUN_SCALE := 0.72
 const RUN_BASELINES := [290.0, 293.0, 293.0, 283.0]
 const RUN_SOCKETS := [
  Vector2(174.7,70.2), Vector2(169.8,71.0), Vector2(175.4,71.2), Vector2(175.9,70.8),
@@ -73,6 +73,7 @@ const HEAD_AIM_LIMIT := 0.28
 @onready var muzzle: Marker2D = $Muzzle
 
 var body_state := "idle"
+var run_palette := ShaderMaterial.new()
 var body_time := 0.0
 var arm_action := ""
 var arm_time := 0.0
@@ -81,6 +82,7 @@ var primary_slot := 0
 var guard_visible := false
 
 func _ready() -> void:
+	run_palette.shader = preload("res://assets/player/run_palette.gdshader")
 	set_collision_pose(false)
 	_apply_frames()
 	_update_muzzle()
@@ -238,6 +240,7 @@ func _apply_frames() -> void:
 		body.animation = animation_name
 	body.frame = sequence_frame if row == 1 else column
 	body.scale = Vector2.ONE * RUN_SCALE if row == 1 else Vector2.ONE
+	body.material = run_palette if row == 1 else null
 	if row == 1:
 		var frame_size: Vector2 = body.sprite_frames.get_frame_texture(&"run", sequence_frame).get_size()
 		var baseline: float = RUN_BASELINES[sequence_frame / 4]

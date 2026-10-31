@@ -15,6 +15,7 @@ var entrance: Tween
 func _ready() -> void:
 	layer = 40
 	root = F.root(self)
+	root.theme = preload("res://ui/ui_theme.tres")
 	var shade := ColorRect.new()
 	shade.color = Color(0.02, 0.03, 0.05, 0.78)
 	root.add_child(shade)
