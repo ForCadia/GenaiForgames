@@ -77,7 +77,9 @@ func _run() -> void:
 	escape.keycode = KEY_ESCAPE
 	escape.pressed = true
 	game._unhandled_input(escape)
-	check(game.state == "start" and paused and game.start_screen.visible, "Escape returns ordinary play to menu")
+	check(game.state == "playing" and paused and game.ui_paused, "Escape pauses ordinary play")
+	game.return_to_start()
+	check(game.state == "start" and paused and game.start_screen.visible, "pause menu returns to title")
 	for preset in [1, 2]:
 		var changed: Array[String] = []
 		var values: Dictionary = ui.preset_values(preset)

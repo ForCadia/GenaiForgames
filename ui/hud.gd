@@ -79,6 +79,7 @@ func _ready() -> void:
 		for side in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(side, 2)
 		sound_button.add_theme_stylebox_override(state, style)
 	sound_button.focus_mode = Control.FOCUS_NONE
+	sound_button.button_down.connect(func(): game._gate_gameplay_input())
 	var messages := F.box(layout)
 	var banner_center := CenterContainer.new()
 	messages.add_child(banner_center)

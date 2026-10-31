@@ -137,7 +137,8 @@ func _process(delta: float) -> void:
 	if state != "victory": _update_fx(delta)
 	if state == "dead":
 		death_delay -= delta
-		if Input.is_action_just_pressed("restart") or Input.is_action_just_pressed("jump") or Input.is_action_just_pressed("fire"):
+		var over_button := get_viewport().gui_get_hovered_control() is BaseButton
+		if Input.is_action_just_pressed("restart") or Input.is_action_just_pressed("jump") or (Input.is_action_just_pressed("fire") and not over_button):
 			_request_retry("polled_input")
 		if death_delay <= 0 and retry_requested:
 			_retry()

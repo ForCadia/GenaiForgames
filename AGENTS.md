@@ -34,7 +34,7 @@ This checkout currently has Web custom templates at ignored `tmp/web-templates/w
 - `Player*`, `player_visual.gd`, `player_hud.gd`: player artwork, shapes and HUD.
 - Enemy scenes and scripts: turrets, laser gates, spikes, Boss and attacks.
 - `lab_panel.gd`: live tuning UI; `lab_telemetry.gd`: local event records and JSON download.
-- `start_screen.gd`: static start screen; no run or simulation before Start. `assets/fonts/`: Noto Sans SC and OFL license for consistent Chinese labels in Web.
+- `start_screen.gd` / `ui/`: themed menu, HUD, controls and overlays; only decorative background scrolling before Start. `assets/fonts/`: Fusion Pixel (OFL) for the UI; Noto Sans SC remains available.
 - `tests/`: existing checks plus Lab B regression verification; automated exports belong in ignored `tmp/`, never `telemetry/`.
 - `telemetry/`: actual tester JSON files, manually copied from downloads/local archives.
 - Markdown documents remain at project root. Keep existing source layout rather than moving everything into the assignment's illustrative `src/` tree.
@@ -54,7 +54,7 @@ Current Lab C Boss revision (2026-10-30): red health is 12 (formerly 4); bombs, 
 
 Latest Lab C controls: hold A/D for backward/forward adjustment within ±90 px of default x=190; release returns smoothly to the default position, including in midair. Boss barrage has 8 normal-sized rounds per wave at 450 px/s. These settings are in game_data.gd; normal scroll speed and old telemetry remain unchanged.
 
-User-authorized menu revision (2026-10-30, lab-b-0.5): the start screen has **开始游戏** and **开发模式**, without A/B or parameter selectors. Both start at A + Original. Ordinary play hides and disables lab UI, F1/F2/F3/T and telemetry recording/export. Development mode enables the existing panel, presets, variant switches and session tools. Esc returns either mode to the menu. Ordinary play must not erase or add to retained developer sessions. Gameplay numbers remain the lab-b-0.4 baseline. Experimental controls described below apply only to development mode.
+User-authorized menu revision (2026-10-30, lab-b-0.5): the start screen has **开始游戏** and **开发模式**, without A/B or parameter selectors. Both start at A + Original. Ordinary play hides and disables lab UI, F1/F2/F3/T and telemetry recording/export. Development mode enables the existing panel, presets, variant switches and session tools. The 2026-10-31 UI revision changes Esc during play to Pause; Return to Title leaves the run. Death/victory Esc still returns to the menu. Ordinary play must not erase or add to retained developer sessions. Gameplay numbers remain the lab-b-0.4 baseline. Experimental controls described below apply only to development mode.
 
 The student selected restart location as the A/B variable: A checkpoint (full Boss encounter on Boss death), B campaign entry on every death. F2/F3 and the existing panel select modes; preserve 1/2/3 weapons. All switches reset cleanly to campaign entry. Default is A + Original. The latest parameter choices are only Original / Slow / Fast Reload (plus Custom displayed after a manual panel edit). The earlier four presets are superseded.
 

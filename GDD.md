@@ -128,7 +128,7 @@ Source pages 10–13 and appendix: GPT-6 Astra draft/assembly and Doubao 2.1 rev
 
 ## Existing implementation
 
-The 2026-10-30 menu revision (lab-b-0.5) provides **开始游戏** for ordinary A + Original play and **开发模式** for the same game with tuning, A/B switches and local telemetry enabled. The start menu no longer selects presets. Experimental combinations remain in the developer panel. Esc returns to the menu; ordinary play never records experimental runs or displays lab statistics. Gameplay parameters are unchanged from lab-b-0.4.
+The 2026-10-30 menu revision (lab-b-0.5) provides **开始游戏** for ordinary A + Original play and **开发模式** for the same game with tuning, A/B switches and local telemetry enabled. The start menu no longer selects presets. Experimental combinations remain in the developer panel. As of the 2026-10-31 UI revision, Esc during play opens Pause (Resume / Controls / Return to Title); ordinary play never records experimental runs or displays lab statistics. Gameplay parameters are unchanged from lab-b-0.4.
 
 2D side-view automatic scrolling action shooter. The player's default horizontal position is fixed; holding A/D now allows a small backward/forward adjustment, and releasing returns smoothly to that default position. The player jumps and slides, aims with the mouse/right stick, fires two weapons, guards, reloads and changes weapons. Ground spikes, laser gates and turrets create threats. Four authored segments lead to a Boss encounter; two additional defined segments currently remain inactive. One unblocked hit causes death. R / Space / Fire retries the segment checkpoint, or the whole Boss encounter. Victory displays final score and allows redeployment.
 

@@ -1,0 +1,52 @@
+extends SceneTree
+
+func _initialize() -> void:
+	call_deferred("run")
+
+func run() -> void:
+	assert("--lab-test" in OS.get_cmdline_user_args())
+	var game = load("res://main.tscn").instantiate()
+	root.add_child(game)
+	game.set_process(false)
+	await process_frame
+	assert(not game.player_hud.visible)
+	game.start_game()
+	game.lab_panel._process(0.01)
+	game.lab_panel._process(0.01)
+	game.player_hud.sync()
+	assert(game.player_hud.visible)
+	assert(game.player_hud.ammo_label.text == "24 / 24")
+	Input.action_press("fire")
+	game.player_hud.sound_button.button_down.emit()
+	game._process(0.02)
+	assert(game.shots.is_empty() and game.ammo[0] == 24)
+	Input.action_release("fire")
+	game.lab_panel._process(0.01)
+	game.lab_panel._process(0.01)
+	game.set_ui_paused(true)
+	var elapsed: float = game.run_elapsed
+	game._process(10)
+	assert(game.run_elapsed == elapsed and paused)
+	game.set_ui_paused(false)
+	game.lab_panel._process(0.01)
+	game.lab_panel._process(0.01)
+	game._die("HOSTILE FIRE")
+	game._request_retry("ui_button")
+	game._process(0.1)
+	assert(game.state == "dead" and game.retry_requested)
+	game._process(0.3)
+	assert(game.state == "playing" and game.run_deaths == 1)
+	assert(game.lab.events.is_empty())
+	game.return_to_start()
+	game.start_game("checkpoint", 0, false, true)
+	game.player_hud.sync()
+	assert(game.player_hud.boss_hud.visible)
+	assert(game.player_hud.boss_hud.health.max_value == 12)
+	game.music.stop()
+	game.world_audio.stop_all()
+	game.weapon_audio.stop_all()
+	await create_timer(0.2).timeout
+	game.queue_free()
+	await process_frame
+	print("UI SMOKE PASS")
+	quit()

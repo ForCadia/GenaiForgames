@@ -33,3 +33,23 @@ Font: Fusion Pixel, official repository https://github.com/TakWolf/fusion-pixel-
 Generated chamfer panels, key caps, icons and stripe textures are original procedural UI assets. UI gallery uses clearly labeled fixture data; screenshots are interface previews, not human playtest evidence.
 
 Stage verification and any deviations are recorded below as work completes.
+
+## Delivered UI revision — 2026-10-31
+
+- Foundation: shared `ui/ui_theme.tres`, palette, strings, generated chamfer/icon/stripe textures, key-cap component, nearest filtering and pixel-font import. Pinned font: official Fusion Pixel **2026.09.01**, `fusion-pixel-12px-monospaced-zh_hans.otf`. `tools/fetch_ui_font.py` reproduces the download and includes constituent OFL notices.
+- HUD: existing `PlayerHUD.tscn` remains the scene adapter, now on CanvasLayer 10 with `ui/hud.gd`. Compact anchored score/guard panels and horizontal weapon panel replace immediate-mode text and the floating HP block. Magazine numbers mean current/capacity, not reserve. M and the icon button share Master mute. Reticle changes color for unavailable fire and turret/Boss aim.
+- Prompts: one notification label replaces overlapping fixed-position floaters; checkpoint panel fades; contextual key-cap hints appear once per run for four seconds; opening controls last six seconds. Death clears prompts.
+- Boss: one `apply_state` updates name/phase, armor or exposed-weak-point text, health and delayed damage trail. Armor flashes on loss. The independent canvas prevents projectiles covering HUD.
+- Menus: pixel-styled title with decorative parallax, controls page, secondary developer/Boss entries, pause/resume/title and visual fade-in. The menu hides the gameplay HUD and player. Tuning uses the same theme.
+- Results: readable death cause and actual checkpoint/campaign/Boss destination, buffered retry buttons, cumulative run time/deaths, campaign S/A/B/C rating and local best score. Developer/Boss test runs are unranked. Preview fixtures cannot save best scores. Victory stops simulation FX updates.
+- Preview: run `ui/debug/ui_gallery.tscn` with F6; select pages or press PageUp/PageDown. Thirteen fixture views include menu, controls, HUD, reload, three Boss states, pause, death, victory, tuning, banner and tutorials. Preview data is explicitly labeled and never becomes tester telemetry.
+
+## Adaptations to the proposal
+
+The original gameplay/retry contract takes priority: early retry input is buffered during the existing 0.35-second lock, never discarded. Fades are cosmetic and do not defer run/retry timestamps. Developer and Boss test entries remain available in release builds, as previously requested. The weapon panel is horizontal to avoid covering the player; the existing HUD scene remains the integration point. Death/results use compact matching cards. Animations use restrained fades, score roll/pop, rank stamp and health trails rather than camera shake, full-screen sliding transitions or sequential result counters. UIAudio exposes empty tick/confirm hooks because no dedicated menu sounds were supplied.
+
+## Verification
+
+Godot 4.7.2 editor import and eight smoke suites passed: gameplay, Lab B, start modes, airtime, horizontal movement, player HUD, Boss and UI. New checks cover paused time, buffered UI retry, ordinary telemetry isolation and the Boss health display. Existing HUD checks now verify viewport anchoring and magazine/reload values instead of the removed HP block. A subset of headless shutdowns still intermittently reports ObjectDB/resource cleanup warnings; no script/assertion failures remain in the final runs.
+
+All 13 preview pages were rendered with the native Compatibility renderer and visually reviewed at 960×720. Web release export was rebuilt; browser gameplay and physical controller navigation are left for manual testing. No deployment/upload or historical telemetry edits were performed.

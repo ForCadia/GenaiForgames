@@ -57,7 +57,7 @@ Menu revision **2026-10-30 / lab-b-0.5**: **开始游戏** starts ordinary play 
 
 In developer mode, F1 opens the existing panel; F2 selects A, F3 selects B. Both entry modes retain 1/2/3 weapon slots and R / Space / Fire retries. Developer retries retain the current named mode or custom values. A mode switch restarts from campaign entry with administrative_variant_switch. A parameter selection/edit causes exactly one administrative_parameter_change reset; selecting the same A/B mode is a no-op.
 
-Esc returns either mode to the start screen; the developer panel also retains its Return button. An active developer run ends with administrative_return_to_start and retains session/data. Either start button restores A + Original. Ordinary runs do not add events to an existing developer session; re-entering developer mode resumes that session. New tester archives/exports the old session and returns to the menu with zero runs in a new session; downloads must be saved and checked before handing over. Automated artifacts stay in ignored tmp/, never telemetry/.
+The 2026-10-31 UI revision makes Esc during play open Pause; Return to Title leaves the run. Pausing excludes gameplay duration. The developer panel retains its Return button. An active developer run ends with administrative_return_to_start and retains session/data. Either start button restores A + Original. Ordinary runs do not add events to an existing developer session; re-entering developer mode resumes that session. New tester archives/exports the old session and returns to the menu with zero runs in a new session; downloads must be saved and checked before handing over. Automated artifacts stay in ignored tmp/, never telemetry/.
 
 ## Restoration and measurement definitions
 
