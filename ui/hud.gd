@@ -88,20 +88,14 @@ func _ready() -> void:
 	banner_center.add_child(banner_panel)
 	banner_label = F.label(banner_panel, "", "AmberLabel")
 	var tutorial_center := CenterContainer.new()
-	root.add_child(tutorial_center)
-	tutorial_center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	tutorial_center.anchor_top = 0.7
-	tutorial_center.anchor_bottom = 0.8
+	messages.add_child(tutorial_center)
 	tutorial_panel = PanelContainer.new()
 	tutorial_center.add_child(tutorial_panel)
 	var tutorial_row := F.box(tutorial_panel, true)
 	tutorial_keys = F.box(tutorial_row, true)
 	tutorial_label = F.label(tutorial_row, "", "AmberLabel")
 	var intro_center := CenterContainer.new()
-	root.add_child(intro_center)
-	intro_center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	intro_center.anchor_top = 0.82
-	intro_center.anchor_bottom = 0.9
+	messages.add_child(intro_center)
 	intro_panel = PanelContainer.new()
 	intro_center.add_child(intro_panel)
 	var intro := F.box(intro_panel, true)
@@ -114,34 +108,35 @@ func _ready() -> void:
 	for label in [banner_label, tutorial_label, toast_label]: label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	F.spacer(layout)
 	var bottom := F.box(layout, true)
+	F.spacer(bottom)
 	var panel := PanelContainer.new()
-	var compact := root.theme.get_stylebox("panel", "PanelContainer").duplicate()
-	for side in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]: compact.set_content_margin(side, 8)
-	panel.add_theme_stylebox_override("panel", compact)
+	panel.name = "WeaponHUD"
+	panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	bottom.add_child(panel)
 	var weapon_layout := F.box(panel, true)
 	var row := F.box(weapon_layout, true)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	for i in range(3):
 		var slot := PanelContainer.new()
-		slot.custom_minimum_size = P.SLOT_SIZE
+		slot.custom_minimum_size = Vector2(36, 24)
+		slot.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 		slot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(slot)
 		var contents := F.box(slot, true)
 		F.label(contents, str(i + 1), "MutedLabel")
-		F.icon(contents, ["rifle", "piercer", "grenade"][i])
+		F.icon(contents, ["rifle", "piercer", "grenade"][i]).custom_minimum_size = Vector2(20, 20)
 		slots.append(slot)
 	var weapons := F.box(weapon_layout)
-	weapons.add_theme_constant_override("separation", 4)
+	weapons.add_theme_constant_override("separation", 2)
 	weapon_label = F.label(weapons, "ASSAULT RIFLE", "AmberLabel")
 	var details := F.box(weapons, true)
 	ammo_label = F.label(details, "24 / 24", "Label")
 	F.spacer(details)
 	penetration_label = F.label(details, "PEN ◆", "MutedLabel")
 	ammo_bar = F.bar(weapons, 192, "ReloadBar")
+	ammo_bar.custom_minimum_size.y = 6
 	reload_label = F.label(weapons, "MAGAZINE", "MutedLabel")
 	reload_label.hide()
-	F.spacer(bottom)
 	_ignore_mouse(root)
 	sound_button.mouse_filter = Control.MOUSE_FILTER_STOP
 
@@ -196,7 +191,7 @@ func sync() -> void:
 	boss_hud.visible = game.boss_mode
 	if game.boss_mode and not game.boss.is_empty(): boss_hud.apply_state(game.boss.hp, game.GD.BOSS.health, game.boss.armor, game.boss.phase)
 	for i in range(3):
-		slots[i].add_theme_stylebox_override("panel", root.theme.get_stylebox("hover" if game.selected_slot == i else "normal", "Button"))
+		slots[i].modulate = P.AMBER if game.selected_slot == i else P.TEXT_DIM
 		slots[i].modulate.a = 0.35 if i == 2 and not game.has_grenade else 1.0
 	if game.selected_slot == 2:
 		weapon_label.text = S.WEAPONS[2]
