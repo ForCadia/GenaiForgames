@@ -4,6 +4,7 @@ extends Node2D
 signal projectile_requested(origin: Vector2, direction: Vector2, speed: float, color: Color)
 signal killed(turret: TurretBase, score_type: String)
 signal feedback(origin: Vector2, color: Color, message: String)
+signal sound_requested(cue: String, duration: float)
 
 enum TurretKind { LIGHT, HEAVY }
 enum TurretState { ACTIVE, DAMAGED, BREAKING, EXPOSED, CHARGING, FIRING, DEAD }
@@ -36,6 +37,7 @@ var phase_left := 0.0
 var laser_hit_consumed := false
 var attack_started := false
 var contact_cooldown := 0.0
+var current_scroll_speed := 0.0
 
 func _ready() -> void:
 	sprite.animation_finished.connect(_on_animation_finished)
@@ -48,6 +50,7 @@ func _ready() -> void:
 		sprite.play(&"idle")
 
 func advance(delta: float, scroll_speed: float, player_position: Vector2) -> void:
+	current_scroll_speed = scroll_speed
 	position.x -= scroll_speed * delta
 	target_position = player_position
 	contact_cooldown = maxf(0.0, contact_cooldown - delta)
@@ -60,6 +63,7 @@ func advance(delta: float, scroll_speed: float, player_position: Vector2) -> voi
 		_update_laser_length()
 		if phase_left <= 0.0 and global_position.x <= laser_fire_x:
 			state = TurretState.FIRING
+			sound_requested.emit("heavy_turret_fire", -1.0)
 			phase_left = laser_duration
 			laser_hit_consumed = false
 			sprite.play(&"laser_fire")
@@ -96,6 +100,7 @@ func take_damage(penetration: int, impact: Vector2) -> void:
 			feedback.emit(impact, Color.WHITE, "RICOCHET // USE PIERCER")
 			return
 		state = TurretState.BREAKING
+		sound_requested.emit("stop", -1.0)
 		attack_timer.stop()
 		_set_laser_visible(false, false)
 		hurt_collision.disabled = true
@@ -131,11 +136,14 @@ func _on_attack_timeout() -> void:
 		return
 	if turret_kind == TurretKind.LIGHT:
 		projectile_requested.emit(muzzle.global_position, Vector2.LEFT, projectile_speed, Color("ffcf70"))
+		sound_requested.emit("light_turret_fire", -1.0)
 		sprite.play(&"damaged_shoot" if state == TurretState.DAMAGED else &"shoot")
 		attack_timer.start(attack_interval)
 	else:
 		state = TurretState.CHARGING
 		phase_left = charge_time
+		var warning_duration := maxf(charge_time, maxf(0.0, global_position.x - laser_fire_x) / maxf(current_scroll_speed, 1.0))
+		sound_requested.emit("heavy_turret_charge", warning_duration)
 		sprite.play(&"laser_charge")
 		_update_laser_length()
 		_set_laser_visible(true, false)
@@ -154,6 +162,7 @@ func _on_animation_finished() -> void:
 		sprite.play(&"damaged_idle" if state == TurretState.DAMAGED else &"idle")
 
 func _explode() -> void:
+	sound_requested.emit("stop", -1.0)
 	state = TurretState.DEAD
 	attack_timer.stop()
 	solid_collision.disabled = true

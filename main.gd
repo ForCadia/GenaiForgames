@@ -37,6 +37,7 @@ var developer_mode := false
 var start_screen: CanvasLayer
 var music: AudioStreamPlayer
 var weapon_audio: Node
+var world_audio: Node
 var checkpoint_weapon_index := 0
 var checkpoint_distance := 0.0
 
@@ -97,6 +98,10 @@ func _ready() -> void:
 	weapon_audio = preload("res://weapon_audio.gd").new()
 	weapon_audio.name = "WeaponAudio"
 	add_child(weapon_audio)
+	world_audio = preload("res://world_audio.gd").new()
+	world_audio.name = "WorldAudio"
+	world_audio.game = self
+	add_child(world_audio)
 	lab_panel = preload("res://lab_panel.gd").new()
 	lab_panel.game = self
 	lab_panel.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -324,12 +329,14 @@ func _spawn_turret(scene: PackedScene) -> void:
 	turret.projectile_requested.connect(_on_turret_projectile)
 	turret.killed.connect(_on_turret_killed)
 	turret.feedback.connect(_on_turret_feedback)
+	turret.sound_requested.connect(func(cue: String, duration: float): world_audio.play_cue(cue, duration, turret))
 	turrets.append(turret)
 
 func _on_turret_projectile(origin: Vector2, direction: Vector2, speed: float, color: Color) -> void:
 	threats.append({"pos": origin, "velocity": direction * speed, "unblockable": false, "radius": 7.0, "color": color})
 
 func _on_turret_killed(turret: TurretBase, score_type: String) -> void:
+	world_audio.play_cue("enemy_explode")
 	_award_enemy_kill(score_type, turret.global_position)
 
 func _on_turret_feedback(origin: Vector2, color: Color, message: String) -> void:
@@ -341,6 +348,7 @@ func _spawn_laser_gate() -> void:
 	laser_gate_root.add_child(gate)
 	gate.position = Vector2(990, 450)
 	gate.destroyed.connect(_on_laser_gate_destroyed)
+	gate.exploded.connect(func(): world_audio.play_cue("enemy_explode"))
 	laser_gates.append(gate)
 
 func _spawn_ground_spikes() -> void:
@@ -458,10 +466,13 @@ func _update_world(delta: float) -> void:
 	for pickup in pickups:
 		pickup.pos.x -= scroll * delta
 		if pickup.pos.distance_to(_player_center()) < 44:
+			world_audio.play_cue("item_pickup")
 			has_grenade = true; pickup.collected = true; _emit(pickup.pos, CYAN, 20, 180); _notify("GRENADE ACQUIRED // PRESS E / RB", CYAN, 1.2)
 	enemies = enemies.filter(func(e): return not e.dead and e.pos.x > -110)
 	obstacles = obstacles.filter(func(o): return o.x > -100)
 	pickups = pickups.filter(func(p): return not p.collected and p.pos.x > -80)
+	world_audio.set_drone_active(laser_gates.any(func(gate):
+		return is_instance_valid(gate) and not gate.is_queued_for_deletion() and gate.state == "Hover" and gate.position.x >= 0 and gate.position.x <= GD.VIEW_SIZE.x))
 
 func _enemy_contact(enemy: Dictionary) -> void:
 	if enemy.dead or enemy.touch_lock > 0: return
@@ -537,6 +548,7 @@ func _receive(unblockable: bool, cause: String) -> void:
 func _die(cause: String) -> void:
 	if not PLAYER_CAN_DIE: return
 	if state != "playing": return
+	world_audio.stop_all(true)
 	weapon_audio.stop_all()
 	lab.finish(score, cause, player, segment, boss_mode, true)
 	retry_requested = false
@@ -605,6 +617,7 @@ func _on_boss_bomb_requested(target_x: float) -> void:
 	var bomb: BossBomb = BOSS_BOMB_SCENE.instantiate()
 	boss_attack_root.add_child(bomb)
 	bomb.position = Vector2(target_x, 115.0)
+	bomb.sound_requested.connect(func(cue: String, duration: float): world_audio.play_cue(cue, duration, bomb))
 	boss_bombs.append(bomb)
 
 func _on_boss_particle_requested(origin: Vector2) -> void:
@@ -635,6 +648,8 @@ func _boss_damage() -> void:
 		score += GD.SCORE.boss
 		lab.finish(score, "victory", player, segment, boss_mode)
 		state = "victory"
+		world_audio.stop_all()
+		world_audio.play_cue("enemy_explode")
 		weapon_audio.stop_all()
 		music.play_track(false)
 		banner = "THE FRONT NEVER STOPS"
@@ -763,6 +778,7 @@ func _reset_player() -> void:
 	player_hud.follow_hitbox(_player_hitbox())
 
 func _clear_world() -> void:
+	world_audio.stop_all()
 	enemies.clear(); obstacles.clear(); pickups.clear(); shots.clear(); threats.clear()
 	for spikes in ground_spikes:
 		if is_instance_valid(spikes): spikes.queue_free()

@@ -14,4 +14,25 @@ Reload playback speed is source duration / actual reload duration. Original mode
 
 Firing retains 1x speed with up to six overlapping voices per weapon. Failed shots, full-magazine reload requests and selecting an already active slot do not play new sounds. Weapon audio pauses with the tuning panel, and clears on death, reset, victory or return to the menu. The existing M key mutes the Master bus, including both music and effects.
 
-Initial playback gains in weapon_audio.gd are -8 dB for firing, -6 dB for reload and -4 dB for switching. These are integration settings pending student listening, not an approved final mix. Tool/source licensing, generation prompts, plan tiers, production times and stage ratings have not been supplied and are not inferred from filenames. These five clips do not by themselves fulfill the assignment's six-sound requirement.
+Initial playback gains in weapon_audio.gd are -8 dB for firing, -6 dB for reload and -4 dB for switching. These are integration settings pending student listening, not an approved final mix. Tool/source licensing, generation prompts, plan tiers, production times and stage ratings have not been supplied and are not inferred from filenames.
+
+## Enemy and environment effects
+
+On 2026-10-30 the student supplied eight additional files and confirmed the ambiguous mappings: droneeffect for the flying laser wall, explode for enemies, bombexpode for Boss bombs, and the countdown for planted Boss bombs.
+
+| Source file | Project file under assets/sfx | Trigger | Source duration |
+|---|---|---|---:|
+| lightturretfire.aiff | light_turret_fire.wav | Light turret actually fires | 1.3764 s |
+| heavyturrentfire.wav | heavy_turret_fire.wav | Heavy turret laser becomes active | 2.0014 s |
+| heavyturrnet_prepare to fire.wav | heavy_turret_charge.wav | Heavy turret starts charging | 0.8364 s |
+| claimitem.wav | item_pickup.wav | Existing grenade pickup is collected | 1.0800 s |
+| droneeffect.wav | laser_gate_hover.wav | At least one living laser wall is on screen | 30.6909 s |
+| explode.wav | enemy_explode.wav | Turret, laser wall or Boss explodes | 1.5791 s |
+| bombexpode.wav | boss_bomb_explode.wav | Boss bomb starts exploding | 3.1310 s |
+| 138108__snakebarney__bomb-countdown-beeps.aiff | boss_bomb_countdown.wav | Boss bomb lands | 2.0437 s |
+
+AIFF files were converted from big-endian PCM to WAV without resampling or changing source bit depth/channels. Other WAV files are copied unchanged. The two fire clips and explosions retain original speed. Charge audio scales to the warning interval, accounting for the turret's travel to its firing position. Bomb countdown scales to ground_hold_time + explosion_warning_time (0.9 s with current defaults), stopping when the bomb explodes or is removed. No gameplay timers were changed.
+
+Multiple laser walls share one looping ambience voice at -20 dB. The ambience stops when none remain alive on screen. Other new effects start at -8 dB; pickup is -4 dB. Effects pause with the tuning panel. Death stops ambience and warnings while allowing already-triggered explosions to finish; resetting or returning to the menu clears all effects. M controls all sound. Pickup audio only hooks the existing collection branch; this change does not add pickup spawns or new mechanics.
+
+There are now 13 supplied effect assets integrated across the existing triggers. This count is not evidence that all Lab C sourcing, editing, AI trials, mixing, licensing and two-browser acceptance steps are complete. Those records and listening acceptance remain separate.

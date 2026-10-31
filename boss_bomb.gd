@@ -1,6 +1,8 @@
 class_name BossBomb
 extends Area2D
 
+signal sound_requested(cue: String, duration: float)
+
 enum BombState {
 	FALLING,
 	GROUNDED,
@@ -39,6 +41,7 @@ func advance(delta: float, track_speed := 0.0) -> void:
 			if position.y >= ground_y:
 				state = BombState.GROUNDED
 				state_time = ground_hold_time
+				sound_requested.emit("boss_bomb_countdown", ground_hold_time + explosion_warning_time)
 				visual.frame = 1
 		BombState.GROUNDED:
 			state_time -= delta
@@ -50,6 +53,7 @@ func advance(delta: float, track_speed := 0.0) -> void:
 			state_time -= delta
 			if state_time <= 0.0:
 				state = BombState.EXPLODING
+				sound_requested.emit("boss_bomb_explode", -1.0)
 				state_time = explosion_duration
 				visual.frame = 3
 				collision.disabled = false

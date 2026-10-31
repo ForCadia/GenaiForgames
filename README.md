@@ -65,6 +65,8 @@ After death, press R, Space, or Fire to restart the current segment checkpoint. 
 
 Weapon audio: rifle/piercer firing, both reloads and weapon switching now use the five student-supplied effects. Reload clips speed up proportionally to fit the actual reload duration, including Fast Reload; firing plays at original speed. M mutes both effects and music. Integration details and source mapping: [SFX.md](SFX.md).
 
+Eight additional effects cover light/heavy turret firing, heavy-turret charging, existing item pickup, laser-wall ambience, enemy explosions, and Boss bomb countdown/explosion. Charge/countdown playback fits existing gameplay timing; laser walls share one ambience loop. All effects follow panel pause and M mute. No new pickup spawns or attack mechanics were added.
+
 Music added on 2026-10-30: **Untitled** plays during ordinary stages and **Chase Mode** during Boss encounters. Music starts after clicking either start button, repeats, and continues through same-track retries. Victory or returning to the menu switches to Untitled. **M** mutes/restores all sound, including while the developer panel is paused. Both normal and developer modes have music. Source records and pending listening checks are in [MUSIC.md](MUSIC.md).
 
 Verified engine: **4.7.2.stable.official.ed1daf0bf**. Existing gameplay and art remain. The current active campaign has **four segments followed by Boss**; six timeline segments are defined, so older six-segment/grenade notes above do not describe the full active path.

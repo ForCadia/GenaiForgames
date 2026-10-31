@@ -2,6 +2,7 @@ class_name LaserGateEnemy
 extends Node2D
 
 signal destroyed(gate: LaserGateEnemy)
+signal exploded
 
 @export_range(1, 20, 1) var hit_points := 1
 
@@ -51,6 +52,7 @@ func take_damage(amount := 1) -> void:
 func _on_animation_finished() -> void:
 	if state == "Hit":
 		state = "Explode"
+		exploded.emit()
 		sprite.play(&"Explode")
 	elif state == "Explode":
 		queue_free()
