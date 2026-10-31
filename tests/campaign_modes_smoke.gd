@@ -19,7 +19,7 @@ func run() -> void:
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)
 	game.set_process(false)
-	game.start_screen.start_button.pressed.emit()
+	game.enter_development_session()
 	assert(game.state == "start" and game.start_screen.level_select.visible and paused)
 	for level in range(3):
 		game.start_level(level)

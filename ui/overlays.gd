@@ -181,11 +181,14 @@ func stat_row(parent: Node, name: String, value: String, variant := "SmallLabel"
 func record_result() -> Dictionary:
 	if not game.run_record.is_empty(): return game.run_record
 	var config := ConfigFile.new()
-	if not game.attract_mode: config.load("user://ui_record.cfg")
+	if not game.attract_mode and game.play_profile == "development": config.load("user://ui_record.cfg")
 	var key: String = game.record_key()
-	var previous := int(config.get_value("record", key, 0))
+	var previous := int(game.progression.records.get(key,0)) if game.play_profile != "development" else int(config.get_value("record", key, 0))
 	var best: int = maxi(previous, game.score)
-	if not game.attract_mode and not game.ui_preview and not "--lab-test" in OS.get_cmdline_user_args():
+	if game.play_profile != "development":
+		game.progression.records[key] = best
+		game.progression.save()
+	if game.play_profile == "development" and not game.attract_mode and not game.ui_preview and not "--lab-test" in OS.get_cmdline_user_args():
 		config.set_value("record", key, best)
 		if game.endless_mode:
 			config.set_value("record", "endless_best_wave", maxi(int(config.get_value("record", "endless_best_wave", 0)), game.endless_wave))

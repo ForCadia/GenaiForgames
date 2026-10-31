@@ -121,6 +121,9 @@ var run_elapsed := 0.0
 var run_deaths := 0
 var run_record: Dictionary = {}
 var overlays: CanvasLayer
+var play_profile := "development"
+var development_profile: Node
+var session_profile: Node
 var progression: Node
 var coin_drops: Array[Dictionary] = []
 var run_total_kills := 0
@@ -135,6 +138,7 @@ func _ready() -> void:
 	progression = preload("res://progression.gd").new()
 	progression.preview_only = attract_mode
 	add_child(progression)
+	development_profile = progression
 	if attract_mode:
 		settings = attract_settings
 	else:
@@ -847,6 +851,8 @@ func _boss_damage() -> void:
 		state = "victory"
 		_bank_remaining_coins()
 		_settle_run(true)
+		if play_profile != "development" and not boss_test_mode and not developer_mode:
+			progression.unlock_after(selected_level)
 		if not developer_mode and not boss_test_mode: overlays.record_result()
 		world_audio.stop_all()
 		world_audio.play_cue("enemy_explode")
@@ -959,6 +965,8 @@ func _gate_gameplay_input() -> void:
 
 func start_game(mode := "checkpoint", parameter_index := 0, development := false, boss_only := false, level_index := 0, infinite := false) -> void:
 	if state != "start": return
+	if development or boss_only: _use_development_profile()
+	elif not mission_unlocked(3 if infinite else clampi(level_index,0,2)): return
 	boss_test_mode = boss_only
 	developer_mode = development
 	selected_level = 0 if development or boss_only else clampi(level_index, 0, CAMPAIGNS.LEVELS.size() - 1)
@@ -1388,3 +1396,55 @@ func _control_held(action: String) -> bool:
 
 func _control_tapped(action: String) -> bool:
 	return bool(attract_taps.get(action,false)) if attract_mode else Input.is_action_just_pressed(action)
+
+func mission_unlocked(index: int) -> bool:
+	return play_profile == "development" or index <= progression.unlocked_stage
+
+func _use_development_profile() -> void:
+	progression = development_profile
+	play_profile = "development"
+	if is_instance_valid(session_profile):
+		session_profile.queue_free()
+		session_profile = null
+
+func open_player_session() -> void:
+	if state != "start": return
+	if play_profile == "development": enter_guest_session()
+	else: start_screen.show_levels(true)
+
+func enter_guest_session() -> void:
+	if state != "start": return
+	_use_development_profile()
+	session_profile = preload("res://progression.gd").new()
+	session_profile.preview_only = true
+	session_profile.coins = 0
+	session_profile.unlocked_stage = 0
+	add_child(session_profile)
+	progression = session_profile
+	play_profile = "guest"
+	run_record.clear()
+	start_screen.show_levels(true)
+
+func enter_development_session() -> void:
+	if state != "start": return
+	_use_development_profile()
+	run_record.clear()
+	start_screen.show_levels(true)
+
+func enter_named_session(player_name: String) -> bool:
+	if state != "start": return false
+	var clean_name := player_name.strip_edges().left(32)
+	if clean_name.is_empty(): return false
+	var next_profile := preload("res://progression.gd").new()
+	next_profile.configure_named(clean_name)
+	add_child(next_profile)
+	if next_profile.load_failed:
+		next_profile.queue_free()
+		return false
+	_use_development_profile()
+	session_profile = next_profile
+	progression = next_profile
+	play_profile = "named"
+	run_record.clear()
+	start_screen.show_levels(true)
+	return true

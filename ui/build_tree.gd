@@ -90,6 +90,7 @@ func _ready() -> void:
 
 func refresh() -> void:
 	if not is_instance_valid(balance): return
+	graph.profile = game.progression
 	balance.text = "%d G" % game.progression.coins
 	var node: Dictionary = DATA.NODES[selected]
 	var parents: Array[String] = []

@@ -16,6 +16,10 @@ var center: CenterContainer
 var panel: PanelContainer
 var build_button: Button
 var root: Control
+var fresh_guest_button: Button
+var name_input: LineEdit
+var profile_label: Label
+var profile_notice: Label
 var drift := 0.0
 var entrance: Tween
 
@@ -51,8 +55,27 @@ func _ready() -> void:
 	var buttons := F.box(button_center)
 	buttons.custom_minimum_size.x = 440
 	buttons.add_theme_constant_override("separation", 12)
-	start_button = preload("res://ui/menu_style.gd").primary(F.button(buttons, S.START + "  [ENTER]", func(): show_levels(true)))
+	start_button = preload("res://ui/menu_style.gd").primary(F.button(buttons, S.START + "  [ENTER]", func(): game.open_player_session()))
 	start_button.custom_minimum_size.y = 56
+	var modes := F.box(buttons,true)
+	modes.add_theme_constant_override("separation",12)
+	fresh_guest_button = F.button(modes,"新游客 / 从零开始",func(): game.enter_guest_session(),true)
+	fresh_guest_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	F.button(modes,"开发模式",func(): game.enter_development_session(),true).size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var identity := F.box(buttons,true)
+	identity.add_theme_constant_override("separation",12)
+	name_input = LineEdit.new()
+	name_input.placeholder_text = "输入名字读取 / 创建存档"
+	name_input.max_length = 32
+	name_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_input.custom_minimum_size.y = 40
+	identity.add_child(name_input)
+	name_input.text_submitted.connect(func(_value: String): _load_name())
+	F.button(identity,"读取存档",_load_name,true)
+	profile_label = F.label(buttons,"","MutedLabel")
+	profile_notice = F.label(buttons,"","AmberLabel")
+	profile_notice.hide()
+
 	build_button = F.button(buttons, "", func(): show_build(true))
 	build_button.custom_minimum_size.y = 48
 	var build_row := HBoxContainer.new()
@@ -80,7 +103,7 @@ func _ready() -> void:
 	tests.offset_bottom = -12
 	developer_button = F.button(tests, S.DEVELOPER, func(): game.start_game("checkpoint", 0, true), true)
 	boss_test_button = F.button(tests, S.BOSS_TEST, func(): game.start_game("checkpoint", 0, false, true), true)
-	developer_button.text = "DEV / 开发"
+	developer_button.text = "LAB / 调参"
 	boss_test_button.text = "DEV / BOSS"
 	for button in [developer_button,boss_test_button]:
 		button.theme_type_variation = "MenuCompact"
@@ -176,7 +199,9 @@ func show_levels(value: bool) -> void:
 	controls.hide()
 	settings_view.hide()
 	level_select.visible = value
-	if value: level_select.first_button.grab_focus()
+	if value:
+		level_select.refresh()
+		level_select.first_button.grab_focus()
 	else: start_button.grab_focus()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -189,7 +214,18 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	if not visible or game.state != "start": return
+	fresh_guest_button.visible = game.play_profile != "development"
 	wallet_label.text = "%d G" % game.progression.coins
+	match game.play_profile:
+		"guest":
+			start_button.text = "继续游客游戏 [ENTER]"
+			profile_label.text = "游客 / 本次进度不保存"
+		"named":
+			start_button.text = "继续游戏 [ENTER]"
+			profile_label.text = "存档：" + game.progression.profile_name.left(20)
+		_:
+			start_button.text = "游客模式 [ENTER]"
+			profile_label.text = "开发存档 / 保留当前状态，全部关卡开放"
 
 func show_build(value: bool) -> void:
 	panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),12 if value else 20))
@@ -215,3 +251,10 @@ func _position_menu() -> void:
 	else:
 		center.offset_left = 0
 		center.offset_top = 0
+
+func _load_name() -> void:
+	if game.enter_named_session(name_input.text):
+		profile_notice.hide()
+	else:
+		profile_notice.text = "请输入名字" if name_input.text.strip_edges().is_empty() else "存档无法读取，原有进度未更改"
+		profile_notice.show()
