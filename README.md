@@ -28,6 +28,7 @@ The legacy `high_barrage` timeline events now instantiate the editor-previewable
 
 | Action | Keyboard / mouse | Controller |
 |---|---|---|
+| Small forward/back adjustment | Hold D / A; release to return to the default position | — |
 | Jump | Space / W | A / Cross |
 | Crouch | S / Ctrl | Left stick down |
 | Aim | Mouse | Right stick |

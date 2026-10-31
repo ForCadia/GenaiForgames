@@ -9,6 +9,9 @@ const PLAYER_X := 190.0
 const CAMPAIGN_SEGMENT_COUNT := 4
 
 const PLAYER := {
+	"horizontal_speed": 180.0,
+	"horizontal_range": 90.0,
+	"horizontal_return_speed": 240.0,
 	"gravity": 1250.0 / 1.1,
 	"jump_speed": 720.0,
 	"standing_half_width": 19.0,
@@ -135,6 +138,7 @@ const ENEMIES := {
 }
 
 const BOSS := {
+	"barrage_speed": 450.0,
 	"armor_per_cycle": 2,
 	"health": 12,
 	"attack_interval": 2.5,

@@ -166,7 +166,7 @@ func _run() -> void:
 	for wave in range(3): game._on_boss_barrage_requested(game.boss_actor.global_position, wave)
 	_check(game.boss_particles.size() == 24, "Three barrage waves must produce 8 rounds each")
 	for shot in game.boss_particles:
-		_check(shot.direction.x < 0.0 and shot.speed == 300.0 and shot.scale == Vector2.ONE, "Barrage rounds must use the normal attack size")
+		_check(shot.direction.x < 0.0 and shot.speed == GameData.BOSS.barrage_speed and shot.speed > 300.0 and shot.scale == Vector2.ONE, "Barrage rounds must be faster and use the normal attack size")
 	game._start_boss()
 	_check(game.boss_particles.is_empty() and game.boss_actor.barrage_wave == 0, "Reset must remove barrage projectiles and progress")
 	# Lethal hits clear both collections while _update_boss is iterating them.

@@ -179,6 +179,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		_switch_weapon()
 
 func _update_player(delta: float) -> void:
+	var horizontal_input := Input.get_axis("move_back", "move_forward")
+	if not is_zero_approx(horizontal_input):
+		player.x = clampf(player.x + horizontal_input * GD.PLAYER.horizontal_speed * delta,
+			GD.PLAYER_X - GD.PLAYER.horizontal_range, GD.PLAYER_X + GD.PLAYER.horizontal_range)
+	else:
+		player.x = move_toward(player.x, GD.PLAYER_X, GD.PLAYER.horizontal_return_speed * delta)
 	player_visual.position = player
 	var stick := Vector2(Input.get_joy_axis(0, 2), Input.get_joy_axis(0, 3))
 	if stick.length() > 0.28: aim = _player_center() + stick.normalized() * 420
@@ -653,7 +659,7 @@ func _on_boss_barrage_requested(origin: Vector2, wave: int) -> void:
 	# Eight normal-sized rounds retain the broad fan with wider gaps.
 	for ray in range(8):
 		var projectile: BossParticle = BOSS_PARTICLE_SCENE.instantiate()
-		projectile.speed = 300.0
+		projectile.speed = GD.BOSS.barrage_speed
 		projectile.lifetime = 4.0
 		boss_attack_root.add_child(projectile)
 		var angle := deg_to_rad(lerpf(95.0, 265.0, float(ray) / 7.0) + (wave - 1) * 3.0)
@@ -796,6 +802,7 @@ func return_to_start() -> void:
 	state = "start"
 	boss_test_mode = false
 	_clear_world()
+	boss_mode = false
 	lab_panel.expanded = false
 	lab_panel.panel.hide()
 	lab_panel.blocked = true
@@ -958,7 +965,7 @@ func _draw_hud() -> void:
 		draw_string(ThemeDB.fallback_font, Vector2(0, 137), "BOSS HP %d / %d   //   ARMOR %d" % [boss.hp, GD.BOSS.health, boss.armor], HORIZONTAL_ALIGNMENT_CENTER, 960, 14, WHITE if boss.armor == 0 else RED)
 	else: draw_string(ThemeDB.fallback_font, Vector2(0, 116), GD.SEGMENTS[segment].hint, HORIZONTAL_ALIGNMENT_CENTER, 960, 12, DIM)
 	if banner_time > 0: draw_string(ThemeDB.fallback_font, Vector2(0, 157), banner, HORIZONTAL_ALIGNMENT_CENTER, 960, 17, WHITE)
-	draw_string(ThemeDB.fallback_font, Vector2(24, 704), "SPACE/W JUMP   S/CTRL CROUCH   LMB/RT FIRE   RMB/LT GUARD   1/2/3 WEAPONS   Q/Y CYCLE   R/X RELOAD", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, DIM)
+	draw_string(ThemeDB.fallback_font, Vector2(24, 704), "A/D HOLD MOVE   SPACE/W JUMP   S/CTRL CROUCH   LMB/RT FIRE   RMB/LT GUARD   1/2/3 WEAPONS   Q/Y CYCLE   R/X RELOAD", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, DIM)
 
 func _draw_death() -> void:
 	draw_rect(Rect2(Vector2.ZERO, GD.VIEW_SIZE), Color(0.01, 0.02, 0.06, 0.82)); draw_string(ThemeDB.fallback_font, Vector2(0, 286), "ONE HIT // CHECKPOINT LOST", HORIZONTAL_ALIGNMENT_CENTER, 960, 34, RED); draw_string(ThemeDB.fallback_font, Vector2(0, 332), banner, HORIZONTAL_ALIGNMENT_CENTER, 960, 15, WHITE); draw_string(ThemeDB.fallback_font, Vector2(0, 382), "PRESS R / SPACE / FIRE TO RETRY", HORIZONTAL_ALIGNMENT_CENTER, 960, 14, CYAN)
