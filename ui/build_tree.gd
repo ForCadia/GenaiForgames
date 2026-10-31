@@ -15,14 +15,12 @@ var buy_button: Button
 var selected := "cell"
 
 func _ready() -> void:
-	custom_minimum_size.x = 896
-	add_theme_constant_override("separation", 8)
+	custom_minimum_size.x = 920
+	add_theme_constant_override("separation", 10)
 	var heading := F.box(self, true)
 	heading.add_theme_constant_override("separation", 14)
 	F.label(heading, "BUILD TREE / 构筑树", "LargeLabel")
-	F.spacer(heading)
-	var legend_row := F.box(self,true)
-	var legend := F.box(legend_row, true)
+	var legend := F.box(heading, true)
 	legend.add_theme_constant_override("separation", 12)
 	legend.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	for spec in [["owned", "已购买"], ["can_buy", "可购买"], ["poor", "金币不足"], ["blocked", "前置未满足"]]:
@@ -66,14 +64,11 @@ func _ready() -> void:
 	graph.profile = game.progression
 	graph.node_selected.connect(func(id: String): selected = id; refresh())
 	add_child(graph)
-	var detail_frame := PanelContainer.new()
-	detail_frame.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121c"),P.PANEL_EDGE,10))
-	add_child(detail_frame)
-	var bottom := F.box(detail_frame, true)
+	var bottom := F.box(self, true)
 	bottom.add_theme_constant_override("separation", 16)
 	var info := F.box(bottom)
 	info.add_theme_constant_override("separation", 3)
-	info.custom_minimum_size.x = 540
+	info.custom_minimum_size.x = 560
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var title_row := F.box(info, true)
 	title_row.add_theme_constant_override("separation", 10)
@@ -82,16 +77,15 @@ func _ready() -> void:
 	status_label = F.label(title_row, "", "AmberLabel")
 	status_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	effect_label = F.label(info, "", "SmallLabel")
-	effect_label.add_theme_font_size_override("font_size",12)
 	effect_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	prereq_label = F.label(info, "", "MutedLabel")
-	var side := F.box(bottom)
+	var side := F.box(bottom, true)
 	side.add_theme_constant_override("separation", 10)
 	side.size_flags_vertical = Control.SIZE_SHRINK_END
 	buy_button = F.button(side, "购买", func():
 		if game.state == "start" and game.progression.buy(selected): refresh())
-	buy_button.custom_minimum_size.x = 220
-	F.button(side, "返回", back, true).custom_minimum_size.x = 220
+	buy_button.custom_minimum_size.x = 170
+	F.button(side, "返回", back, true).custom_minimum_size.x = 100
 	refresh()
 
 func refresh() -> void:
@@ -105,7 +99,7 @@ func refresh() -> void:
 		parents.append(DATA.NODES[parent].name)
 		if not game.progression.has_upgrade(parent): locked.append(DATA.NODES[parent].name)
 	name_label.text = str(node.name)
-	name_label.modulate = P.TEXT
+	name_label.modulate = graph.branch_color(node.branch)
 	effect_label.text = "效果：" + str(node.text)
 	prereq_label.text = "前置：" + " + ".join(parents) if not parents.is_empty() else "从核心直接解锁"
 	var shortage: int = int(node.cost) - game.progression.coins
@@ -115,19 +109,18 @@ func refresh() -> void:
 		buy_button.disabled = true
 		buy_button.text = "已购买"
 	elif not locked.is_empty():
-		status_label.text = "前置未满足"
-		prereq_label.text = "缺少：" + " + ".join(locked)
-		status_label.modulate = P.TEXT_DIM
+		status_label.text = "● 前置未满足：" + " + ".join(locked)
+		status_label.modulate = P.RED
 		buy_button.disabled = true
 		buy_button.text = "未解锁"
 	elif shortage > 0:
-		status_label.text = "金币不足"
+		status_label.text = "● 金币不足（还差 %d G）" % shortage
 		status_label.modulate = P.AMBER
 		buy_button.disabled = true
-		buy_button.text = "还差 %d G" % shortage
+		buy_button.text = "金币不足"
 	else:
 		status_label.text = "● 可购买"
-		status_label.modulate = P.CYAN
+		status_label.modulate = P.TEXT
 		buy_button.disabled = false
 		buy_button.text = "购买  %d G" % node.cost
 	graph.selected = selected

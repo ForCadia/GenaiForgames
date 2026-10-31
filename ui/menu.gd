@@ -103,6 +103,7 @@ func _ready() -> void:
 	build_view = preload("res://ui/build_tree.gd").new()
 	build_view.game = game
 	build_view.back = func(): show_build(false)
+	build_view.theme = preload("res://ui/ui_theme.tres")
 	panel.add_child(build_view)
 	build_view.hide()
 	visibility_changed.connect(func():
@@ -188,7 +189,7 @@ func _process(delta: float) -> void:
 	game.track_layer.scroll_offset.x = -roundf(drift)
 
 func show_build(value: bool) -> void:
-	panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),8 if value else 20))
+	panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),12 if value else 20))
 	menu.visible = not value
 	controls.hide()
 	settings_view.hide()

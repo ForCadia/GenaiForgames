@@ -19,3 +19,5 @@ Godot real-render capture inspected main menu, selector, controls, settings top/
 Existing checks passed: settings_smoke, progression_smoke, campaign_modes_smoke, start_modes_smoke. Progression test still reports its existing exit resource cleanup warnings. Test runs used `--lab-test`, with no real settings/progression writes or historical telemetry modifications.
 
 Claude's coordinates were treated as a layout reference, not copied literally: content-driven panel heights avoid overflowing his proposed fixed rectangles. Existing Fusion Pixel and game assets are retained. Readable small labels use 12px where fractional font sizes distorted the pixel font. Best-score grades and new gameplay/control mappings were not added.
+
+Follow-up: at the user's request, the build-tree portion of this pass was rolled back to its previous presentation; other noncombat improvements remain.
