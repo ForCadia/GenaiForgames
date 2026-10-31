@@ -1,6 +1,7 @@
 extends AudioStreamPlayer
 
 const MUSIC_VOLUME_DB := -14.0
+const BOSS_MUSIC_VOLUME_DB := -17.0
 
 var normal_music: AudioStreamMP3 = preload("res://assets/music/untitled.mp3").duplicate()
 var boss_music: AudioStreamMP3 = preload("res://assets/music/chase_mode.mp3").duplicate()
@@ -14,6 +15,7 @@ func _ready() -> void:
 
 func play_track(is_boss: bool) -> void:
 	var next_track := boss_music if is_boss else normal_music
+	volume_db = BOSS_MUSIC_VOLUME_DB if is_boss else MUSIC_VOLUME_DB
 	started = true
 	# One player, and no restart when a checkpoint uses the same track.
 	if stream == next_track and playing: return

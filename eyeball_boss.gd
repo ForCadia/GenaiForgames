@@ -6,6 +6,7 @@ signal particle_requested(origin: Vector2)
 signal feedback(origin: Vector2, color: Color, message: String)
 signal weak_point_hit()
 signal form_changed(form: BossForm)
+signal sound_requested(cue: String, duration: float)
 
 enum BossForm {
 	DOUBLE_ARMOR,
@@ -44,6 +45,7 @@ func _ready() -> void:
 	reset_for_battle(false)
 
 func reset_for_battle(enabled: bool) -> void:
+	sound_requested.emit("stop", -1.0)
 	form = BossForm.DOUBLE_ARMOR
 	attack_state = AttackState.IDLE
 	state_time = 1.15
@@ -55,6 +57,7 @@ func reset_for_battle(enabled: bool) -> void:
 	_show_form_idle()
 
 func set_combat_enabled(enabled: bool) -> void:
+	if not enabled: sound_requested.emit("stop", -1.0)
 	combat_enabled = enabled
 	_set_hurtbox_enabled(enabled and attack_state != AttackState.ARMOR_BREAK and attack_state != AttackState.DEAD)
 	if not enabled and attack_state != AttackState.DEAD:
@@ -74,6 +77,7 @@ func advance(delta: float, player_position: Vector2) -> void:
 			if state_time <= 0.0:
 				attack_state = AttackState.TELEGRAPH
 				state_time = telegraph_time
+				if not next_attack_is_bomb: sound_requested.emit("boss_particle_charge", telegraph_time)
 				visual.frame = _form_row() * 8 + (2 if next_attack_is_bomb else 4)
 				feedback.emit(global_position + Vector2(-90, 0), Color("ff5f6d"), "BOSS TELEGRAPH // %s" % ("JUMP" if next_attack_is_bomb else "CROUCH"))
 		AttackState.TELEGRAPH:
@@ -123,12 +127,14 @@ func receive_shot(penetration: int, impact_position: Vector2) -> void:
 		feedback.emit(impact_position, Color("e4f8ff"), "ARMORED // USE PIERCER")
 		return
 	attack_state = AttackState.ARMOR_BREAK
+	sound_requested.emit("stop", -1.0)
 	state_time = armor_break_time
 	_set_hurtbox_enabled(false)
 	visual.frame = _form_row() * 8 + 6
 	feedback.emit(impact_position, Color("ffcf70"), "OUTER ARMOR BROKEN" if form == BossForm.DOUBLE_ARMOR else "INNER ARMOR BROKEN // WEAK POINT EXPOSED")
 
 func start_death() -> void:
+	sound_requested.emit("stop", -1.0)
 	combat_enabled = false
 	attack_state = AttackState.DEAD
 	_set_hurtbox_enabled(false)

@@ -8,6 +8,17 @@ const SOUNDS := {
 	"enemy_explode": preload("res://assets/sfx/enemy_explode.wav"),
 	"boss_bomb_countdown": preload("res://assets/sfx/boss_bomb_countdown.wav"),
 	"boss_bomb_explode": preload("res://assets/sfx/boss_bomb_explode.wav"),
+	"boss_particle_charge": preload("res://assets/sfx/heavy_turret_charge.wav"),
+	"boss_particle_fire": preload("res://assets/sfx/heavy_turret_fire.wav"),
+	"shield_open": preload("res://assets/sfx/shield_open.wav"),
+}
+const CUE_GAINS_DB := {
+	"boss_bomb_countdown": -2.0,
+	"boss_bomb_explode": -2.0,
+	"boss_particle_charge": -2.0,
+	"boss_particle_fire": -2.0,
+	"item_pickup": -4.0,
+	"shield_open": -6.0,
 }
 
 var game: Node
@@ -22,7 +33,7 @@ func _ready() -> void:
 	drone_stream.loop_end = int(round(drone_stream.get_length() * drone_stream.mix_rate))
 	drone_stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 	drone_player.stream = drone_stream
-	drone_player.volume_db = -20.0
+	drone_player.volume_db = -10.0
 	add_child(drone_player)
 
 func set_drone_active(active: bool) -> void:
@@ -39,7 +50,7 @@ func play_cue(cue: String, duration := -1.0, source: Node = null) -> void:
 	if not SOUNDS.has(cue): return
 	if game.state != "playing" and not (game.state == "victory" and cue == "enemy_explode"): return
 	# Keep completed actors' one-shot tails, but cancel interrupted charge cues.
-	if cue in ["heavy_turret_fire", "boss_bomb_explode"]: stop_for(source)
+	if cue in ["heavy_turret_fire", "boss_bomb_explode", "boss_particle_fire"]: stop_for(source)
 	if voices.get_child_count() >= 24:
 		var oldest := voices.get_child(0) as AudioStreamPlayer
 		oldest.stop()
@@ -48,9 +59,9 @@ func play_cue(cue: String, duration := -1.0, source: Node = null) -> void:
 	var player := AudioStreamPlayer.new()
 	player.stream = SOUNDS[cue]
 	player.set_meta("explosion", cue in ["enemy_explode", "boss_bomb_explode"])
-	player.volume_db = -8.0 if cue != "item_pickup" else -4.0
+	player.volume_db = CUE_GAINS_DB.get(cue, -8.0)
 	if duration > 0.0: player.pitch_scale = player.stream.get_length() / duration
-	if cue in ["heavy_turret_charge", "boss_bomb_countdown"] and is_instance_valid(source):
+	if cue in ["heavy_turret_charge", "boss_bomb_countdown", "boss_particle_charge"] and is_instance_valid(source):
 		player.set_meta("source_id", source.get_instance_id())
 		source.tree_exiting.connect(func():
 			if is_instance_valid(player):

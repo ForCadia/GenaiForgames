@@ -53,15 +53,23 @@ func _run() -> void:
 	assert(game.segment == 0)
 	game.obstacles.clear()
 	game.particles.append({"pos": Vector2.ZERO, "velocity": Vector2.ZERO, "life": 1.0, "color": Color.WHITE})
+	game.player.y = GameData.GROUND_Y - 160.0
+	game.velocity_y = -220.0
 	game._update_segment()
 	assert(game.segment == 1 and not game.segment_transition_pending)
+	assert(game.player.y == GameData.GROUND_Y - 160.0 and game.velocity_y == -220.0)
+	assert(game.player_visual.position == game.player)
 	assert(game.enemies.is_empty() and game.turrets.is_empty() and game.obstacles.is_empty() and game.pickups.is_empty())
 	assert(game.shots.is_empty() and game.threats.is_empty() and game.particles.is_empty() and game.floaters.is_empty())
 	for current_segment in range(1, GameData.CAMPAIGN_SEGMENT_COUNT):
 		assert(game.segment == current_segment)
 		game.next_event = GameData.SEGMENTS[current_segment].events.size()
 		game.segment_time = GameData.SEGMENTS[current_segment].duration * GameData.SEGMENT_PACE
+		game.player.y = GameData.GROUND_Y - 120.0
+		game.velocity_y = 180.0
 		game._update_segment()
+		assert(game.player.y == GameData.GROUND_Y - 120.0 and game.velocity_y == 180.0)
+		assert(game.player_visual.position == game.player)
 		assert(game.enemies.is_empty() and game.turrets.is_empty() and game.obstacles.is_empty() and game.pickups.is_empty())
 		assert(game.shots.is_empty() and game.threats.is_empty())
 	assert(game.boss_mode)
@@ -74,5 +82,14 @@ func _run() -> void:
 	assert(game.boss.armor == 0 and game.boss.hp == boss_hp)
 	game._hit_boss({"penetration": 1, "pos": game._boss_pos()})
 	assert(game.boss.hp == boss_hp - 1 and game.boss.armor == 0)
+	# A death in midair still respawns on the ground at the full Boss checkpoint.
+	game._die("AIRBORNE_RETRY_CHECK")
+	game._request_retry("keyboard")
+	game._process(0.36)
+	assert(game.state == "playing" and game.boss_mode)
+	assert(game.player.y == GameData.GROUND_Y and game.velocity_y == 0.0)
+	assert(game.boss.hp == GameData.BOSS.health and game.boss.armor == GameData.BOSS.armor_per_cycle)
 	print("GAMEPLAY AIM / ARMOR / TRANSITION SMOKE: PASS")
+	game.queue_free()
+	await process_frame
 	quit(0)

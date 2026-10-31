@@ -228,4 +228,6 @@ func _run() -> void:
 	var file := FileAccess.open("res://tmp/automated-start-modes.json", FileAccess.WRITE)
 	file.store_string(JSON.stringify(data, "\t"))
 	print("START / SIX COMBINATIONS / BASELINE / A-B RESETS / INPUT TIMING / ADMIN FILTER / JSON: ", "PASS" if failures.is_empty() else "FAIL")
+	game.queue_free()
+	await process_frame
 	quit(0 if failures.is_empty() else 1)

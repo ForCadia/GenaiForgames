@@ -111,6 +111,7 @@ func _ready() -> void:
 	boss_actor.feedback.connect(_on_boss_feedback)
 	boss_actor.weak_point_hit.connect(_boss_damage)
 	boss_actor.form_changed.connect(_on_boss_form_changed)
+	boss_actor.sound_requested.connect(func(cue: String, duration: float): world_audio.play_cue(cue, duration, boss_actor))
 	_clear_world()
 	_reset_player()
 	_update_parallax()
@@ -197,6 +198,7 @@ func _update_player(delta: float) -> void:
 	player_visual.set_collision_pose(crouching)
 
 	guard_lock = maxf(0, guard_lock - delta)
+	var was_guarding := guarding
 	guarding = Input.is_action_pressed("guard") and guard_energy > 0 and guard_lock <= 0
 	if guarding:
 		guard_idle = 0
@@ -209,6 +211,7 @@ func _update_player(delta: float) -> void:
 		if guard_lock <= 0 and guard_idle >= float(lab_panel.values.guard_delay):
 			guard_energy = minf(GD.GUARD.maximum, guard_energy + float(lab_panel.values.guard_regen) * delta)
 
+	if guarding and not was_guarding: world_audio.play_cue("shield_open")
 	if Input.is_action_just_pressed("switch_weapon"): _switch_weapon()
 	if Input.is_action_just_pressed("weapon_slot_1"): _select_slot(0)
 	if Input.is_action_just_pressed("weapon_slot_2"): _select_slot(1)
@@ -304,8 +307,8 @@ func _update_segment() -> void:
 	# Let the outgoing enemies, obstacles, pickups and hostile rounds leave
 	# the screen instead of making them vanish mid-frame at the time limit.
 	if segment_transition_pending and enemies.is_empty() and turrets.is_empty() and laser_gates.is_empty() and ground_spikes.is_empty() and obstacles.is_empty() and pickups.is_empty() and threats.is_empty():
-		if segment == GD.CAMPAIGN_SEGMENT_COUNT - 1: _start_boss()
-		else: _start_segment(segment + 1)
+		if segment == GD.CAMPAIGN_SEGMENT_COUNT - 1: _start_boss(true)
+		else: _start_segment(segment + 1, true)
 
 func _spawn_event(event: Dictionary) -> void:
 	match event.kind:
@@ -560,21 +563,23 @@ func _die(cause: String) -> void:
 	_refresh_player_ui()
 	player_hud.follow_hitbox(_player_hitbox())
 
-func _start_segment(index: int) -> void:
+func _start_segment(index: int, preserve_motion := false) -> void:
 	music.play_track(false)
 	segment = index; segment_time = 0; next_event = 0; segment_transition_pending = false; boss_mode = false
 	checkpoint_score = score; checkpoint_stats = stats.duplicate(true); checkpoint_ammo = ammo.duplicate()
 	checkpoint_weapon_index = weapon_index; checkpoint_distance = distance
-	_clear_world(); _reset_player()
+	_clear_world(); _reset_player(preserve_motion)
 	lab.set_location(segment, false)
 	if lab.active: lab.record("checkpoint_reached", {"score": score})
 	player_visual.start_scrolling()
+	if preserve_motion: player_visual.set_motion(_grounded(), crouching, weapon_index, aim, guarding, true)
 	banner = "CHECKPOINT // " + GD.SEGMENTS[index].title; banner_time = 2
 
-func _start_boss() -> void:
+func _start_boss(preserve_motion := false) -> void:
 	music.play_track(true)
-	boss_mode = true; segment_time = 0; segment_transition_pending = false; _clear_world(); _reset_player()
+	boss_mode = true; segment_time = 0; segment_transition_pending = false; _clear_world(); _reset_player(preserve_motion)
 	player_visual.start_scrolling()
+	if preserve_motion: player_visual.set_motion(_grounded(), crouching, weapon_index, aim, guarding, true)
 	checkpoint_score = score; checkpoint_stats = stats.duplicate(true); checkpoint_ammo = ammo.duplicate()
 	checkpoint_weapon_index = weapon_index; checkpoint_distance = distance
 	lab.set_location(segment, true)
@@ -623,6 +628,7 @@ func _on_boss_bomb_requested(target_x: float) -> void:
 func _on_boss_particle_requested(origin: Vector2) -> void:
 	if state != "playing" or not boss_mode:
 		return
+	world_audio.play_cue("boss_particle_fire", -1.0, boss_actor)
 	var projectile: BossParticle = BOSS_PARTICLE_SCENE.instantiate()
 	boss_attack_root.add_child(projectile)
 	projectile.position = Vector2(origin.x, projectile.firing_height)
@@ -766,13 +772,19 @@ func return_to_start() -> void:
 	get_tree().paused = true
 	queue_redraw()
 
-func _reset_player() -> void:
+func _reset_player(preserve_motion := false) -> void:
 	weapon_audio.stop_all()
 	death_delay = 0.0
 	player_visual.set_primary_weapon(weapon_index)
-	player = Vector2(GD.PLAYER_X, GD.GROUND_Y); velocity_y = 0; crouching = false; guarding = false; slide_time_left = 0.0
+	# Natural progression keeps the current jump/slide; retries still reset fully.
+	if not preserve_motion:
+		player = Vector2(GD.PLAYER_X, GD.GROUND_Y)
+		velocity_y = 0
+		crouching = false
+		slide_time_left = 0.0
+	guarding = false
 	player_visual.position = player
-	player_visual.set_collision_pose(false)
+	player_visual.set_collision_pose(crouching)
 	guard_energy = GD.GUARD.maximum; guard_idle = 0; guard_lock = 0; reload_left = 0; shot_left = 0; selected_slot = weapon_index
 	_refresh_player_ui()
 	player_hud.follow_hitbox(_player_hitbox())
