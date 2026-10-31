@@ -13,7 +13,7 @@ func _run() -> void:
 	game.set_process(false)
 	for segment_index in range(GameData.CAMPAIGN_SEGMENT_COUNT):
 		for event in GameData.SEGMENTS[segment_index].events:
-			assert(event.kind in ["enemy", "low_obstacle", "high_barrage"])
+			assert(event.kind in ["enemy", "low_obstacle", "high_barrage", "grenade"])
 			if event.kind == "enemy":
 				assert(event.type in ["unarmored", "light", "heavy"])
 

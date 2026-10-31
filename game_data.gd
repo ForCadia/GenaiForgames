@@ -65,6 +65,7 @@ const SEGMENTS := [
 		"title": "01 // MOVEMENT DRILL", "duration": 20.0, "scroll": 220.0,
 		"hint": "SPACE / A: JUMP   •   STOMP ENEMIES FROM ABOVE",
 		"events": [
+			{"at": 0.7, "kind": "grenade"},
 			{"at": 1.8, "kind": "enemy", "type": "unarmored", "y": 0.0},
 			{"at": 5.1, "kind": "low_obstacle"},
 			{"at": 8.0, "kind": "enemy", "type": "unarmored", "y": 0.0},
@@ -77,6 +78,7 @@ const SEGMENTS := [
 		"title": "02 // CROUCH & FIRE", "duration": 20.0, "scroll": 225.0,
 		"hint": "S / CTRL: CROUCH UNDER HIGH FIRE",
 		"events": [
+			{"at": 0.7, "kind": "grenade"},
 			{"at": 1.5, "kind": "high_barrage"},
 			{"at": 10.2, "kind": "high_barrage"},
 		]
@@ -85,6 +87,7 @@ const SEGMENTS := [
 		"title": "03 // LIGHT ARMOR", "duration": 21.0, "scroll": 235.0,
 		"hint": "Q / Y: SWITCH WEAPONS   •   PIERCER BREAKS ARMOR",
 		"events": [
+			{"at": 0.7, "kind": "grenade"},
 			{"at": 1.5, "kind": "enemy", "type": "light", "y": 0.0},
 			{"at": 5.0, "kind": "enemy", "type": "light", "y": 0.0},
 			{"at": 11.0, "kind": "enemy", "type": "light", "y": -125.0},
@@ -96,6 +99,7 @@ const SEGMENTS := [
 		"title": "04 // HEAVY ARMOR", "duration": 22.0, "scroll": 240.0,
 		"hint": "RIFLE RICOCHETS   •   PIERCER BREAKS RED HEAVY ARMOR",
 		"events": [
+			{"at": 0.7, "kind": "grenade"},
 			{"at": 1.8, "kind": "enemy", "type": "heavy", "y": 0.0},
 			{"at": 6.5, "kind": "enemy", "type": "unarmored", "y": 0.0},
 			{"at": 9.0, "kind": "enemy", "type": "heavy", "y": 0.0},
@@ -140,7 +144,7 @@ const ENEMIES := {
 const BOSS := {
 	"barrage_speed": 450.0,
 	"armor_per_cycle": 2,
-	"health": 12,
+	"health": 24,
 	"attack_interval": 2.5,
 	"telegraph_time": 0.72,
 	"loop_interval": 7.0,

@@ -13,6 +13,7 @@ const WHITE := Color("e4f8ff")
 const YELLOW := Color("ffcf70")
 const RED := Color("ff5f6d")
 const DIM := Color("54718e")
+const GRENADE_TEXTURE := preload("res://assets/items/grenade.png")
 const PLAYER_CAN_DIE := true
 const BOSS_IDLE_Y := 350.0
 const BOSS_ATTACK_Y := 520.0
@@ -58,6 +59,7 @@ var ammo := [GD.WEAPONS[0].magazine, GD.WEAPONS[1].magazine]
 var reload_left := 0.0
 var shot_left := 0.0
 var has_grenade := false
+var boss_grenade_spawned := false
 
 var score := 0
 var stats := {"unarmored": 0, "light": 0, "heavy": 0, "flyer": 0}
@@ -301,19 +303,45 @@ func _fire() -> void:
 	_emit(origin, _weapon().color, 5, 145)
 
 func _grenade() -> void:
+	if state != "playing" or not has_grenade: return
 	has_grenade = false
-	selected_slot = 0
-	weapon_index = 0
-	_refresh_player_ui()
-	var count := 0
+	if selected_slot == 2: selected_slot = weapon_index
+	var screen := Rect2(Vector2.ZERO, GD.VIEW_SIZE)
 	for enemy in enemies:
-		if enemy.pos.distance_to(_player_center()) <= GD.GRENADE.radius: _kill_enemy(enemy); count += 1
+		if screen.has_point(enemy.pos): _kill_enemy(enemy)
 	for turret in turrets:
-		if is_instance_valid(turret) and turret.global_position.distance_to(_player_center()) <= GD.GRENADE.radius:
-			turret.force_kill(); count += 1
+		if is_instance_valid(turret) and screen.intersects(turret.body_rect()):
+			turret.force_kill()
+	for gate in laser_gates:
+		if is_instance_valid(gate) and screen.intersects(gate.hazard_rect()): gate.take_damage()
+	for i in range(ground_spikes.size() - 1, -1, -1):
+		if ground_spikes[i].position.x >= 0 and ground_spikes[i].position.x <= GD.VIEW_SIZE.x:
+			ground_spikes[i].queue_free()
+			ground_spikes.remove_at(i)
+	for obstacle in obstacles:
+		if obstacle.x >= 0 and obstacle.x <= GD.VIEW_SIZE.x: obstacle.danger = false
 	enemies = enemies.filter(func(e): return not e.dead)
-	threats.clear(); _emit(Vector2(520, 380), CYAN, 70, 420)
-	_notify("GRENADE PULSE // %d CLEARED" % count, CYAN, 1)
+	# All hostile rounds are cleared, including offscreen Boss ammunition.
+	threats.clear()
+	_clear_boss_attacks()
+	if boss_mode: _boss_damage()
+	world_audio.play_cue("boss_bomb_explode")
+	var flash_layer := CanvasLayer.new()
+	flash_layer.layer = 8
+	add_child(flash_layer)
+	var flash := ColorRect.new()
+	flash.color = Color(1, 0.95, 0.75, 0.8)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flash_layer.add_child(flash)
+	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var tween := flash_layer.create_tween()
+	tween.tween_property(flash, "color:a", 0.0, 0.25)
+	tween.tween_callback(flash_layer.queue_free)
+	_refresh_player_ui()
+	_notify("GRENADE // SCREEN CLEAR", CYAN, 1)
+
+func _spawn_grenade_pickup() -> void:
+	pickups.append({"pos": Vector2(990, GD.GROUND_Y - 35), "collected": false})
 
 func _update_segment() -> void:
 	var data: Dictionary = GD.SEGMENTS[segment]
@@ -330,6 +358,7 @@ func _update_segment() -> void:
 
 func _spawn_event(event: Dictionary) -> void:
 	match event.kind:
+		"grenade": _spawn_grenade_pickup()
 		"enemy": _spawn_enemy(event.type, event.get("y", 0), event.get("returns", false))
 		"low_obstacle": _spawn_ground_spikes()
 		"high_barrage": _spawn_laser_gate()
@@ -486,9 +515,9 @@ func _update_world(delta: float) -> void:
 				_die("TRACK IMPACT // UNBLOCKABLE")
 	for pickup in pickups:
 		pickup.pos.x -= scroll * delta
-		if pickup.pos.distance_to(_player_center()) < 44:
+		if not has_grenade and pickup.pos.distance_to(_player_center()) < 44:
 			world_audio.play_cue("item_pickup")
-			has_grenade = true; pickup.collected = true; _emit(pickup.pos, CYAN, 20, 180); _notify("GRENADE ACQUIRED // PRESS E / RB", CYAN, 1.2)
+			has_grenade = true; pickup.collected = true; _emit(pickup.pos, CYAN, 20, 180); _notify("GRENADE ACQUIRED // PRESS F / RB", CYAN, 1.2)
 	enemies = enemies.filter(func(e): return not e.dead and e.pos.x > -110)
 	obstacles = obstacles.filter(func(o): return o.x > -100)
 	pickups = pickups.filter(func(p): return not p.collected and p.pos.x > -80)
@@ -597,6 +626,7 @@ func _start_segment(index: int, preserve_motion := false) -> void:
 	banner = "CHECKPOINT // " + GD.SEGMENTS[index].title; banner_time = 2
 
 func _start_boss(preserve_motion := false) -> void:
+	boss_grenade_spawned = false
 	music.play_track(true)
 	boss_mode = true; segment_time = 0; segment_transition_pending = false; _clear_world(); _reset_player(preserve_motion)
 	player_visual.start_scrolling()
@@ -612,6 +642,9 @@ func _start_boss(preserve_motion := false) -> void:
 
 func _update_boss(delta: float) -> void:
 	if state != "playing": return
+	if not boss_grenade_spawned and segment_time >= 0.5:
+		boss_grenade_spawned = true
+		_spawn_grenade_pickup()
 	# Finish the descent before releasing the low three-shot attack. Bombs and
 	# barrage waves stay in the upper-right flight region.
 	boss_actor.attack_position_ready = absf(boss_actor.position.y - BOSS_ATTACK_Y) < 1.0 if boss_actor.wants_low_flight() else boss_actor.position.y <= BOSS_IDLE_Y + 1.0
@@ -932,6 +965,8 @@ func _circle_rect(center: Vector2, radius: float, rect: Rect2) -> bool:
 func _line_circle(a: Vector2, b: Vector2, center: Vector2, radius: float) -> bool: return Geometry2D.get_closest_point_to_segment(center, a, b).distance_to(center) <= radius
 
 func _draw() -> void:
+	for pickup in pickups:
+		draw_texture_rect(GRENADE_TEXTURE, Rect2(pickup.pos - Vector2(24, 24), Vector2(48, 48)), false)
 	for object in obstacles: _draw_obstacle(object)
 	for bullet in threats:
 		var threat_color: Color = bullet.get("color", RED)

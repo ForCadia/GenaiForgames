@@ -2,12 +2,21 @@ extends RefCounted
 
 static func root(parent: Node) -> Control:
 	var node := Control.new()
-	node.theme = preload("res://ui/ui_theme.tres")
+	node.theme = frameless_theme()
 	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	parent.add_child(node)
 	node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return node
+
+static func frameless_theme() -> Theme:
+	var result := preload("res://ui/ui_theme.tres").duplicate() as Theme
+	var empty := StyleBoxEmpty.new()
+	for side in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]: empty.set_content_margin(side, 12)
+	for type in ["PanelContainer", "Panel", "PopupMenu"]: result.set_stylebox("panel", type, empty)
+	for type in ["Button", "OptionButton", "ActiveSlot"]:
+		for state in ["normal", "hover", "pressed", "focus", "disabled"]: result.set_stylebox(state, type, empty)
+	return result
 
 static func label(parent: Node, text: String, variant := "SmallLabel") -> Label:
 	var node := Label.new()
@@ -57,7 +66,7 @@ static func spacer(parent: Node) -> Control:
 
 static func icon(parent: Node, name: String) -> TextureRect:
 	var node := TextureRect.new()
-	node.texture = load("res://ui/textures/" + name + ".png")
+	node.texture = load("res://assets/items/grenade.png" if name == "grenade" else "res://ui/textures/" + name + ".png")
 	node.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	node.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	node.custom_minimum_size = Vector2(24, 24)

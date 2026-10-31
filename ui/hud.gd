@@ -69,7 +69,7 @@ func _ready() -> void:
 	shield.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	shield_label = F.label(right, "GUARD LOCK", "AmberLabel")
 	shield_label.hide()
-	grenade_label = F.label(right, "[E] GRENADE ×1", "AmberLabel")
+	grenade_label = F.label(right, "[F] GRENADE ×1", "AmberLabel")
 	sound_button = F.button(shield_row, "", func(): AudioServer.set_bus_mute(0, not AudioServer.is_bus_mute(0)), true)
 	sound_button.custom_minimum_size = Vector2(24, 24)
 	sound_button.icon = preload("res://ui/textures/speaker.png")
@@ -86,7 +86,8 @@ func _ready() -> void:
 	banner_panel = PanelContainer.new()
 	banner_panel.custom_minimum_size = Vector2(520, 44)
 	banner_center.add_child(banner_panel)
-	banner_label = F.label(banner_panel, "", "AmberLabel")
+	banner_label = F.label(banner_panel, "", "LargeLabel")
+	banner_label.modulate = P.AMBER
 	var tutorial_center := CenterContainer.new()
 	messages.add_child(tutorial_center)
 	tutorial_panel = PanelContainer.new()
@@ -114,11 +115,12 @@ func _ready() -> void:
 	panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	bottom.add_child(panel)
 	var weapon_layout := F.box(panel, true)
+	weapon_layout.add_theme_constant_override("separation", 24)
 	var row := F.box(weapon_layout, true)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	for i in range(3):
 		var slot := PanelContainer.new()
-		slot.custom_minimum_size = Vector2(36, 24)
+		slot.custom_minimum_size = Vector2(52, 24)
 		slot.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 		slot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(slot)
@@ -133,7 +135,7 @@ func _ready() -> void:
 	ammo_label = F.label(details, "24 / 24", "Label")
 	F.spacer(details)
 	penetration_label = F.label(details, "PEN ◆", "MutedLabel")
-	ammo_bar = F.bar(weapons, 192, "ReloadBar")
+	ammo_bar = F.bar(weapons, 252, "ReloadBar")
 	ammo_bar.custom_minimum_size.y = 6
 	reload_label = F.label(weapons, "MAGAZINE", "MutedLabel")
 	reload_label.hide()

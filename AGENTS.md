@@ -50,6 +50,8 @@ No AI-service requests or API keys in game code. Telemetry is local only. Do not
 
 ## Confirmed experiment and start screen
 
+Latest user revision (2026-10-31): Boss red health is now 24. F consumes one picked-up grenade, flashes the screen, clears visible normal enemies/hazards and all hostile rounds, and deals one direct Boss health damage without removing armor. Each active segment and Boss entry provide one pickup opportunity; capacity remains one. UI panels are frameless, checkpoint text is larger and the weapon HUD is wider at lower right. These changes supersede the earlier Lab C values below and never alter historical telemetry.
+
 Current Lab C Boss revision (2026-10-30): red health is 12 (formerly 4); bombs, descending three-shot spread and three-wave upper-right barrage cycle in all play modes. The menu also has **Boss 战测试** for direct Boss entry and Boss-only retries/replays, with telemetry disabled. This user-authorized combat revision is separate from historical Lab B parameters/results below; do not rewrite old tester JSON.
 
 Latest Lab C controls: hold A/D for backward/forward adjustment within ±90 px of default x=190; release returns smoothly to the default position, including in midair. Boss barrage has 8 normal-sized rounds per wave at 450 px/s. These settings are in game_data.gd; normal scroll speed and old telemetry remain unchanged.

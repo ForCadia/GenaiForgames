@@ -41,7 +41,7 @@ func run() -> void:
 	game.start_game("checkpoint", 0, false, true)
 	game.player_hud.sync()
 	assert(game.player_hud.boss_hud.visible)
-	assert(game.player_hud.boss_hud.health.max_value == 12)
+	assert(game.player_hud.boss_hud.health.max_value == GameData.BOSS.health)
 	game.music.stop()
 	game.world_audio.stop_all()
 	game.weapon_audio.stop_all()

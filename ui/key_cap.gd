@@ -4,7 +4,7 @@ extends PanelContainer
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var style := preload("res://ui/ui_theme.tres").get_stylebox("normal", "Button").duplicate()
+	var style := StyleBoxEmpty.new()
 	for side in [SIDE_LEFT, SIDE_RIGHT]: style.set_content_margin(side, 6)
 	for side in [SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(side, 3)
 	add_theme_stylebox_override("panel", style)

@@ -38,7 +38,7 @@ var update_left := 0.0
 func _ready() -> void:
 	layer = 20
 	var root := VBoxContainer.new()
-	root.theme = preload("res://ui/ui_theme.tres")
+	root.theme = preload("res://ui/ui_factory.gd").frameless_theme()
 	root.custom_minimum_size.x = 375
 	add_child(root)
 	root.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
