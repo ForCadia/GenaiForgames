@@ -16,7 +16,7 @@ enum TurretState { ACTIVE, DAMAGED, BREAKING, EXPOSED, CHARGING, FIRING, DEAD }
 @export var charge_time := 0.28
 @export var laser_duration := 0.32
 @export var laser_cooldown := 1.35
-@export var laser_length := 700.0
+@export var laser_length := 1400.0
 @export var laser_fire_x := 640.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D

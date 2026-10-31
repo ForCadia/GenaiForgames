@@ -114,10 +114,19 @@ var run_elapsed := 0.0
 var run_deaths := 0
 var run_record: Dictionary = {}
 var overlays: CanvasLayer
+var progression: Node
+var coin_drops: Array[Dictionary] = []
+var run_total_kills := 0
+var run_total_shots := 0
+var run_coins := 0
+var settlement: Dictionary = {}
+var auto_guard_left := 0.0
 var settings: Node
 
 func _ready() -> void:
 	randomize()
+	progression = preload("res://progression.gd").new()
+	add_child(progression)
 	settings = preload("res://game_settings.gd").new()
 	settings.name = "Settings"
 	add_child(settings)
@@ -247,17 +256,19 @@ func _update_player(delta: float) -> void:
 	player_visual.set_collision_pose(crouching)
 
 	guard_lock = maxf(0, guard_lock - delta)
-	guarding = Input.is_action_pressed("guard") and guard_energy > 0 and guard_lock <= 0
+	auto_guard_left = maxf(0, auto_guard_left - delta)
+	if Input.is_action_pressed("guard"): auto_guard_left = 0
+	guarding = (Input.is_action_pressed("guard") or auto_guard_left > 0) and guard_energy > 0 and guard_lock <= 0
 	if guarding:
 		guard_idle = 0
-		guard_energy = maxf(0, guard_energy - float(lab_panel.values.guard_drain) * delta)
+		guard_energy = maxf(0, guard_energy - float(lab_panel.values.guard_drain) * (1.0 + _meta_effect("drain")) * delta)
 		if guard_energy <= 0:
-			guarding = false; guard_lock = float(lab_panel.values.guard_lock)
+			guarding = false; guard_lock = maxf(0.1, float(lab_panel.values.guard_lock) + _meta_effect("guard_lock"))
 			_notify("GUARD BREAK", RED); _emit(_player_center(), RED, 22, 190)
 	else:
 		guard_idle += delta
-		if guard_lock <= 0 and guard_idle >= float(lab_panel.values.guard_delay):
-			guard_energy = minf(GD.GUARD.maximum, guard_energy + float(lab_panel.values.guard_regen) * delta)
+		if guard_lock <= 0 and guard_idle >= maxf(0.0, float(lab_panel.values.guard_delay) + _meta_effect("regen_delay")):
+			guard_energy = minf(guard_capacity(), guard_energy + guard_regen() * delta)
 
 	world_audio.set_shield_active(guarding)
 	if Input.is_action_just_pressed("switch_weapon"): _switch_weapon()
@@ -278,8 +289,10 @@ func _update_player(delta: float) -> void:
 		if selected_slot == 2:
 			if has_grenade: _grenade()
 			else: _notify("GRENADE SLOT EMPTY", RED, 0.35)
-		elif ammo[weapon_index] > 0: _fire()
-		else: _notify("EMPTY — PRESS R / X", RED, 0.2)
+		else:
+			_auto_select_weapon()
+			if ammo[weapon_index] > 0: _fire()
+			else: _notify("EMPTY // PRESS R / X", RED, 0.2)
 
 func _switch_weapon() -> void:
 	if reload_left > 0: return
@@ -325,9 +338,10 @@ func _fire() -> void:
 	var to_target := aim - origin
 	var direction: Vector2 = to_target.normalized() if to_target.length_squared() > 0.001 else player_visual.shot_direction()
 	shots.append({"pos": origin, "previous": origin, "velocity": direction * _weapon().projectile_speed, "penetration": _weapon().penetration, "color": _weapon().color, "style": _weapon().projectile_style})
+	run_total_shots += 1
 	ammo[weapon_index] -= 1
 	_refresh_player_ui()
-	shot_left = float(lab_panel.values.rifle_cadence if weapon_index == 0 else lab_panel.values.piercer_cadence)
+	shot_left = float(lab_panel.values.rifle_cadence if weapon_index == 0 else lab_panel.values.piercer_cadence) * (1.0 + _meta_effect("cadence"))
 	_emit(origin, _weapon().color, 5, 145)
 
 func _grenade() -> void:
@@ -380,7 +394,7 @@ func _update_segment() -> void:
 			segment_transition_pending = true
 	# Let the outgoing enemies, obstacles, pickups and hostile rounds leave
 	# the screen instead of making them vanish mid-frame at the time limit.
-	if segment_transition_pending and enemies.is_empty() and turrets.is_empty() and laser_gates.is_empty() and ground_spikes.is_empty() and obstacles.is_empty() and pickups.is_empty() and threats.is_empty():
+	if segment_transition_pending and enemies.is_empty() and turrets.is_empty() and laser_gates.is_empty() and ground_spikes.is_empty() and obstacles.is_empty() and pickups.is_empty() and coin_drops.is_empty() and threats.is_empty():
 		if endless_mode: _advance_endless()
 		elif segment == GD.CAMPAIGN_SEGMENT_COUNT - 1: _start_boss(true)
 		else: _start_segment(segment + 1, true)
@@ -437,10 +451,12 @@ func _spawn_ground_spikes() -> void:
 	ground_spikes.append(spikes)
 
 func _on_laser_gate_destroyed(gate: LaserGateEnemy) -> void:
+	_award_enemy_kill("flyer", gate.global_position)
 	_emit(gate.global_position, RED, 12, 145)
 	_notify("LASER GATE DOWN", CYAN)
 
 func _update_world(delta: float) -> void:
+	_update_coins(delta)
 	var scroll := _scroll()
 	distance += scroll * delta
 	for enemy in enemies:
@@ -606,6 +622,7 @@ func _kill_enemy(enemy: Dictionary) -> void:
 func _award_enemy_kill(enemy_type: String, origin: Vector2) -> void:
 	var points: int = GD.SCORE[enemy_type]
 	stats[enemy_type] += 1
+	_register_kill(enemy_type, origin)
 	score += points
 	floaters.append({"pos": origin, "text": "+%d" % points, "color": YELLOW, "life": 0.85})
 	_emit(origin, RED, 18, 205)
@@ -613,7 +630,7 @@ func _award_enemy_kill(enemy_type: String, origin: Vector2) -> void:
 func _update_threats(delta: float) -> void:
 	for i in range(threats.size() - 1, -1, -1):
 		var bullet := threats[i]; bullet.pos += bullet.velocity * delta
-		if guarding and not bullet.unblockable and _circle_rect(bullet.pos, bullet.radius, _guard_hitbox()):
+		if guarding and guard_energy > 0 and not bullet.unblockable and _circle_rect(bullet.pos, bullet.radius, _guard_hitbox()):
 			guard_energy = maxf(0.0, guard_energy - 7.0)
 			_emit(bullet.pos, CYAN, 14, 210)
 			_notify("PARRY", CYAN, 0.25)
@@ -622,7 +639,14 @@ func _update_threats(delta: float) -> void:
 		elif bullet.pos.x < -50 or bullet.pos.x > 1020: threats.remove_at(i)
 
 func _receive(unblockable: bool, cause: String) -> void:
-	if guarding and not unblockable:
+	if state != "playing": return
+	if not unblockable and not guarding and not Input.is_action_pressed("guard") and _upgrade("auto_guard") and guard_energy >= 7 and guard_lock <= 0:
+		auto_guard_left = 0.22
+		guarding = true
+		guard_idle = 0
+		player_visual.set_motion(_grounded(), crouching, weapon_index, aim, true, true)
+		world_audio.set_shield_active(true)
+	if guarding and guard_energy > 0 and not unblockable:
 		guard_energy = maxf(0, guard_energy - 7); _emit(_player_center(), CYAN, 18, 190); _notify("PARRY", CYAN)
 	else: _die(cause)
 
@@ -636,7 +660,9 @@ func _die(cause: String) -> void:
 	run_deaths += 1
 	state = "dead"; death_delay = player_visual.death_animation_duration(); death_ui_ready = false
 	banner = cause; _emit(_player_center(), RED, 40, 300)
-	if endless_mode: overlays.record_result()
+	if endless_mode:
+		_settle_run(false)
+		overlays.record_result()
 	if boss_mode:
 		boss_actor.set_combat_enabled(false)
 		_clear_boss_attacks()
@@ -764,6 +790,7 @@ func _boss_damage() -> void:
 	_emit(_boss_pos(), WHITE, 45, 390)
 	if boss.hp <= 0:
 		score += GD.SCORE.boss
+		_register_kill("boss", _boss_pos())
 		if endless_mode:
 			state = "intermission"
 			endless_intermission = 1.0
@@ -776,6 +803,8 @@ func _boss_damage() -> void:
 			return
 		lab.finish(score, "victory", player, segment, boss_mode)
 		state = "victory"
+		_bank_remaining_coins()
+		_settle_run(true)
 		if not developer_mode and not boss_test_mode: overlays.record_result()
 		world_audio.stop_all()
 		world_audio.play_cue("enemy_explode")
@@ -827,7 +856,7 @@ func _reset_campaign() -> void:
 	grenade_count = 0
 	retry_requested = false
 	weapon_index = 0
-	ammo = [GD.WEAPONS[0].magazine, GD.WEAPONS[1].magazine]
+	ammo = [weapon_data(0).magazine, weapon_data(1).magazine]
 	distance = 0
 	score = 0
 	stats = {"unarmored": 0, "light": 0, "heavy": 0, "flyer": 0}
@@ -845,6 +874,10 @@ func _start_lab_run() -> void:
 
 func _new_run(reason := "administrative_restart") -> void:
 	run_record.clear()
+	run_total_kills = 0
+	run_total_shots = 0
+	run_coins = 0
+	settlement.clear()
 	run_elapsed = 0
 	run_deaths = 0
 	player_hud.reset_run()
@@ -945,13 +978,13 @@ func _reset_player(preserve_motion := false) -> void:
 	guarding = false
 	player_visual.position = player
 	player_visual.set_collision_pose(crouching)
-	guard_energy = GD.GUARD.maximum; guard_idle = 0; guard_lock = 0; reload_left = 0; shot_left = 0; selected_slot = weapon_index
+	auto_guard_left = 0; guard_energy = guard_capacity(); guard_idle = 0; guard_lock = 0; reload_left = 0; shot_left = 0; selected_slot = weapon_index
 	_refresh_player_ui()
 	player_hud.follow_hitbox(_player_hitbox())
 
 func _clear_world() -> void:
 	world_audio.stop_all()
-	enemies.clear(); obstacles.clear(); pickups.clear(); shots.clear(); threats.clear()
+	coin_drops.clear(); enemies.clear(); obstacles.clear(); pickups.clear(); shots.clear(); threats.clear()
 	for spikes in ground_spikes:
 		if is_instance_valid(spikes): spikes.queue_free()
 	ground_spikes.clear()
@@ -990,8 +1023,15 @@ func _notify(text: String, color: Color, duration := 0.55) -> void:
 	notice = text; notice_time = duration
 	player_hud.toast_label.modulate = color
 
-func _weapon() -> Dictionary: return GD.WEAPONS[weapon_index]
-func _reload_duration() -> float: return float(_weapon().reload) * float(lab_panel.values.reload_multiplier)
+func _weapon() -> Dictionary:
+	return weapon_data(weapon_index)
+
+func weapon_data(index: int) -> Dictionary:
+	var data: Dictionary = GD.WEAPONS[index].duplicate()
+	data.magazine += int(_meta_effect("rifle_mag" if index == 0 else "piercer_mag"))
+	data.projectile_speed *= 1.0 + _meta_effect("projectile")
+	return data
+func _reload_duration() -> float: return float(_weapon().reload) * float(lab_panel.values.reload_multiplier) * (1.0 + _meta_effect("reload"))
 func _refresh_player_ui() -> void:
 	# The current game is one-hit death; state is its only health source.
 	player_hud.refresh(0 if state == "dead" else 1, 1, _weapon().name,
@@ -1031,6 +1071,11 @@ func _circle_rect(center: Vector2, radius: float, rect: Rect2) -> bool:
 func _line_circle(a: Vector2, b: Vector2, center: Vector2, radius: float) -> bool: return Geometry2D.get_closest_point_to_segment(center, a, b).distance_to(center) <= radius
 
 func _draw() -> void:
+	for coin in coin_drops:
+		draw_circle(coin.pos, 11, Color(1, 0.65, 0.1, 0.2))
+		draw_circle(coin.pos, 7, YELLOW)
+		draw_circle(coin.pos, 4, Color("aa6c20"))
+		draw_line(coin.pos + Vector2(0,-3), coin.pos + Vector2(0,3), YELLOW, 2)
 	for pickup in pickups:
 		draw_circle(pickup.pos, 31, Color(1.0, 0.7, 0.15, 0.18))
 		var marker := PackedVector2Array([pickup.pos + Vector2(0, -34), pickup.pos + Vector2(33, 0), pickup.pos + Vector2(0, 34), pickup.pos + Vector2(-33, 0), pickup.pos + Vector2(0, -34)])
@@ -1157,6 +1202,7 @@ func record_key() -> String:
 	return "best_score" if selected_level == 0 else "level_%d_best_score" % (selected_level + 1)
 
 func _advance_endless() -> void:
+	_bank_remaining_coins()
 	endless_wave += 1
 	state = "playing"
 	if endless_wave % 5 == 0:
@@ -1171,3 +1217,71 @@ func _apply_level_look() -> void:
 	background_layer.modulate = tint
 	middle_layer.modulate = tint
 	track_layer.modulate = tint
+
+func _meta_enabled() -> bool:
+	return not developer_mode and not boss_test_mode and not ui_preview
+
+func _meta_effect(key: String) -> float:
+	return progression.effect(key) if _meta_enabled() and is_instance_valid(progression) else 0.0
+
+func _upgrade(id: String) -> bool:
+	return _meta_enabled() and is_instance_valid(progression) and progression.has_upgrade(id)
+
+func guard_capacity() -> float:
+	return GD.GUARD.maximum + _meta_effect("capacity")
+
+func guard_regen() -> float:
+	if not _meta_enabled(): return float(lab_panel.values.guard_regen)
+	if _upgrade("fast_regen"): return 50.0
+	return 12.5 + _meta_effect("regen")
+
+func _register_kill(kind: String, origin: Vector2) -> void:
+	run_total_kills += 1
+	if not _meta_enabled(): return
+	var value: int = preload("res://build_data.gd").COIN_VALUES.get(kind, 3)
+	coin_drops.append({"pos": origin, "vy": -110.0, "value": value})
+
+func _update_coins(delta: float) -> void:
+	for i in range(coin_drops.size() - 1, -1, -1):
+		var coin: Dictionary = coin_drops[i]
+		coin.pos.x -= _scroll() * delta
+		coin.vy += 650 * delta
+		coin.pos.y = minf(GD.GROUND_Y - 8, coin.pos.y + coin.vy * delta)
+		if coin.pos.y >= GD.GROUND_Y - 8: coin.vy = 0.0
+		var target := player + Vector2(0, -18)
+		var magnet := _meta_effect("magnet")
+		if magnet > 0 and coin.pos.distance_to(target) < magnet:
+			coin.pos = coin.pos.move_toward(target, 420 * delta)
+		if _player_hitbox().grow(24 + _meta_effect("pickup")).has_point(coin.pos):
+			if progression.credit(coin.value):
+				run_coins += int(coin.value)
+				floaters.append({"pos": coin.pos, "text": "+%d G" % coin.value, "color": YELLOW, "life": 0.65})
+				coin_drops.remove_at(i)
+		elif coin.pos.x < -40: coin_drops.remove_at(i)
+
+func _bank_remaining_coins() -> void:
+	if not _meta_enabled(): return
+	var amount := 0
+	for coin in coin_drops: amount += int(coin.value)
+	if amount > 0 and progression.credit(amount):
+		run_coins += amount
+		coin_drops.clear()
+
+func _settle_run(completed: bool) -> void:
+	if not settlement.is_empty() or not _meta_enabled(): return
+	var bonus := run_total_kills * 2 + (40 + selected_level * 20 if completed else maxi(0, endless_wave - 1) * 3)
+	settlement = {"bonus": bonus, "paid": bonus == 0 or progression.credit(bonus)}
+
+func _auto_select_weapon() -> void:
+	if not _upgrade("auto_weapon") or selected_slot == 2 or reload_left > 0: return
+	var desired := -1
+	for turret in turrets:
+		if is_instance_valid(turret) and turret.body_rect().grow(8).has_point(aim) and turret.state not in [TurretBase.TurretState.DEAD, TurretBase.TurretState.BREAKING]:
+			desired = 1 if turret.turret_kind == TurretBase.TurretKind.HEAVY and turret.state != TurretBase.TurretState.EXPOSED else 0
+	if boss_mode and boss_actor.visible and aim.distance_to(_boss_pos()) < 130:
+		desired = 1 if int(boss.get("armor", 0)) > 0 else 0
+	for enemy in enemies:
+		if not enemy.dead and aim.distance_to(enemy.pos) < 55: desired = 1 if enemy.armor > 0 else 0
+	for gate in laser_gates:
+		if is_instance_valid(gate) and gate.hazard_rect().has_point(aim): desired = 0
+	if desired >= 0 and desired != weapon_index: _select_slot(desired)

@@ -10,6 +10,8 @@ var menu: VBoxContainer
 var controls: VBoxContainer
 var settings_view: VBoxContainer
 var level_select: VBoxContainer
+var build_view: VBoxContainer
+var wallet_label: Label
 var root: Control
 var drift := 0.0
 var entrance: Tween
@@ -46,6 +48,8 @@ func _ready() -> void:
 	var buttons := F.box(button_center)
 	buttons.custom_minimum_size.x = 400
 	start_button = F.button(buttons, S.START, func(): show_levels(true))
+	F.button(buttons, "BUILD TREE / 构筑树", func(): show_build(true))
+	wallet_label = F.label(buttons, "", "AmberLabel")
 	F.button(buttons, S.SETTINGS, func(): show_settings(true))
 	F.button(buttons, S.CONTROLS, func(): show_controls(true))
 	if not OS.has_feature("web"): F.button(buttons, S.QUIT, func(): get_tree().quit(), true)
@@ -73,6 +77,11 @@ func _ready() -> void:
 	level_select.back = func(): show_levels(false)
 	panel.add_child(level_select)
 	level_select.hide()
+	build_view = preload("res://ui/build_tree.gd").new()
+	build_view.game = game
+	build_view.back = func(): show_build(false)
+	panel.add_child(build_view)
+	build_view.hide()
 	visibility_changed.connect(func():
 		if visible:
 			show_controls(false)
@@ -99,6 +108,8 @@ static func build_controls(parent: Node, back: Callable) -> void:
 	F.button(parent, S.BACK, back)
 
 func show_controls(value: bool) -> void:
+	if is_instance_valid(build_view): build_view.hide()
+	if is_instance_valid(developer_button): developer_button.get_parent().show()
 	if is_instance_valid(level_select): level_select.hide()
 	if is_instance_valid(settings_view): settings_view.hide()
 	menu.visible = not value
@@ -107,6 +118,7 @@ func show_controls(value: bool) -> void:
 	else: start_button.grab_focus()
 
 func show_settings(value: bool) -> void:
+	build_view.hide()
 	level_select.hide()
 	menu.visible = not value
 	controls.hide()
@@ -117,6 +129,7 @@ func show_settings(value: bool) -> void:
 	else: start_button.grab_focus()
 
 func show_levels(value: bool) -> void:
+	build_view.hide()
 	menu.visible = not value
 	controls.hide()
 	settings_view.hide()
@@ -125,15 +138,27 @@ func show_levels(value: bool) -> void:
 	else: start_button.grab_focus()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed("ui_cancel") and (controls.visible or settings_view.visible or level_select.visible):
-		if level_select.visible: show_levels(false)
+	if visible and event.is_action_pressed("ui_cancel") and (controls.visible or settings_view.visible or level_select.visible or build_view.visible):
+		if build_view.visible: show_build(false)
+		elif level_select.visible: show_levels(false)
 		elif settings_view.visible: show_settings(false)
 		else: show_controls(false)
 		get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
 	if not visible or game.state != "start": return
+	wallet_label.text = "COINS  %d G" % game.progression.coins
 	drift += delta * 12
 	game.background_layer.scroll_offset.x = -roundf(drift * 0.15)
 	game.middle_layer.scroll_offset.x = -roundf(drift * 0.55)
 	game.track_layer.scroll_offset.x = -roundf(drift)
+
+func show_build(value: bool) -> void:
+	menu.visible = not value
+	controls.hide()
+	settings_view.hide()
+	level_select.hide()
+	build_view.visible = value
+	developer_button.get_parent().visible = not value
+	if value: build_view.refresh()
+	else: start_button.grab_focus()

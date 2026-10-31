@@ -228,13 +228,14 @@ func sync() -> void:
 		score_tween.parallel().tween_property(score_label, "scale", Vector2(1.15, 1.15), 0.1)
 		score_tween.tween_property(score_label, "scale", Vector2.ONE, 0.12)
 	score_label.text = "%06d" % roundi(shown_score)
-	kills_label.text = "KILLS %02d" % (game.stats.unarmored + game.stats.light + game.stats.heavy + game.stats.flyer)
+	kills_label.text = "KILLS %02d   G %d" % [game.run_total_kills, game.progression.coins] if game._meta_enabled() else "KILLS %02d" % game.run_total_kills
 	mode_label.text = game.mode_caption()
 	var reached: int = 4 if game.boss_mode or game.state == "victory" else game.segment
 	for index in range(5):
 		var color := P.RED if index == 4 else P.CYAN
 		stage_styles[index].border_color = color if index <= reached or index == 4 else P.TEXT_DIM
 		stage_styles[index].bg_color = color if index <= reached else Color(0, 0, 0, 0)
+	shield.max_value = game.guard_capacity()
 	shield.value = game.guard_energy
 	shield.modulate = P.RED if game.guard_lock > 0 else (P.AMBER if game.guard_energy < 25 else Color.WHITE)
 	shield_label.visible = game.guard_lock > 0

@@ -125,6 +125,11 @@ func rebuild() -> void:
 
 func add_stats(parent: Node = null) -> void:
 	var target: Node = parent if parent != null else content
+	F.label(target, "KILLS  %d    SHOTS  %d" % [game.run_total_kills, game.run_total_shots], "MutedLabel")
+	if game._meta_enabled():
+		var bonus := int(game.settlement.get("bonus", 0))
+		F.label(target, "COINS  %d PICKED + %d BONUS" % [game.run_coins, bonus], "AmberLabel")
+		F.label(target, "WALLET  %d G" % game.progression.coins, "MutedLabel")
 	F.label(target, "SCORE  %06d" % game.score, "LargeLabel")
 	F.label(target, "TIME  %02d:%02d    DEATHS  %02d" % [int(game.run_elapsed) / 60, int(game.run_elapsed) % 60, game.run_deaths], "MutedLabel")
 
