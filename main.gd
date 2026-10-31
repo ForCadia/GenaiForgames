@@ -326,7 +326,8 @@ func _update_player(delta: float) -> void:
 		else:
 			_auto_select_weapon()
 			if ammo[weapon_index] > 0: _fire()
-			else: _notify("EMPTY // PRESS R / X", RED, 0.2)
+			elif not _upgrade("auto_weapon"): _notify("EMPTY // PRESS R / X", RED, 0.2)
+	_auto_reload_empty()
 
 func _switch_weapon() -> void:
 	if reload_left > 0: return
@@ -1470,3 +1471,7 @@ func _consume_guard_hit() -> void:
 		guarding = false
 		auto_guard_left = 0
 		guard_lock = maxf(0.1,float(lab_panel.values.guard_lock)+_meta_effect("guard_lock"))
+
+func _auto_reload_empty() -> void:
+	if state == "playing" and selected_slot != 2 and _upgrade("auto_weapon") and ammo[weapon_index] <= 0 and reload_left <= 0 and shot_left <= 0:
+		_reload()

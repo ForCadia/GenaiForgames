@@ -22,7 +22,7 @@ const NODES := {
 	"magazine_two": {"name":"弹仓改造", "cost":65, "parents":["magazine"], "branch":"offense", "pos":Vector2(735,370), "text":"步枪弹匣再 +4，穿甲枪弹匣再 +1", "effects":{"rifle_mag":4.0,"piercer_mag":1.0}},
 	"projectile": {"name":"弹道加速", "cost":65, "parents":["fire_rate"], "branch":"offense", "pos":Vector2(600,405), "text":"玩家子弹飞行速度提高 10%", "effects":{"projectile":0.10}},
 	"loader_two": {"name":"联动供弹", "cost":95, "parents":["magazine_two","projectile"], "branch":"offense", "pos":Vector2(715,420), "text":"换弹时间再缩短 8%", "effects":{"reload":-0.08}},
-	"auto_weapon": {"name":"终极·智能切枪", "cost":150, "parents":["loader_two"], "branch":"offense", "pos":Vector2(790,465), "text":"开火时按准星目标选枪：重甲穿甲枪，普通目标步枪；保留手雷选择", "effects":{}},
+	"auto_weapon": {"name":"终极·智能切枪", "cost":150, "parents":["loader_two"], "branch":"offense", "pos":Vector2(790,465), "text":"按目标护甲与 DPS 智能切枪；弹匣打空自动换弹，保留手雷选择", "effects":{}},
 }
 const COIN_VALUES := {"unarmored":3, "light":3, "heavy":7, "flyer":4, "boss":35}
 const BASE_REGEN := 12.5

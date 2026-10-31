@@ -50,3 +50,5 @@ Godot 编辑器导入、`tests/progression_smoke.gd`、`tests/campaign_modes_smo
 原 magnet 节点改为“战斗回能”：击杀恢复 3 点护盾能量；sensor_two 改为“能量回收”：击杀回能再 +2，保留拾取距离 +16。内部 ID、价格和前置保持不变，所以旧存档已购买的节点直接生效，无需重买。回能只影响当前能量，不绕过护盾锁定，不超过能量上限。
 
 Latest combat balance: shield base regeneration is now 6.25/s, intermediate regeneration bonuses are 3.125/s and 6.25/s, and the capstone is 25/s. Sustained drain is 1.5×, impact cost 18 and recharge delay is +0.5s. These supersede the earlier 12.5/50/7 descriptions above. Upgrade costs, prerequisite IDs and saved purchases are unchanged. See COMBAT_BALANCE.md.
+
+智能切枪终极节点现在同时提供自动换弹：当前枪弹匣为空且最后一发冷却结束后，按正常换弹时间装填，不需要按 R。保留目标护甲/DPS 选枪与手雷选择，价格、前置、ID 和已购存档不变。tests/smart_weapon_smoke.gd 验证两把枪、正常换弹时长、未购买状态、手雷槽与 LAB 隔离。
