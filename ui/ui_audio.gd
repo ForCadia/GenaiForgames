@@ -4,7 +4,6 @@ const CLICK := preload("res://assets/sfx/ui_click.wav")
 const ERROR := preload("res://assets/sfx/ui_error.wav")
 var player := AudioStreamPlayer.new()
 var reject_until := 0
-var last_click := -1000
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -22,7 +21,7 @@ func _watch(node: Node) -> void:
 func bind_button(button: BaseButton) -> void:
 	if button.has_meta("ui_audio_bound"): return
 	button.set_meta("ui_audio_bound",true)
-	button.pressed.connect(confirm)
+	button.button_down.connect(confirm)
 	button.gui_input.connect(func(event: InputEvent):
 		if button.disabled and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT: reject())
 
@@ -30,9 +29,8 @@ func tick() -> void:
 	pass
 
 func confirm() -> void:
-	var now := Time.get_ticks_msec()
-	if now < reject_until or now-last_click < 40: return
-	last_click = now
+	# Native button_down covers mouse, keyboard and controller press.
+	# A fresh valid press is never suppressed by the preceding click/error.
 	_play(CLICK,"ui_click.wav")
 
 func reject() -> void:

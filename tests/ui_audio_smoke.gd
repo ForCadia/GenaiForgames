@@ -9,7 +9,9 @@ func run() -> void:
 	var button := Button.new()
 	root.add_child(button)
 	assert(button.has_meta("ui_audio_bound"))
-	button.pressed.emit()
+	assert(button.button_down.is_connected(audio.confirm))
+	assert(not button.pressed.is_connected(audio.confirm))
+	button.button_down.emit()
 	assert(audio.player.stream == audio.CLICK and audio.player.bus == "SFX")
 	button.disabled = true
 	var click := InputEventMouseButton.new()
@@ -18,7 +20,7 @@ func run() -> void:
 	button.gui_input.emit(click)
 	assert(audio.player.stream == audio.ERROR)
 	audio.confirm()
-	assert(audio.player.stream == audio.ERROR)
+	assert(audio.player.stream == audio.CLICK)
 	await create_timer(0.4).timeout
 	audio.confirm()
 	assert(audio.player.stream == audio.CLICK)
@@ -27,6 +29,5 @@ func run() -> void:
 	button.queue_free()
 	game.queue_free()
 	await process_frame
-	print("UI BUTTON CLICK / DISABLED ERROR / ERROR PRIORITY / SFX BUS: PASS")
+	print("UI BUTTON DOWN / NO RELEASE DUPLICATE / IMMEDIATE AFTER ERROR / SFX BUS: PASS")
 	quit()
-

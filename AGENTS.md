@@ -110,3 +110,5 @@ Latest smart-weapon capstone revision (2026-10-31): auto_weapon now also reloads
 Latest UI audio revision (2026-10-31): both new Downloads sounds are for buttons, not coins. UIAudio uses ui_click.wav (first isolated 0.10–0.62s excerpt of buttonpress_needrevise.wav) for valid presses and ui_error.wav (error_01 source) for disabled/rejected actions; central BaseButton binding avoids duplicates, hover remains silent, SFX/Master settings apply while paused. Coin sound is pending a separate user asset. See UI_SFX.md.
 
 Latest coin audio revision (2026-10-31): actual coin pickup now plays assets/sfx/coin_pickup.wav from the user's coin_misc_05 file when credit succeeds. SFX-controlled, 80ms minimum gap prevents stacked pickup bursts, attract demo remains silent; button sounds remain separate.
+
+Latest button-click revision (2026-10-31): replace normal click with the user's iphone_button_wake_up source, trimming its leading silence (0.414–0.860s excerpt). UIAudio now plays on button_down, not release, with no normal-click throttling or rejection cooldown suppressing new valid presses. Button actions themselves retain their original activation semantics.
