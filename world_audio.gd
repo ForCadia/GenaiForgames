@@ -3,6 +3,7 @@ extends Node
 const MIX := preload("res://audio_mix.gd")
 
 const SOUNDS := {
+	"coin_pickup": preload("res://assets/sfx/coin_pickup.wav"),
 	"armor_ricochet": preload("res://assets/sfx/armor_ricochet.wav"),
 	"light_turret_fire": preload("res://assets/sfx/light_turret_fire.wav"),
 	"heavy_turret_fire": preload("res://assets/sfx/heavy_turret_fire.wav"),
@@ -15,6 +16,7 @@ const SOUNDS := {
 	"boss_particle_fire": preload("res://assets/sfx/heavy_turret_fire.wav"),
 }
 
+var coin_sound_left := 0.0
 var game: Node
 var voices := Node.new()
 var drone_player := AudioStreamPlayer.new()
@@ -98,3 +100,12 @@ func stop_all(keep_explosions := false) -> void:
 		if keep_explosions and player.get_meta("explosion", false): continue
 		player.stop()
 		player.queue_free()
+
+func _process(delta: float) -> void:
+	coin_sound_left = maxf(0.0,coin_sound_left-delta)
+
+func play_coin_pickup() -> bool:
+	if game.attract_mode or game.state != "playing" or coin_sound_left > 0: return false
+	coin_sound_left = 0.08
+	play_cue("coin_pickup")
+	return true

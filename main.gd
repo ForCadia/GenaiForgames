@@ -1333,6 +1333,7 @@ func _update_coins(delta: float) -> void:
 		if coin.landed and _player_hitbox().grow(24 + _meta_effect("pickup")).has_point(coin.pos):
 			if progression.credit(int(coin.value)):
 				run_coins += int(coin.value)
+				world_audio.play_coin_pickup()
 				floaters.append({"pos": coin.pos, "text": "+%d G" % coin.value, "color": YELLOW, "life": 0.65})
 				coin_drops.remove_at(i)
 

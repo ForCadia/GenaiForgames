@@ -108,3 +108,5 @@ Latest Boss appearance revision (2026-10-31): Boss armor appearance now follows 
 Latest smart-weapon capstone revision (2026-10-31): auto_weapon now also reloads an empty selected gun automatically after its last-shot cadence, using normal reload duration. Armor/DPS target selection is unchanged; grenade selection is not interrupted. Node ID/cost/prerequisites and existing purchases remain valid; historical LAB does not apply the capstone.
 
 Latest UI audio revision (2026-10-31): both new Downloads sounds are for buttons, not coins. UIAudio uses ui_click.wav (first isolated 0.10–0.62s excerpt of buttonpress_needrevise.wav) for valid presses and ui_error.wav (error_01 source) for disabled/rejected actions; central BaseButton binding avoids duplicates, hover remains silent, SFX/Master settings apply while paused. Coin sound is pending a separate user asset. See UI_SFX.md.
+
+Latest coin audio revision (2026-10-31): actual coin pickup now plays assets/sfx/coin_pickup.wav from the user's coin_misc_05 file when credit succeeds. SFX-controlled, 80ms minimum gap prevents stacked pickup bursts, attract demo remains silent; button sounds remain separate.
