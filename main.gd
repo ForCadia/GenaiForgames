@@ -106,9 +106,13 @@ var ui_preview := false
 var run_elapsed := 0.0
 var run_deaths := 0
 var overlays: CanvasLayer
+var settings: Node
 
 func _ready() -> void:
 	randomize()
+	settings = preload("res://game_settings.gd").new()
+	settings.name = "Settings"
+	add_child(settings)
 	music = preload("res://music_player.gd").new()
 	music.name = "Music"
 	add_child(music)
@@ -341,7 +345,7 @@ func _grenade() -> void:
 	flash_layer.layer = 8
 	add_child(flash_layer)
 	var flash := ColorRect.new()
-	flash.color = Color(1, 0.95, 0.75, 0.8)
+	flash.color = Color(1, 0.95, 0.75, 0.18 if settings.options.reduced_flash else 0.8)
 	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	flash_layer.add_child(flash)
 	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -1070,7 +1074,8 @@ func _start_death_camera() -> void:
 	var screen_anchor := Vector2(GD.VIEW_SIZE.x * 0.5, GD.VIEW_SIZE.y * 0.62)
 	var target := Transform2D(Vector2(zoom, 0), Vector2(0, zoom), screen_anchor - focus * zoom)
 	death_camera_tween = create_tween()
-	death_camera_tween.tween_property(get_viewport(), "canvas_transform", target, DEATH_CAMERA_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	if settings.options.death_camera:
+		death_camera_tween.tween_property(get_viewport(), "canvas_transform", target, DEATH_CAMERA_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	death_camera_tween.tween_interval(DEATH_CAMERA_HOLD)
 	death_camera_tween.tween_callback(func(): death_ui_ready = true)
 

@@ -1,5 +1,7 @@
 extends Node
 
+const MIX := preload("res://audio_mix.gd")
+
 const SOUNDS := {
 	"armor_ricochet": preload("res://assets/sfx/armor_ricochet.wav"),
 	"light_turret_fire": preload("res://assets/sfx/light_turret_fire.wav"),
@@ -11,13 +13,6 @@ const SOUNDS := {
 	"boss_bomb_explode": preload("res://assets/sfx/boss_bomb_explode.wav"),
 	"boss_particle_charge": preload("res://assets/sfx/heavy_turret_charge.wav"),
 	"boss_particle_fire": preload("res://assets/sfx/heavy_turret_fire.wav"),
-}
-const CUE_GAINS_DB := {
-	"boss_bomb_countdown": -2.0,
-	"boss_bomb_explode": -2.0,
-	"boss_particle_charge": -2.0,
-	"boss_particle_fire": -2.0,
-	"item_pickup": -4.0,
 }
 
 var game: Node
@@ -33,10 +28,12 @@ func _ready() -> void:
 	drone_stream.loop_end = int(round(drone_stream.get_length() * drone_stream.mix_rate))
 	drone_stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 	drone_player.stream = drone_stream
-	drone_player.volume_db = -10.0
+	drone_player.bus = "SFX"
+	drone_player.volume_db = MIX.gain("laser_gate_hover.wav")
 	add_child(drone_player)
 	shield_player.stream = preload("res://assets/sfx/shield_open.wav")
-	shield_player.volume_db = -12.0
+	shield_player.bus = "SFX"
+	shield_player.volume_db = MIX.gain("shield_open.wav")
 	add_child(shield_player)
 
 func set_shield_active(active: bool) -> void:
@@ -67,9 +64,10 @@ func play_cue(cue: String, duration := -1.0, source: Node = null) -> void:
 		voices.remove_child(oldest)
 		oldest.queue_free()
 	var player := AudioStreamPlayer.new()
+	player.bus = "SFX"
 	player.stream = SOUNDS[cue]
 	player.set_meta("explosion", cue in ["enemy_explode", "boss_bomb_explode"])
-	player.volume_db = CUE_GAINS_DB.get(cue, -8.0)
+	player.volume_db = MIX.gain(SOUNDS[cue].resource_path)
 	if duration > 0.0: player.pitch_scale = player.stream.get_length() / duration
 	if cue in ["heavy_turret_charge", "boss_bomb_countdown", "boss_particle_charge"] and is_instance_valid(source):
 		player.set_meta("source_id", source.get_instance_id())

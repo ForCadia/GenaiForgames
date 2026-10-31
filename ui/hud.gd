@@ -12,7 +12,6 @@ var stage_styles: Array[StyleBoxFlat] = []
 var shield: ProgressBar
 var shield_label: Label
 var grenade_label: Label
-var sound_button: Button
 var weapon_label: Label
 var ammo_label: Label
 var penetration_label: Label
@@ -89,16 +88,6 @@ func _ready() -> void:
 	shield_label = F.label(right, "GUARD LOCK", "AmberLabel")
 	shield_label.hide()
 	grenade_label = F.label(right, "[F] GRENADE ×1", "AmberLabel")
-	sound_button = F.button(shield_row, "", func(): AudioServer.set_bus_mute(0, not AudioServer.is_bus_mute(0)), true)
-	sound_button.custom_minimum_size = Vector2(24, 24)
-	sound_button.icon = preload("res://ui/textures/speaker.png")
-	sound_button.tooltip_text = "Mute / unmute [M]"
-	for state in ["normal", "hover", "pressed", "focus"]:
-		var style := root.theme.get_stylebox(state, "Button").duplicate()
-		for side in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(side, 2)
-		sound_button.add_theme_stylebox_override(state, style)
-	sound_button.focus_mode = Control.FOCUS_NONE
-	sound_button.button_down.connect(func(): game._gate_gameplay_input())
 	var messages := F.box(layout)
 	var banner_center := CenterContainer.new()
 	messages.add_child(banner_center)
@@ -190,7 +179,6 @@ func _ready() -> void:
 	reload_label.hide()
 	_ignore_mouse(root)
 	_ignore_mouse(hints_root)
-	sound_button.mouse_filter = Control.MOUSE_FILTER_STOP
 
 func _ignore_mouse(node: Node) -> void:
 	if node is Control: node.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -228,7 +216,7 @@ func _process(delta: float) -> void:
 func sync() -> void:
 	if not is_instance_valid(score_label): return
 	visible = game.state != "start"
-	hints_layer.visible = game.state == "playing" and not game.ui_paused and not game.boss_mode
+	hints_layer.visible = game.state == "playing" and not game.ui_paused and not game.boss_mode and bool(game.settings.options.tutorials)
 	root.modulate.a = 0.35 if game.state in ["dead", "victory"] or game.ui_paused else 1.0
 	if target_score != game.score:
 		target_score = game.score
@@ -249,7 +237,6 @@ func sync() -> void:
 	shield_label.visible = game.guard_lock > 0
 	grenade_label.visible = game.has_grenade
 	grenade_label.text = "[F] GRENADE ×%d" % game.grenade_count
-	sound_button.icon = preload("res://ui/textures/muted.png") if AudioServer.is_bus_mute(0) else preload("res://ui/textures/speaker.png")
 	boss_hud.visible = game.boss_mode
 	if game.boss_mode and not game.boss.is_empty(): boss_hud.apply_state(game.boss.hp, game.GD.BOSS.health, game.boss.armor, game.boss.phase)
 	for i in range(3):

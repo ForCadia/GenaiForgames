@@ -16,13 +16,6 @@ func run() -> void:
 	game.player_hud.sync()
 	assert(game.player_hud.visible)
 	assert(game.player_hud.ammo_label.text == "24 / 24")
-	Input.action_press("fire")
-	game.player_hud.sound_button.button_down.emit()
-	game._process(0.02)
-	assert(game.shots.is_empty() and game.ammo[0] == 24)
-	Input.action_release("fire")
-	game.lab_panel._process(0.01)
-	game.lab_panel._process(0.01)
 	game.set_ui_paused(true)
 	var elapsed: float = game.run_elapsed
 	game._process(10)

@@ -5,6 +5,7 @@ const TITLE := "EVERFRONT"
 const SUBTITLE := "THE FRONT NEVER STOPS"
 const START := "START GAME"
 const CONTROLS := "CONTROLS"
+const SETTINGS := "SETTINGS"
 const QUIT := "QUIT"
 const BACK := "BACK"
 const RESUME := "RESUME"
@@ -31,7 +32,7 @@ const CONTROLS_ROWS := [
 	["SPACE / W", "A / CROSS", "JUMP"], ["S / CTRL", "LEFT STICK DOWN", "CROUCH / SLIDE"],
 	["MOUSE", "RIGHT STICK", "AIM"], ["LMB", "RT / R2", "FIRE"], ["RMB", "LT / L2", "GUARD"],
 	["1 / 2 / 3", "--", "WEAPON SLOTS"], ["Q / WHEEL", "Y / TRIANGLE", "CYCLE WEAPON"],
-	["R", "X / SQUARE", "RELOAD"], ["F", "RB / R1", "SCREEN-CLEAR GRENADE"], ["M", "--", "MUTE"], ["ESC", "--", "PAUSE / BACK"],
+	["R", "X / SQUARE", "RELOAD"], ["F", "RB / R1", "SCREEN-CLEAR GRENADE"], ["ESC", "--", "PAUSE / BACK"],
 ]
 const CAUSES := {"HOSTILE FIRE":"Hit by enemy fire", "BOSS HIGH PARTICLE":"Hit by Boss energy fire", "BOSS BOMB":"Caught in a Boss bomb blast", "HEAVY TURRET LASER":"Hit by a heavy turret laser", "TURRET COLLISION":"Collided with a turret", "GROUND SPIKES // UNBLOCKABLE":"Hit ground spikes", "LASER GATE":"Hit a laser wall"}
 

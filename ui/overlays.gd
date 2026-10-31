@@ -8,6 +8,7 @@ var panel: PanelContainer
 var content: BoxContainer
 var shown := ""
 var controls_open := false
+var settings_open := false
 var fade: Tween
 var best_score := 0
 var rank_animation: Tween
@@ -39,6 +40,7 @@ func _process(_delta: float) -> void:
 	if requested == shown: return
 	shown = requested
 	controls_open = false
+	settings_open = false
 	visible = shown != ""
 	if visible: rebuild()
 
@@ -48,12 +50,19 @@ func rebuild() -> void:
 		content.queue_free()
 	content = F.box(panel)
 	content.add_theme_constant_override("separation", 16)
-	if controls_open:
+	if settings_open:
+		var page := preload("res://ui/settings_page.gd").new()
+		page.game = game
+		page.back = func(): settings_open = false; rebuild()
+		content.add_child(page)
+		page.back_button.grab_focus()
+	elif controls_open:
 		preload("res://ui/menu.gd").build_controls(content, func(): controls_open = false; rebuild())
 	elif shown == "pause":
 		F.label(content, "// SYSTEM STANDBY", "AmberLabel")
 		F.label(content, S.PAUSED, "TitleLabel")
 		F.button(content, S.RESUME, func(): game.set_ui_paused(false)).grab_focus()
+		F.button(content, S.SETTINGS, func(): settings_open = true; rebuild())
 		F.button(content, S.CONTROLS, func(): controls_open = true; rebuild())
 		F.button(content, S.RETURN_TITLE, func(): game.return_to_start(), true)
 	elif shown == "dead":
@@ -123,7 +132,10 @@ func _background_input(event: InputEvent) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if visible and shown == "pause" and event.is_action_pressed("ui_cancel"):
-		if controls_open:
+		if settings_open:
+			settings_open = false
+			rebuild()
+		elif controls_open:
 			controls_open = false
 			rebuild()
 		else: game.set_ui_paused(false)

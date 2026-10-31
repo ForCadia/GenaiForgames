@@ -64,11 +64,11 @@ After death, press R, Space, or Fire to restart the current segment checkpoint. 
 
 ## Lab B additions (2026-10-04)
 
-Weapon audio: rifle/piercer firing, both reloads and weapon switching now use the five student-supplied effects. Reload clips speed up proportionally to fit the actual reload duration, including Fast Reload; firing plays at original speed. M mutes both effects and music. Integration details and source mapping: [SFX.md](SFX.md).
+Weapon audio: rifle/piercer firing, both reloads and weapon switching now use the five student-supplied effects. Reload clips speed up proportionally to fit the actual reload duration, including Fast Reload; firing plays at original speed. Esc → SETTINGS controls effects/music/master volume and mute. Integration details and source mapping: [SFX.md](SFX.md).
 
-Eight additional effects cover light/heavy turret firing, heavy-turret charging, existing item pickup, laser-wall ambience, enemy explosions, and Boss bomb countdown/explosion. Charge/countdown playback fits existing gameplay timing; laser walls share one ambience loop. All effects follow panel pause and M mute. No new pickup spawns or attack mechanics were added.
+Eight additional effects cover light/heavy turret firing, heavy-turret charging, existing item pickup, laser-wall ambience, enemy explosions, and Boss bomb countdown/explosion. Charge/countdown playback fits existing gameplay timing; laser walls share one ambience loop. All effects follow panel pause and the saved Settings audio levels. No new pickup spawns or attack mechanics were added.
 
-Music added on 2026-10-30: **Untitled** plays during ordinary stages and **Chase Mode** during Boss encounters. Music starts after clicking either start button, repeats, and continues through same-track retries. Victory or returning to the menu switches to Untitled. **M** mutes/restores all sound, including while the developer panel is paused. Both normal and developer modes have music. Source records and pending listening checks are in [MUSIC.md](MUSIC.md).
+Music added on 2026-10-30: **Untitled** plays during ordinary stages and **Chase Mode** during Boss encounters. Music starts after clicking either start button, repeats, and continues through same-track retries. Victory or returning to the menu switches to Untitled. **Esc → SETTINGS** adjusts Master/Music/Sound Effects and mute; the M shortcut and HUD audio button have been removed. Both normal and developer modes have music. Source records and pending listening checks are in [MUSIC.md](MUSIC.md).
 
 Verified engine: **4.7.2.stable.official.ed1daf0bf**. Existing gameplay and art remain. The current active campaign has **four segments followed by Boss**; six timeline segments are defined, so older six-segment/grenade notes above do not describe the full active path.
 
@@ -161,3 +161,5 @@ It opens http://127.0.0.1:8000/ and reuses only a server whose homepage matches 
 The Web custom templates must be **web_nothreads_debug.zip / web_nothreads_release.zip**, matching `variant/thread_support=false`. The initial custom templates were threaded despite that setting; corrected on 2026-10-04. The Duke deploy script installs the WASM/PCK MIME rules from `tools/duke.htaccess` without discarding existing rules. The WASM header must be `Content-Type: application/wasm`. Use a private window after updates.
 
 Final review update (2026-10-14): the student confirms latest private-window play, retry and JSON download passed; no repeat requested. Desktop submission checklist distinguishes verified files, user confirmations and unresolved assignment evidence. A processed final video and the requested (Final)(1) PDF could not be located in the searched paths; do not treat the old 99.31-second recording as a compliant final video.
+
+Current audio calibration and available settings: [SOUND_SETTINGS.md](SOUND_SETTINGS.md).
