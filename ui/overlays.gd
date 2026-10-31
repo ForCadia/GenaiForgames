@@ -34,6 +34,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	var requested: String = "pause" if game.ui_paused else game.state
+	if requested == "dead" and not game.death_ui_ready: requested = ""
 	if requested not in ["pause", "dead", "victory"]: requested = ""
 	if requested == shown: return
 	shown = requested

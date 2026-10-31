@@ -15,7 +15,8 @@ const ARM_CELL := Vector2i(192, 204)
 const BODY_BASELINES := [216, 230, 235, 214, 231]
 # Ground-contact frames place a boot on the floor. In-between airborne poses
 # retain a visible rise; only the artwork moves, never the collision root.
-const RUN_SCALE := 0.64
+# Match the original idle shoulder-to-ground span (~148 source pixels).
+const RUN_SCALE := 0.68
 const RUN_BASELINES := [290.0, 293.0, 293.0, 283.0]
 const RUN_SOCKETS := [
  Vector2(174.7,70.2), Vector2(169.8,71.0), Vector2(175.4,71.2), Vector2(175.9,70.8),
@@ -190,6 +191,13 @@ func play_death() -> void:
 	hurt_collision.disabled = true
 	hurtbox.monitorable = false
 	_apply_frames()
+
+func death_animation_duration() -> float:
+	var frames := body.sprite_frames
+	var duration := 0.0
+	for index in range(frames.get_frame_count(&"death")):
+		duration += frames.get_frame_duration(&"death", index)
+	return duration / BODY_FPS
 
 func muzzle_world_position() -> Vector2:
 	_update_muzzle()

@@ -8,7 +8,7 @@ Prompt:
 
 The user subsequently specified an immediate screen flash/clear rather than a travelling projectile. F (or the retained controller RB binding / third weapon slot) consumes one grenade. Visible regular enemies and track hazards are cleared; all hostile bullets, Boss bombs and Boss particles are cleared. Boss receives one direct red-health hit without losing armor. Boss maximum red health is now 24. Existing movement, scrolling and weapon cadence are unchanged.
 
-Each of the four active segments has one pickup event at authored time 0.7 seconds (subject to the existing segment pace); Boss entry supplies one pickup after 0.5 active seconds. Inventory capacity remains one. Retries restore the encounter and its pickup opportunity. `assets/sfx/item_pickup.wav` is byte-identical to the user's Downloads/claimitem.wav and is reused when collected. Historical tester JSON is unchanged.
+Each of the four active segments has one pickup event at authored time 0.7 seconds (subject to the existing segment pace); Boss entry supplies one pickup after 0.5 active seconds. Inventory now accumulates without the previous one-grenade cap and carries across natural stage transitions. Checkpoint retry restores the stage-entry count; a new campaign starts at zero. Retries restore the encounter and its pickup opportunity. `assets/sfx/item_pickup.wav` is byte-identical to the user's Downloads/claimitem.wav and is reused when collected. Historical tester JSON is unchanged.
 
 UI follow-up: checkpoint titles use the 24px LargeLabel variant. Panels, button backgrounds and key-cap boxes are removed through a derived theme without overwriting the user's theme resource. The lower-right weapon HUD is widened while retaining its compact height.
 

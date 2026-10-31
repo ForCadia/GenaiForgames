@@ -58,7 +58,11 @@ var selected_slot := 0
 var ammo := [GD.WEAPONS[0].magazine, GD.WEAPONS[1].magazine]
 var reload_left := 0.0
 var shot_left := 0.0
-var has_grenade := false
+var grenade_count := 0
+var checkpoint_grenades := 0
+var has_grenade: bool:
+	get: return grenade_count > 0
+	set(value): grenade_count = maxi(1, grenade_count) if value else 0
 var boss_grenade_spawned := false
 
 var score := 0
@@ -74,6 +78,7 @@ var distance := 0.0
 var boss_mode := false
 var state := "start"
 var death_delay := 0.0
+var death_ui_ready := false
 var banner := ""
 var banner_time := 0.0
 var notice := ""
@@ -142,7 +147,9 @@ func _process(delta: float) -> void:
 		var over_button := get_viewport().gui_get_hovered_control() is BaseButton
 		if Input.is_action_just_pressed("restart") or Input.is_action_just_pressed("jump") or (Input.is_action_just_pressed("fire") and not over_button):
 			_request_retry("polled_input")
-		if death_delay <= 0 and retry_requested:
+		if death_delay <= 0 and not death_ui_ready:
+			death_ui_ready = true
+		elif death_ui_ready and retry_requested:
 			_retry()
 		queue_redraw()
 		return
@@ -304,8 +311,8 @@ func _fire() -> void:
 
 func _grenade() -> void:
 	if state != "playing" or not has_grenade: return
-	has_grenade = false
-	if selected_slot == 2: selected_slot = weapon_index
+	grenade_count -= 1
+	if selected_slot == 2 and not has_grenade: selected_slot = weapon_index
 	var screen := Rect2(Vector2.ZERO, GD.VIEW_SIZE)
 	for enemy in enemies:
 		if screen.has_point(enemy.pos): _kill_enemy(enemy)
@@ -515,9 +522,9 @@ func _update_world(delta: float) -> void:
 				_die("TRACK IMPACT // UNBLOCKABLE")
 	for pickup in pickups:
 		pickup.pos.x -= scroll * delta
-		if not has_grenade and pickup.pos.distance_to(_player_center()) < 44:
+		if pickup.pos.distance_to(_player_center()) < 44:
 			world_audio.play_cue("item_pickup")
-			has_grenade = true; pickup.collected = true; _emit(pickup.pos, CYAN, 20, 180); _notify("GRENADE ACQUIRED // PRESS F / RB", CYAN, 1.2)
+			grenade_count += 1; pickup.collected = true; _emit(pickup.pos, CYAN, 20, 180); _notify("GRENADE +1 // TOTAL %d // F / RB" % grenade_count, CYAN, 1.2)
 	enemies = enemies.filter(func(e): return not e.dead and e.pos.x > -110)
 	obstacles = obstacles.filter(func(o): return o.x > -100)
 	pickups = pickups.filter(func(p): return not p.collected and p.pos.x > -80)
@@ -605,7 +612,8 @@ func _die(cause: String) -> void:
 	lab.finish(score, cause, player, segment, boss_mode, true)
 	retry_requested = false
 	run_deaths += 1
-	state = "dead"; death_delay = 0.35; banner = cause; _emit(_player_center(), RED, 40, 300)
+	state = "dead"; death_delay = player_visual.death_animation_duration(); death_ui_ready = false
+	banner = cause; _emit(_player_center(), RED, 40, 300)
 	if boss_mode:
 		boss_actor.set_combat_enabled(false)
 		_clear_boss_attacks()
@@ -614,6 +622,7 @@ func _die(cause: String) -> void:
 	player_hud.follow_hitbox(_player_hitbox())
 
 func _start_segment(index: int, preserve_motion := false) -> void:
+	checkpoint_grenades = grenade_count
 	music.play_track(false)
 	segment = index; segment_time = 0; next_event = 0; segment_transition_pending = false; boss_mode = false
 	checkpoint_score = score; checkpoint_stats = stats.duplicate(true); checkpoint_ammo = ammo.duplicate()
@@ -626,6 +635,7 @@ func _start_segment(index: int, preserve_motion := false) -> void:
 	banner = "CHECKPOINT // " + GD.SEGMENTS[index].title; banner_time = 2
 
 func _start_boss(preserve_motion := false) -> void:
+	checkpoint_grenades = grenade_count
 	boss_grenade_spawned = false
 	music.play_track(true)
 	boss_mode = true; segment_time = 0; segment_transition_pending = false; _clear_world(); _reset_player(preserve_motion)
@@ -759,6 +769,7 @@ func _retry() -> void:
 		score = checkpoint_score
 		stats = checkpoint_stats.duplicate(true)
 		ammo = checkpoint_ammo.duplicate()
+		grenade_count = checkpoint_grenades
 		weapon_index = checkpoint_weapon_index
 		distance = checkpoint_distance
 		if boss_mode: _start_boss()
@@ -769,6 +780,7 @@ func _retry() -> void:
 	_start_lab_run()
 
 func _reset_campaign() -> void:
+	grenade_count = 0
 	retry_requested = false
 	weapon_index = 0
 	ammo = [GD.WEAPONS[0].magazine, GD.WEAPONS[1].magazine]
@@ -844,6 +856,7 @@ func start_game(mode := "checkpoint", parameter_index := 0, development := false
 	get_tree().paused = false
 
 func return_to_start() -> void:
+	grenade_count = 0
 	ui_paused = false
 	weapon_audio.stop_all()
 	music.return_to_menu()
@@ -869,6 +882,7 @@ func return_to_start() -> void:
 func _reset_player(preserve_motion := false) -> void:
 	weapon_audio.stop_all()
 	death_delay = 0.0
+	death_ui_ready = false
 	player_visual.set_primary_weapon(weapon_index)
 	# Natural progression keeps the current jump/slide; retries still reset fully.
 	if not preserve_motion:
@@ -896,7 +910,7 @@ func _clear_world() -> void:
 		if is_instance_valid(gate): gate.queue_free()
 	laser_gates.clear()
 	_clear_boss_attacks()
-	particles.clear(); floaters.clear(); notice = ""; notice_time = 0.0; has_grenade = false
+	particles.clear(); floaters.clear(); notice = ""; notice_time = 0.0
 	boss.clear()
 	if is_instance_valid(boss_actor): boss_actor.reset_for_battle(false)
 

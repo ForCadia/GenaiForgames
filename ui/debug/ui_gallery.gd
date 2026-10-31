@@ -61,6 +61,7 @@ func show_page(index: int) -> void:
 	if index == 5: game.set_ui_paused(true)
 	if index == 6:
 		game.state = "dead"
+		game.death_ui_ready = true
 		game.banner = "HOSTILE FIRE"
 	if index == 7: game.state = "victory"
 	if index == 8:

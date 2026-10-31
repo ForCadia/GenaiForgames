@@ -19,6 +19,10 @@ func run() -> void:
 	game.pickups[0].pos = game._player_center()
 	game._update_world(0)
 	assert(game.has_grenade and game.pickups.is_empty())
+	game._spawn_grenade_pickup()
+	game.pickups[0].pos = game._player_center()
+	game._update_world(0)
+	assert(game.grenade_count == 2)
 	assert(game.world_audio.voices.get_child_count() > 0)
 	game._spawn_enemy("unarmored", 0, false)
 	game.turrets[0].position.x = 500
@@ -29,8 +33,10 @@ func run() -> void:
 	Input.action_press("use_grenade")
 	game._update_player(0)
 	Input.action_release("use_grenade")
-	assert(not game.has_grenade and game.threats.is_empty() and game.score > prior_score)
+	assert(game.grenade_count == 1 and game.threats.is_empty() and game.score > prior_score)
 	assert(not outside.is_queued_for_deletion())
+	game._start_segment(1)
+	assert(game.grenade_count == 1)
 	game.return_to_start()
 	game.start_game("checkpoint", 0, false, true)
 	game.lab_panel.blocked = false

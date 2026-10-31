@@ -33,6 +33,7 @@ var banner_tween: Tween
 var tutorial_panel: PanelContainer
 var tutorial_keys: BoxContainer
 var intro_panel: PanelContainer
+var hints_layer: CanvasLayer
 var selected_slot_style := StyleBoxFlat.new()
 var inactive_slot_style := StyleBoxEmpty.new()
 
@@ -93,13 +94,17 @@ func _ready() -> void:
 	banner_center.add_child(banner_panel)
 	banner_label = F.label(banner_panel, "", "LargeLabel")
 	banner_label.modulate = P.AMBER
+	hints_layer = CanvasLayer.new()
+	hints_layer.layer = 90
+	hints_layer.hide()
+	add_child(hints_layer)
+	var hints_root := F.root(hints_layer)
+	var hints_center := CenterContainer.new()
+	hints_root.add_child(hints_center)
+	hints_center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var hints := VBoxContainer.new()
-	root.add_child(hints)
-	hints.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	hints.offset_left = 12
-	hints.offset_right = 538
-	hints.offset_top = -72
-	hints.offset_bottom = -8
+	hints_center.add_child(hints)
+	hints.custom_minimum_size.x = 560
 	hints.add_theme_constant_override("separation", 4)
 	var hint_style := StyleBoxFlat.new()
 	hint_style.bg_color = Color(0.02, 0.035, 0.05, 0.78)
@@ -168,6 +173,7 @@ func _ready() -> void:
 	reload_label = F.label(weapons, "MAGAZINE", "MutedLabel")
 	reload_label.hide()
 	_ignore_mouse(root)
+	_ignore_mouse(hints_root)
 	sound_button.mouse_filter = Control.MOUSE_FILTER_STOP
 
 func _ignore_mouse(node: Node) -> void:
@@ -202,6 +208,7 @@ func _process(delta: float) -> void:
 func sync() -> void:
 	if not is_instance_valid(score_label): return
 	visible = game.state != "start"
+	hints_layer.visible = game.state == "playing" and not game.ui_paused and not game.boss_mode
 	root.modulate.a = 0.35 if game.state in ["dead", "victory"] or game.ui_paused else 1.0
 	if target_score != game.score:
 		target_score = game.score
@@ -218,6 +225,7 @@ func sync() -> void:
 	shield.modulate = P.RED if game.guard_lock > 0 else (P.AMBER if game.guard_energy < 25 else Color.WHITE)
 	shield_label.visible = game.guard_lock > 0
 	grenade_label.visible = game.has_grenade
+	grenade_label.text = "[F] GRENADE ×%d" % game.grenade_count
 	sound_button.icon = preload("res://ui/textures/muted.png") if AudioServer.is_bus_mute(0) else preload("res://ui/textures/speaker.png")
 	boss_hud.visible = game.boss_mode
 	if game.boss_mode and not game.boss.is_empty(): boss_hud.apply_state(game.boss.hp, game.GD.BOSS.health, game.boss.armor, game.boss.phase)
@@ -227,7 +235,7 @@ func sync() -> void:
 		slots[i].modulate.a = 0.35 if i == 2 and not game.has_grenade else 1.0
 	if game.selected_slot == 2:
 		weapon_label.text = S.WEAPONS[2]
-		ammo_label.text = "1 / 1" if game.has_grenade else "0 / 1"
+		ammo_label.text = "× %02d" % game.grenade_count
 		penetration_label.text = "BLAST"
 		ammo_bar.value = 100 if game.has_grenade else 0
 	if game.banner != last_banner and game.banner_time > 0 and game.state == "playing":

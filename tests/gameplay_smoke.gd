@@ -85,7 +85,8 @@ func _run() -> void:
 	# A death in midair still respawns on the ground at the full Boss checkpoint.
 	game._die("AIRBORNE_RETRY_CHECK")
 	game._request_retry("keyboard")
-	game._process(0.36)
+	game._process(game.player_visual.death_animation_duration())
+	game._process(0.01)
 	assert(game.state == "playing" and game.boss_mode)
 	assert(game.player.y == GameData.GROUND_Y and game.velocity_y == 0.0)
 	assert(game.boss.hp == GameData.BOSS.health and game.boss.armor == GameData.BOSS.armor_per_cycle)
