@@ -15,7 +15,7 @@ const ARM_CELL := Vector2i(192, 204)
 const BODY_BASELINES := [216, 230, 235, 214, 231]
 # Ground-contact frames place a boot on the floor. In-between airborne poses
 # retain a visible rise; only the artwork moves, never the collision root.
-const RUN_SCALE := 0.72
+const RUN_SCALE := 0.64
 const RUN_BASELINES := [290.0, 293.0, 293.0, 283.0]
 const RUN_SOCKETS := [
  Vector2(174.7,70.2), Vector2(169.8,71.0), Vector2(175.4,71.2), Vector2(175.9,70.8),
@@ -42,7 +42,7 @@ const HELMET_X_FROM_SOCKET := 16.0
 const HELMET_BOTTOM_FROM_SOCKET_TOP := 20.0
 const HELMET_NECK_SOURCE := Vector2(110, 152)
 const BODY_FPS := 12.0
-const RUN_FPS := 14.0
+const RUN_FPS := 22.0
 const RUN_FRAME_COUNT := 16
 const FIRE_FRAME_TIME := 0.05
 const ARM_SCALE := Vector2(0.75, 0.75)

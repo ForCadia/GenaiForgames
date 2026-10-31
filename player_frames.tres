@@ -333,7 +333,7 @@ animations = [{
 "frames": [{"duration": 1.0, "texture": SubResource("RunOlive_00")}, {"duration": 1.0, "texture": SubResource("RunOlive_01")}, {"duration": 1.0, "texture": SubResource("RunOlive_02")}, {"duration": 1.0, "texture": SubResource("RunOlive_03")}, {"duration": 1.0, "texture": SubResource("RunOlive_04")}, {"duration": 1.0, "texture": SubResource("RunOlive_05")}, {"duration": 1.0, "texture": SubResource("RunOlive_06")}, {"duration": 1.0, "texture": SubResource("RunOlive_07")}, {"duration": 1.0, "texture": SubResource("RunOlive_08")}, {"duration": 1.0, "texture": SubResource("RunOlive_09")}, {"duration": 1.0, "texture": SubResource("RunOlive_10")}, {"duration": 1.0, "texture": SubResource("RunOlive_11")}, {"duration": 1.0, "texture": SubResource("RunOlive_12")}, {"duration": 1.0, "texture": SubResource("RunOlive_13")}, {"duration": 1.0, "texture": SubResource("RunOlive_14")}, {"duration": 1.0, "texture": SubResource("RunOlive_15")}],
 "loop": 1,
 "name": &"run",
-"speed": 14.0
+"speed": 22.0
 }, {
 "frames": [{
 "duration": 1.0,

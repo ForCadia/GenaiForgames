@@ -29,7 +29,7 @@ func _run() -> void:
 	preview.start_scrolling()
 	assert(preview.body_state == "run" and preview.body.frame == 0)
 	for frame in range(16):
-		preview.body_time = (float(frame) + 0.1) / 14.0
+		preview.body_time = (float(frame) + 0.1) / PlayerVisual.RUN_FPS
 		preview._apply_frames()
 		assert(preview.body.frame == frame)
 		var texture: AtlasTexture = preview.body.sprite_frames.get_frame_texture(&"run", frame)
