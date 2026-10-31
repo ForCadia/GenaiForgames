@@ -7,7 +7,7 @@ func _run() -> void:
 	assert("--lab-test" in OS.get_cmdline_user_args(), "Use -- --lab-test; never write test data into playtest logs")
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)
-	game.start_game("checkpoint", 0)
+	game.start_game("checkpoint", 0, true)
 	game.lab_panel._process(0.01)
 	game.lab_panel._process(0.01)
 	await process_frame

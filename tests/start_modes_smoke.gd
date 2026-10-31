@@ -47,6 +47,37 @@ func _run() -> void:
 		"scroll_multiplier": GameData.SCROLL_MULTIPLIER, "laser_gate_speed": 315.0,
 		"reload_multiplier": 1.0, "particles_enabled": true}
 	check(ui.baseline == expected, "current default baseline matches game constants")
+	# Ordinary play exposes no test UI, hotkeys, telemetry or non-default presets.
+	check(not game.developer_mode and game.lab.events.is_empty() and game.lab.session_id.is_empty(), "menu creates no test session")
+	Input.action_press("fire")
+	game.start_screen.start_button.pressed.emit()
+	game._process(0.02)
+	check(game.shots.is_empty() and game.ammo[0] == 24, "ordinary start click blocked")
+	Input.action_release("fire")
+	release_gate(game)
+	check(not ui.visible and not game.developer_mode and not game.lab.enabled, "ordinary play hides and disables testing")
+	for key in [KEY_F1, KEY_F2, KEY_F3, KEY_T]:
+		var event := InputEventKey.new()
+		event.physical_keycode = key
+		event.pressed = true
+		ui._input(event)
+	ui.toggle_panel()
+	ui.apply_preset(1)
+	game.set_restart_mode("campaign")
+	check(not paused and not ui.expanded and game.restart_mode == "checkpoint" and ui.values == expected, "ordinary play ignores developer controls")
+	check(not game.lab.export_json(), "ordinary play cannot export test data")
+	game.score = 400
+	game._start_segment(2)
+	game._die("ORDINARY_DEATH")
+	request_retry(game)
+	game._process(0.36)
+	check(game.state == "playing" and game.segment == 2 and game.score == 400, "ordinary checkpoint retry works")
+	check(game.lab.events.is_empty() and game.lab.run_number == 0 and not game.lab.active, "ordinary death/retry creates no test records")
+	var escape := InputEventKey.new()
+	escape.keycode = KEY_ESCAPE
+	escape.pressed = true
+	game._unhandled_input(escape)
+	check(game.state == "start" and paused and game.start_screen.visible, "Escape returns ordinary play to menu")
 	for preset in [1, 2]:
 		var changed: Array[String] = []
 		var values: Dictionary = ui.preset_values(preset)
@@ -57,16 +88,18 @@ func _run() -> void:
 	check(is_equal_approx(ui.preset_values(2).reload_multiplier, 0.8), "reload -20%")
 	for mode_index in range(2):
 		for preset in range(3):
-			game.start_screen.restart_selector.select(mode_index)
-			game.start_screen.parameter_selector.select(preset)
 			var starts_before: int = game.lab.run_number
 			Input.action_press("fire")
-			game.start_screen.start_button.pressed.emit()
+			game.start_screen.developer_button.pressed.emit()
+			check(game.developer_mode and ui.visible and game.lab.enabled, "developer button enables test tools")
+			check(game.restart_mode == "checkpoint" and ui.values == expected, "developer entry starts with defaults")
+			check(game.lab.run_number == starts_before + 1, "developer entry creates exactly one run")
+			game.set_restart_mode("checkpoint" if mode_index == 0 else "campaign")
+			ui.apply_preset(preset)
 			game._process(0.02)
 			check(game.shots.is_empty() and game.ammo[0] == 24 and game.lab.duration == 0, "start click/held fire blocked")
 			Input.action_release("fire")
 			release_gate(game)
-			check(game.lab.run_number == starts_before + 1, "one start for each of six combinations")
 			check(game.lab.snapshot == ui.preset_values(preset), "full start snapshot")
 			check(game.lab.restart_mode == ("checkpoint" if mode_index == 0 else "campaign"), "selected restart mode")
 			check(game.lab.parameter_mode == ui.PRESET_NAMES[preset], "consistent mode name")
@@ -81,9 +114,8 @@ func _run() -> void:
 					check(is_equal_approx(game.reload_left, GameData.WEAPONS[weapon].reload * 0.8), "reload multiplier affects actual weapons")
 			game.return_to_start()
 			check(paused and game.state == "start" and not game.lab.active, "return pauses run")
-			check(game.start_screen.restart_selector.selected == mode_index and game.start_screen.parameter_selector.selected == preset, "return preserves choices")
 	check(game.lab.variant_statistics().A.failures == 0 and game.lab.variant_statistics().B.retries == 0, "six administrative starts pollute no outcomes")
-	game.start_game("checkpoint", 0)
+	game.start_game("checkpoint", 0, true)
 	release_gate(game)
 	# A restores the ordinary segment's entry state, not the death state.
 	game.score = 400
@@ -170,6 +202,24 @@ func _run() -> void:
 		if event.event == "retry":
 			check(event.has("failure_to_input_seconds") and event.has("failure_to_restart_seconds"), "JSON retry delays")
 	check(game.lab.export_json(), "JSON export serializes")
+	# Switching back to ordinary play restores defaults without deleting or adding
+	# to the developer session. Re-entering development resumes that session.
+	ui.apply_preset(2)
+	game.set_restart_mode("campaign")
+	game.return_to_start()
+	var preserved_events: int = game.lab.events.size()
+	var preserved_runs: int = game.lab.run_number
+	var preserved_session: String = game.lab.session_id
+	game.start_screen.start_button.pressed.emit()
+	release_gate(game)
+	check(not ui.visible and game.restart_mode == "checkpoint" and ui.values == expected, "ordinary entry clears prior developer settings")
+	game._die("ORDINARY_AFTER_DEVELOPMENT")
+	request_retry(game)
+	game._process(0.36)
+	game.return_to_start()
+	check(game.lab.events.size() == preserved_events and game.lab.run_number == preserved_runs and game.lab.session_id == preserved_session, "ordinary play preserves developer archive without mixing data")
+	game.start_screen.developer_button.pressed.emit()
+	check(game.lab.session_id == preserved_session and game.lab.run_number == preserved_runs + 1, "developer re-entry retains session")
 	var session: String = game.lab.session_id
 	ui.new_tester()
 	check(game.state == "start" and game.lab.session_id != session and game.lab.run_number == 0, "new tester begins at menu in new session")

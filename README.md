@@ -65,8 +65,9 @@ After death, press R, Space, or Fire to restart the current segment checkpoint. 
 
 Verified engine: **4.7.2.stable.official.ed1daf0bf**. Existing gameplay and art remain. The current active campaign has **four segments followed by Boss**; six timeline segments are defined, so older six-segment/grenade notes above do not describe the full active path.
 
-- First choose A/B and 原版 / 慢速 / 快速换弹 on the static start screen, then click **开始游戏 / START**. Default is **A + 原版**. World, timers and run telemetry stay paused until Start. Each start applies the selected complete combination once and starts at campaign entry; held keys and clicks cannot fire through the menu.
-- **F1** or the LAB B button opens/closes the existing tuning panel. The original 12 controls remain; a single **Reload time multiplier** is added. Gameplay, enemy timers and animations pause while open. Scroll to reach all controls, particle toggle and return/reset/export/session buttons.
+- Click **开始游戏** for ordinary play with **A + Original**. The start screen has no preset selectors. Ordinary play hides the lab UI and disables test shortcuts and telemetry recording/export. **Esc** returns to the start screen. World and timers stay paused on the menu; held keys and clicks cannot fire through either start button.
+- Click **开发模式** to enable the lab tools and local test recording. This also starts at campaign entry with **A + Original**; choose other combinations in the in-game panel. The controls and data operations below apply only to development mode. Returning to ordinary play restores defaults and retains previous developer records without adding ordinary runs to them.
+- In development mode, **F1** or the LAB B button opens/closes the existing tuning panel. The original 12 controls remain; a single **Reload time multiplier** is added. Gameplay, enemy timers and animations pause while open. Scroll to reach all controls, particle toggle and return/reset/export/session buttons.
 - An edit takes effect immediately and starts a clean campaign attempt; JSON records an administrative parameter-change ending. Restore Defaults resets all values once. Do not count these resets as player retries.
 - **T** exports JSON (unused by original controls); while typing a number, use the export button. Web downloads the session; desktop archives it under Godot `user://lab_b_telemetry` and opens the folder. Copy actual tester exports into `telemetry/`.
 - **New tester** archives/exports first, retains old files and returns to the menu with a new session and zero runs. Check the download is saved before handing over. No network/AI telemetry calls. **返回开始界面** retains the existing session/data; an active run ends as administrative_return_to_start.
@@ -74,6 +75,8 @@ Verified engine: **4.7.2.stable.official.ed1daf0bf**. Existing gameplay and art 
 - **F2 = A / Checkpoint**, **F3 = B / Campaign**, also selectable in the panel. A restores segment entry (full Boss battle on Boss death); B always restores campaign entry. A restores checkpoint score/kill counters/ammo/weapon/scroll distance; B starts with zero score/counters/distance, rifle and 24/5 ammo. All temporary threats/player timers clear. Same failures, score-award rules and controls. Switching mode while playing produces administrative_variant_switch and resets the campaign; it is not a retry. Existing 1/2/3 weapon keys remain.
 
 ### Parameter modes and test procedure
+
+The 2026-10-30 menu revision is `lab-b-0.5`: developer tools are opt-in, ordinary play is not recorded, and gameplay parameters remain the lab-b-0.4 baseline. Older deployment and human-test records below retain their historical versions.
 
 Original baseline verified from game constants and git 613233e; it is never captured from temporary sliders. All twelve original defaults remain. Added reload multiplier defaults to 1.0. See PROTOTYPE.md for the full parameter table.
 
@@ -83,7 +86,7 @@ Original baseline verified from game constants and git 613233e; it is never capt
 | 慢速 | scroll multiplier 1.5→1.275 (−15%) | first-segment scroll 330→280.5 px/s; event times and independent gate speed unchanged |
 | 快速换弹 | reload multiplier 1.0→0.8 (−20%) | rifle/piercer reload 0.96/1.44 s; animation and HUD use the same duration |
 
-These three modes combine with A/B to give six choices. The panel uses the same names; a selection changes the full snapshot with exactly one administrative_parameter_change reset. Manual edits display 自定义. Selecting 原版 restores all original values. Returning to the start screen remembers the last named choice; Start reapplies it, including after custom edits. Former Baseline / Loop presets are superseded.
+These three modes combine with A/B to give six choices inside the developer panel. A selection changes the full snapshot with exactly one administrative_parameter_change reset. Manual edits display 自定义. Selecting 原版 restores all original values. Either start-screen button resets to A + Original, including after custom edits. Former Baseline / Loop presets are superseded.
 
 For parameter rounds, fix **A** and begin each single-variable test from Original; keep the panel closed while testers play. The student reverted the higher-speed and higher-jump trials and authorized the retained airtime revision described below. Formal A/B uses **Original only** within the same build and identical parameter snapshots; the same tester tries both, with alternating orders. Presets alone do not count as measured iterations. Do not backdate the still-incomplete Prototype Card.
 

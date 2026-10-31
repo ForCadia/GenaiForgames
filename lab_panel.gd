@@ -142,7 +142,7 @@ func _add_button(text: String, action: Callable) -> void:
 	body.add_child(button)
 
 func _input(event: InputEvent) -> void:
-	if game.state == "start": return
+	if not game.developer_mode or game.state == "start": return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.physical_keycode == KEY_F1:
 			toggle_panel()
@@ -158,6 +158,7 @@ func _editing_text() -> bool:
 	return get_viewport().gui_get_focus_owner() is LineEdit
 
 func toggle_panel() -> void:
+	if not game.developer_mode or game.state == "start": return
 	expanded = not expanded
 	panel.visible = expanded
 	blocked = true
@@ -202,6 +203,7 @@ func preset_values(index: int) -> Dictionary:
 	return result
 
 func apply_preset(index: int, reset_run := true) -> void:
+	if reset_run and not game.developer_mode: return
 	if index < 0 or index > 2: return
 	selected_parameter_index = index
 	values = preset_values(index)
@@ -218,9 +220,11 @@ func reset_defaults() -> void:
 	apply_preset(0)
 
 func export_data() -> void:
+	if not game.developer_mode: return
 	status_label.text = "JSON download requested; save it in telemetry/." if game.lab.export_json() else game.lab.last_error
 
 func new_tester() -> void:
+	if not game.developer_mode: return
 	# Archive first. Existing session files are never deleted.
 	game.lab.finish(game.score, "administrative_session_change", game.player, game.segment, game.boss_mode)
 	game.lab.record("session_end")

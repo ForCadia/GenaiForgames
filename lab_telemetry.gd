@@ -1,6 +1,7 @@
 extends RefCounted
 
-const VERSION := "lab-b-0.4"
+const VERSION := "lab-b-0.5"
+var enabled := false
 var session_id := ""
 var run_id := ""
 var events: Array[Dictionary] = []
@@ -26,9 +27,16 @@ func _init() -> void:
 	for key in preload("res://lab_panel.gd").SPECS:
 		snapshot[key] = preload("res://lab_panel.gd").SPECS[key][1]
 	snapshot["particles_enabled"] = true
-	new_session()
+
+func set_enabled(value: bool) -> void:
+	enabled = value
+	if enabled and session_id.is_empty(): new_session()
+	if not enabled:
+		active = false
+		clear_pending_retry()
 
 func new_session() -> void:
+	if not enabled: return
 	session_id = "%s-%s" % [Time.get_unix_time_from_system(), Time.get_ticks_usec()]
 	run_id = ""
 	run_number = 0
@@ -49,6 +57,7 @@ func set_location(current_segment: int, is_boss: bool) -> void:
 	boss = is_boss
 
 func record(kind: String, details: Dictionary = {}) -> void:
+	if not enabled: return
 	var event := {"event": kind, "session_id": session_id, "run_id": run_id,
 		"timestamp": Time.get_datetime_string_from_system(true) + "Z",
 		"monotonic_ms": Time.get_ticks_msec(), "version": VERSION,
@@ -61,6 +70,7 @@ func record(kind: String, details: Dictionary = {}) -> void:
 	persist()
 
 func start(parameters: Dictionary, mode: String, preset: String, current_segment: int, is_boss: bool, score: int) -> void:
+	if not enabled: return
 	snapshot = parameters.duplicate(true)
 	restart_mode = mode
 	variant = "A" if mode == "checkpoint" else "B"
@@ -113,7 +123,7 @@ func document() -> Dictionary:
 		"variant_summary": variant_statistics(), "events": events}
 
 func persist() -> bool:
-	if not persistence: return true
+	if not enabled or not persistence: return true
 	var err := DirAccess.make_dir_recursive_absolute(storage)
 	if err != OK:
 		last_error = "Local telemetry directory unavailable: %s" % err
@@ -127,6 +137,7 @@ func persist() -> bool:
 	return true
 
 func export_json() -> bool:
+	if not enabled: return false
 	var data := JSON.stringify(document(), "\t")
 	if JSON.parse_string(data) == null:
 		last_error = "JSON validation failed"

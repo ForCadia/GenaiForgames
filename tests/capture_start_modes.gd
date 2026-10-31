@@ -12,7 +12,13 @@ func _capture() -> void:
 	await RenderingServer.frame_post_draw
 	DirAccess.make_dir_recursive_absolute("res://tmp")
 	assert(root.get_texture().get_image().save_png("res://tmp/start-screen.png") == OK)
-	game.start_game("campaign", 2)
+	game.start_screen.start_button.pressed.emit()
+	game.set_process(false)
+	await process_frame
+	await RenderingServer.frame_post_draw
+	assert(root.get_texture().get_image().save_png("res://tmp/ordinary-game.png") == OK)
+	game.return_to_start()
+	game.start_screen.developer_button.pressed.emit()
 	game.set_process(false)
 	game.lab_panel.toggle_panel()
 	await process_frame

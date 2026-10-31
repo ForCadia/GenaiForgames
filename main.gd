@@ -33,6 +33,7 @@ var lab = preload("res://lab_telemetry.gd").new()
 var lab_panel: CanvasLayer
 var retry_requested := false
 var restart_mode := "checkpoint"
+var developer_mode := false
 var start_screen: CanvasLayer
 var checkpoint_weapon_index := 0
 var checkpoint_distance := 0.0
@@ -145,6 +146,10 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if state != "start" and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		return_to_start()
+		get_viewport().set_input_as_handled()
+		return
 	if state == "start" or lab_panel.blocked: return
 	if state == "dead":
 		for action in ["restart", "jump", "fire"]:
@@ -668,6 +673,7 @@ func _new_run(reason := "administrative_restart") -> void:
 	queue_redraw()
 
 func set_restart_mode(mode: String) -> void:
+	if not developer_mode: return
 	if mode not in ["checkpoint", "campaign"] or mode == restart_mode: return
 	var previous := restart_mode
 	lab.finish(score, "administrative_variant_switch", player, segment, boss_mode)
@@ -690,12 +696,19 @@ func _gate_gameplay_input() -> void:
 	lab_panel.release_pending = not lab_panel.expanded
 	lab_panel.release_frames = 1
 
-func start_game(mode: String, parameter_index: int) -> void:
+func start_game(mode := "checkpoint", parameter_index := 0, development := false) -> void:
 	if state != "start": return
-	set_restart_mode(mode)
+	developer_mode = development
+	lab.set_enabled(developer_mode)
+	if developer_mode:
+		set_restart_mode(mode)
+	else:
+		restart_mode = "checkpoint"
+		parameter_index = 0
+	lab_panel.mode_selector.select(0 if restart_mode == "checkpoint" else 1)
 	lab_panel.apply_preset(parameter_index, false)
 	start_screen.hide()
-	lab_panel.show()
+	lab_panel.visible = developer_mode
 	lab_panel.expanded = false
 	lab_panel.panel.hide()
 	_new_run()
@@ -713,7 +726,7 @@ func return_to_start() -> void:
 	lab_panel.blocked = true
 	lab_panel.release_pending = false
 	lab_panel.hide()
-	start_screen.show_selection(restart_mode, lab_panel.selected_parameter_index)
+	start_screen.show()
 	get_tree().paused = true
 	queue_redraw()
 
@@ -860,6 +873,7 @@ func _draw_victory() -> void:
 	draw_string(ThemeDB.fallback_font, Vector2(0, 550), "PRESS R / SPACE TO REDEPLOY", HORIZONTAL_ALIGNMENT_CENTER, 960, 14, YELLOW)
 
 func lab_parameters_changed(key: String, manual := true) -> void:
+	if not developer_mode: return
 	if manual: lab_panel.mark_custom()
 	lab.finish(score, "administrative_parameter_change", player, segment, boss_mode)
 	lab.record("parameter_change", {"changed": key, "new_parameters": lab_panel.values.duplicate(true),

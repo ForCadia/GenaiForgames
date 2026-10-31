@@ -53,11 +53,11 @@ Slow reduces scrolling world speed 15%: first segment 330→280.5 px/s; Boss 277
 
 ## Controls and session protocol
 
-Default **A + Original**. The start screen pauses world, enemies, timers and animations. No run exists or accumulates time until clicking START. That button applies the chosen complete combination once and starts at campaign entry. There are six combinations; held inputs and the start click are gated until release.
+Menu revision **2026-10-30 / lab-b-0.5**: **开始游戏** starts ordinary play with **A + Original**, without lab UI, lab shortcuts or telemetry recording/export. **开发模式** starts with the same defaults and enables the existing panel and local telemetry. There are no preset selectors on the start screen; all six experimental combinations remain available inside the developer panel. Gameplay parameters are unchanged from lab-b-0.4. The menu pauses world, enemies, timers and animations; held inputs and either start click are gated until release.
 
-F1 opens the existing panel; F2 selects A, F3 selects B; 1/2/3 retain weapon slots. R / Space / Fire retries directly without returning to the menu and retains the current named mode or custom values. A mode switch restarts from campaign entry with administrative_variant_switch. A parameter selection/edit causes exactly one administrative_parameter_change reset; selecting the same A/B mode is a no-op.
+In developer mode, F1 opens the existing panel; F2 selects A, F3 selects B. Both entry modes retain 1/2/3 weapon slots and R / Space / Fire retries. Developer retries retain the current named mode or custom values. A mode switch restarts from campaign entry with administrative_variant_switch. A parameter selection/edit causes exactly one administrative_parameter_change reset; selecting the same A/B mode is a no-op.
 
-Return to start ends an active run with administrative_return_to_start, retains session/data and remembers the last selected options. Starting again applies the selected full named mode, not leftover custom sliders. For Custom, the menu remembers the last named selection and states that starting will reapply it. New tester archives/exports the old session and returns to the menu with zero runs in a new session; downloads must be saved and checked before handing over. Automated artifacts stay in ignored tmp/, never telemetry/.
+Esc returns either mode to the start screen; the developer panel also retains its Return button. An active developer run ends with administrative_return_to_start and retains session/data. Either start button restores A + Original. Ordinary runs do not add events to an existing developer session; re-entering developer mode resumes that session. New tester archives/exports the old session and returns to the menu with zero runs in a new session; downloads must be saved and checked before handing over. Automated artifacts stay in ignored tmp/, never telemetry/.
 
 ## Restoration and measurement definitions
 
