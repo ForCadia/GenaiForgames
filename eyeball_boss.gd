@@ -26,6 +26,9 @@ enum AttackState {
 	DEAD,
 }
 
+@export var armor_per_layer := preload("res://combat_balance.gd").BOSS_ARMOR_PER_LAYER
+var armor_hp := 18
+
 @export var attack_interval := 2.5
 @export var telegraph_time := 0.72
 @export var recovery_time := 0.45
@@ -54,6 +57,7 @@ func _ready() -> void:
 func reset_for_battle(enabled: bool) -> void:
 	sound_requested.emit("stop", -1.0)
 	form = BossForm.DOUBLE_ARMOR
+	armor_hp = armor_per_layer
 	attack_state = AttackState.IDLE
 	state_time = 1.15
 	idle_frame_time = 0.0
@@ -133,6 +137,7 @@ func advance(delta: float, player_position: Vector2) -> void:
 		AttackState.ARMOR_BREAK:
 			if state_time <= 0.0:
 				form = mini(int(form) + 1, int(BossForm.WEAK_POINT)) as BossForm
+				armor_hp = armor_per_layer if form != BossForm.WEAK_POINT else 0
 				form_changed.emit(form)
 				attack_state = AttackState.RECOVERY
 				state_time = recovery_time
@@ -155,6 +160,10 @@ func receive_shot(penetration: int, impact_position: Vector2) -> void:
 	if penetration < 3:
 		sound_requested.emit("armor_ricochet", -1.0)
 		feedback.emit(impact_position, Color("e4f8ff"), "ARMORED // USE PIERCER")
+		return
+	armor_hp = maxi(0, armor_hp - penetration)
+	if armor_hp > 0:
+		feedback.emit(impact_position, Color("63e6f2"), "ARMOR HIT // %d / %d" % [armor_points(), armor_per_layer * 2])
 		return
 	attack_state = AttackState.ARMOR_BREAK
 	sound_requested.emit("stop", -1.0)
@@ -203,3 +212,7 @@ func _set_hurtbox_enabled(enabled: bool) -> void:
 	var shape := get_node_or_null("Hurtbox/CollisionShape2D") as CollisionShape2D
 	if shape:
 		shape.disabled = not enabled
+
+func armor_points() -> int:
+	if form == BossForm.WEAK_POINT: return 0
+	return armor_hp + (armor_per_layer if form == BossForm.DOUBLE_ARMOR else 0)

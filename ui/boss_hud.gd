@@ -3,6 +3,7 @@ extends VBoxContainer
 const F := preload("res://ui/ui_factory.gd")
 var title: Label
 var armor: Label
+var armor_bar: ProgressBar
 var health: ProgressBar
 var trail: ProgressBar
 var damage_tween: Tween
@@ -17,6 +18,11 @@ func _ready() -> void:
 	title = F.label(header, "SENTINEL", "AmberLabel")
 	F.spacer(header)
 	armor = F.label(header, "ARMOR ◆ ◆")
+	armor_bar = F.bar(self,440,"ProgressBar")
+	armor_bar.custom_minimum_size.y = 8
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = UIPalette.CYAN
+	armor_bar.add_theme_stylebox_override("fill",fill)
 	var track := Control.new()
 	track.custom_minimum_size.y = 12
 	track.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -26,9 +32,13 @@ func _ready() -> void:
 	health = F.bar(track, 0, "BossBar")
 	health.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
-func apply_state(hp: int, maximum: int, plates: int, phase: int) -> void:
+func apply_state(hp: int, maximum: int, plates: int, phase: int, armor_points := -1, armor_maximum := 36) -> void:
+	var remaining := plates * 18 if armor_points < 0 else armor_points
+	armor_bar.max_value = armor_maximum
+	armor_bar.value = remaining
+	armor_bar.modulate = Color.WHITE if remaining > 0 else Color(0.3,0.4,0.5,0.5)
 	title.text = "SENTINEL / PHASE %02d" % phase
-	armor.text = "ARMOR " + "◆ ".repeat(plates) if plates > 0 else "WEAK POINT EXPOSED"
+	armor.text = "ARMOR %d / %d // AP" % [remaining,armor_maximum] if plates > 0 else "WEAK POINT EXPOSED"
 	if plates != last_plates: armor.modulate = Color.WHITE if plates > 0 else UIPalette.AMBER
 	if plates < last_plates:
 		if armor_tween: armor_tween.kill()

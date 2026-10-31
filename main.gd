@@ -1,5 +1,6 @@
 extends Node2D
 
+const BALANCE := preload("res://combat_balance.gd")
 const GD := preload("res://game_data.gd")
 const CAMPAIGNS := preload("res://campaign_data.gd")
 const LASER_GATE_SCENE := preload("res://LaserGateEnemy.tscn")
@@ -294,13 +295,13 @@ func _update_player(delta: float) -> void:
 	guarding = (_control_held("guard") or auto_guard_left > 0) and guard_energy > 0 and guard_lock <= 0
 	if guarding:
 		guard_idle = 0
-		guard_energy = maxf(0, guard_energy - float(lab_panel.values.guard_drain) * (1.0 + _meta_effect("drain")) * delta)
+		guard_energy = maxf(0, guard_energy - _guard_drain() * delta)
 		if guard_energy <= 0:
 			guarding = false; guard_lock = maxf(0.1, float(lab_panel.values.guard_lock) + _meta_effect("guard_lock"))
 			_notify("GUARD BREAK", RED); _emit(_player_center(), RED, 22, 190)
 	else:
 		guard_idle += delta
-		if guard_lock <= 0 and guard_idle >= maxf(0.0, float(lab_panel.values.guard_delay) + _meta_effect("regen_delay")):
+		if guard_lock <= 0 and guard_idle >= _guard_delay():
 			guard_energy = minf(guard_capacity(), guard_energy + guard_regen() * delta)
 
 	world_audio.set_shield_active(guarding)
@@ -519,7 +520,7 @@ func _update_world(delta: float) -> void:
 		var turret_rect := turret.body_rect()
 		if guarding and turret.state != TurretBase.TurretState.DEAD and _guard_hitbox().intersects(turret_rect):
 			turret.force_kill()
-			guard_energy = maxf(0.0, guard_energy - 7.0)
+			_consume_guard_hit()
 			_emit(turret_rect.get_center(), CYAN, 24, 260)
 			_notify("SHIELD IMPACT // TARGET DESTROYED", CYAN)
 			continue
@@ -545,7 +546,7 @@ func _update_world(delta: float) -> void:
 			continue
 		if guarding and gate.state == "Hover" and _guard_hitbox().intersects(gate.hazard_rect()):
 			gate.take_damage()
-			guard_energy = maxf(0.0, guard_energy - 7.0)
+			_consume_guard_hit()
 			_emit(gate.global_position, CYAN, 24, 260)
 			_notify("SHIELD IMPACT // LASER GATE DESTROYED", CYAN)
 			continue
@@ -564,12 +565,12 @@ func _update_world(delta: float) -> void:
 			_notify("SHIELD IMPACT // OBSTACLE DESTROYED", CYAN)
 			spikes.queue_free()
 			ground_spikes.remove_at(i)
-			guard_energy = maxf(0.0, guard_energy - 7.0)
+			_consume_guard_hit()
 			continue
 		var touching := spikes.hits_rect(_player_hitbox())
 		if touching and not spikes.touching_player:
-			_receive(false, "GROUND SPIKES")
-			if state == "playing" and guarding:
+			var blocked := _receive(false, "GROUND SPIKES")
+			if blocked:
 				_emit(spikes.global_position + Vector2(0,-40), CYAN,24,260)
 				spikes.queue_free()
 				ground_spikes.remove_at(i)
@@ -580,6 +581,7 @@ func _update_world(delta: float) -> void:
 		var rect: Rect2 = obstacle.rect; rect.position += Vector2(obstacle.x, GD.GROUND_Y)
 		if obstacle.danger:
 			if guarding and _guard_hitbox().intersects(rect):
+				_consume_guard_hit()
 				obstacle.danger = false
 				obstacle.x = -1000.0
 				_emit(rect.get_center(), CYAN, 20, 230)
@@ -611,7 +613,7 @@ func _enemy_contact(enemy: Dictionary) -> void:
 	if enemy.dead or enemy.touch_lock > 0: return
 	if guarding and _circle_rect(enemy.pos, enemy.radius, _guard_hitbox()):
 		_kill_enemy(enemy)
-		guard_energy = maxf(0.0, guard_energy - 7.0)
+		_consume_guard_hit()
 		_notify("SHIELD IMPACT // TARGET DESTROYED", CYAN)
 		return
 	if not _circle_rect(enemy.pos, enemy.radius, _player_hitbox()): return
@@ -669,24 +671,26 @@ func _update_threats(delta: float) -> void:
 	for i in range(threats.size() - 1, -1, -1):
 		var bullet := threats[i]; bullet.pos += bullet.velocity * delta
 		if guarding and guard_energy > 0 and not bullet.unblockable and _circle_rect(bullet.pos, bullet.radius, _guard_hitbox()):
-			guard_energy = maxf(0.0, guard_energy - 7.0)
+			_consume_guard_hit()
 			_emit(bullet.pos, CYAN, 14, 210)
 			_notify("PARRY", CYAN, 0.25)
 			threats.remove_at(i)
 		elif _circle_rect(bullet.pos, bullet.radius, _player_hitbox()): _receive(bullet.unblockable, "HOSTILE FIRE"); threats.remove_at(i)
 		elif bullet.pos.x < -50 or bullet.pos.x > 1020: threats.remove_at(i)
 
-func _receive(unblockable: bool, cause: String) -> void:
-	if state != "playing": return
-	if not unblockable and not guarding and not _control_held("guard") and _upgrade("auto_guard") and guard_energy >= 7 and guard_lock <= 0:
+func _receive(unblockable: bool, cause: String) -> bool:
+	if state != "playing": return false
+	if not unblockable and not guarding and not _control_held("guard") and _upgrade("auto_guard") and guard_energy >= _guard_hit_cost() and guard_lock <= 0:
 		auto_guard_left = 0.22
 		guarding = true
 		guard_idle = 0
 		player_visual.set_motion(_grounded(), crouching, weapon_index, aim, true, true)
 		world_audio.set_shield_active(true)
 	if guarding and guard_energy > 0 and not unblockable:
-		guard_energy = maxf(0, guard_energy - 7); _emit(_player_center(), CYAN, 18, 190); _notify("PARRY", CYAN)
-	else: _die(cause)
+		_consume_guard_hit(); _emit(_player_center(), CYAN, 18, 190); _notify("PARRY", CYAN)
+		return true
+	_die(cause)
+	return false
 
 func _die(cause: String) -> void:
 	if not PLAYER_CAN_DIE: return
@@ -735,6 +739,7 @@ func _start_boss(preserve_motion := false) -> void:
 	if lab.active: lab.record("checkpoint_reached", {"score": score})
 	boss = {"armor": GD.BOSS.armor_per_cycle, "hp": GD.BOSS.health, "phase": 1}
 	boss_actor.position = Vector2(GD.VIEW_SIZE.x + 220.0, BOSS_IDLE_Y)
+	boss_actor.armor_per_layer = 3 if developer_mode else BALANCE.BOSS_ARMOR_PER_LAYER
 	boss_actor.reset_for_battle(true)
 	boss_actor.set_combat_enabled(false)
 	boss_entering = true
@@ -1287,9 +1292,9 @@ func guard_capacity() -> float:
 	return GD.GUARD.maximum + _meta_effect("capacity")
 
 func guard_regen() -> float:
-	if not _meta_enabled(): return float(lab_panel.values.guard_regen)
-	if _upgrade("fast_regen"): return 50.0
-	return 12.5 + _meta_effect("regen")
+	if developer_mode: return float(lab_panel.values.guard_regen)
+	if _upgrade("fast_regen"): return 50.0 * BALANCE.GUARD_REGEN_MULTIPLIER
+	return (12.5 + _meta_effect("regen")) * BALANCE.GUARD_REGEN_MULTIPLIER
 
 func _register_kill(kind: String, origin: Vector2) -> void:
 	run_total_kills += 1
@@ -1448,3 +1453,20 @@ func enter_named_session(player_name: String) -> bool:
 	run_record.clear()
 	start_screen.show_levels(true)
 	return true
+
+func _guard_hit_cost() -> float:
+	return 7.0 if developer_mode else BALANCE.GUARD_HIT_COST
+
+func _guard_drain() -> float:
+	return float(lab_panel.values.guard_drain) * (1.0 + _meta_effect("drain")) * (1.0 if developer_mode else BALANCE.GUARD_DRAIN_MULTIPLIER)
+
+func _guard_delay() -> float:
+	return maxf(0.0, float(lab_panel.values.guard_delay) + _meta_effect("regen_delay") + (0.0 if developer_mode else BALANCE.GUARD_EXTRA_DELAY))
+
+func _consume_guard_hit() -> void:
+	guard_energy = maxf(0.0, guard_energy - _guard_hit_cost())
+	guard_idle = 0
+	if guard_energy <= 0:
+		guarding = false
+		auto_guard_left = 0
+		guard_lock = maxf(0.1,float(lab_panel.values.guard_lock)+_meta_effect("guard_lock"))

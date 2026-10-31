@@ -29,7 +29,7 @@ func run() -> void:
 	game._spawn_ground_spikes()
 	game.ground_spikes[0].position = game.player
 	game._update_world(0)
-	assert(game.state == "playing" and game.guarding and game.guard_energy == 93)
+	assert(game.state == "playing" and game.guarding and game.guard_energy == 82)
 	assert(game.ground_spikes.is_empty())
 	game._reset_player()
 	game.guard_energy = 0

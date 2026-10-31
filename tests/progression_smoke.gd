@@ -10,7 +10,7 @@ func run() -> void:
 	game.progression.coins = 2000
 	assert(not game.progression.buy("auto_guard"))
 	game.start_level(0)
-	assert(game.guard_regen() == 12.5)
+	assert(game.guard_regen() == 6.25)
 	game._award_enemy_kill("heavy", game.player)
 	assert(game.run_total_kills == 1 and game.coin_drops.size() == 5)
 	var drop_value := 0
@@ -46,7 +46,7 @@ func run() -> void:
 	for id in preload("res://build_data.gd").NODES:
 		assert(game.progression.buy(id))
 	assert(not game.progression.buy("cell"))
-	assert(game.guard_regen() == 50 and game.guard_capacity() == 150)
+	assert(game.guard_regen() == 25 and game.guard_capacity() == 150)
 	game.guard_energy = 50
 	game._register_kill("light",Vector2(800,500))
 	assert(game.guard_energy == 55)
@@ -71,7 +71,7 @@ func run() -> void:
 	assert(turret.laser_length == 1400)
 	game.guard_energy = 100
 	game._receive(false, "AUTO GUARD")
-	assert(game.state == "playing" and game.guarding and game.guard_energy == 93)
+	assert(game.state == "playing" and game.guarding and game.guard_energy == 82)
 	Input.action_press("guard")
 	game._update_player(0.01)
 	assert(game.guarding and game.auto_guard_left == 0)

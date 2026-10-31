@@ -29,16 +29,19 @@ func _run() -> void:
 	boss.receive_shot(1, boss.position)
 	_check(boss.armor_layers() == 2, "Assault rifle must not damage double armor")
 	_check(armor_sounds == 1, "Insufficient penetration must play armor ricochet")
-	boss.receive_shot(3, boss.position)
-	boss.receive_shot(3, boss.position)
-	boss.advance(0.6, Vector2(190, 586))
-	_check(boss.form == EyeballBoss.BossForm.SINGLE_ARMOR, "One AP hit must remove exactly one layer")
-	boss.receive_shot(1, boss.position)
-	_check(boss.armor_layers() == 1, "Assault rifle must not damage single armor")
-	boss.receive_shot(3, boss.position)
-	boss.advance(0.6, Vector2(190, 586))
-	_check(boss.form == EyeballBoss.BossForm.WEAK_POINT, "Second AP hit must expose the weak point")
-	_check(weak_hits == 0, "Second armor break must not damage the weak point")
+	_check(boss.armor_points() == 36, "Rifle must not reduce armor points")
+	for hit in range(5): boss.receive_shot(3,boss.position)
+	_check(boss.armor_points() == 21 and boss.form == EyeballBoss.BossForm.DOUBLE_ARMOR, "Five AP hits must not break the first layer")
+	boss.receive_shot(3,boss.position)
+	_check(boss.armor_points() == 18, "Six AP hits must remove exactly 18 armor")
+	boss.advance(0.6,Vector2(190,586))
+	_check(boss.form == EyeballBoss.BossForm.SINGLE_ARMOR and boss.armor_points() == 18, "Outer break must preserve inner armor")
+	boss.receive_shot(1,boss.position)
+	_check(boss.armor_points() == 18,"Rifle must not damage inner armor")
+	for hit in range(6): boss.receive_shot(3,boss.position)
+	boss.advance(0.6,Vector2(190,586))
+	_check(boss.form == EyeballBoss.BossForm.WEAK_POINT and boss.armor_points() == 0,"Twelve AP hits expose the weak point")
+	_check(weak_hits == 0,"Armor damage must not damage red health")
 	boss.receive_shot(1, boss.position)
 	_check(weak_hits == 1, "Exposed weak point must forward damage to existing health logic")
 
@@ -70,7 +73,7 @@ func _run() -> void:
 	boss.state_time = 0.0
 	boss.advance(0.01, Vector2(190, 586))
 	boss.advance(boss.telegraph_time, Vector2(190, 586))
-	boss.receive_shot(3, boss.position)
+	for hit in range(6): boss.receive_shot(3, boss.position)
 	boss.advance(boss.armor_break_time, Vector2(190, 586))
 	_check(barrage_waves.size() == 4, "Armor break must cancel the remaining barrage waves")
 
@@ -118,6 +121,8 @@ func _run() -> void:
 	await process_frame
 	game.set_process(false)
 	game._start_boss()
+	game._update_boss(2.0)
+	game.boss_actor.state_time = 1.15
 	_check(game.boss.hp == GameData.BOSS.health and game.boss.hp > 4 and game.boss.armor == 2, "Boss must start with increased red health and two armor layers")
 	game._update_boss(1.2)
 	_check(game.particles.is_empty(), "Attack warning must not create red particles")
@@ -128,15 +133,16 @@ func _run() -> void:
 	_check(game.boss_bombs.back().global_position.is_equal_approx(game.boss_actor.global_position), "Bomb must originate at the Boss, not above the landing point")
 	game._hit_boss({"penetration": 1, "pos": Vector2(700, 350)})
 	_check(game.boss.hp == GameData.BOSS.health and game.boss.armor == 2, "Armored rifle impact must not update the Boss health bar")
-	game._hit_boss({"penetration": 3, "pos": Vector2(700, 350)})
-	game.boss_actor.advance(0.6, Vector2(190, 586))
-	game._hit_boss({"penetration": 3, "pos": Vector2(700, 350)})
-	game.boss_actor.advance(0.6, Vector2(190, 586))
-	_check(game.boss.hp == GameData.BOSS.health and game.boss.armor == 0, "Two AP hits must expose without damaging the weak health")
+	for plate in range(2):
+		for hit in range(6): game._hit_boss({"penetration":3,"pos":Vector2(700,350)})
+		game.boss_actor.advance(0.6,Vector2(190,586))
+	_check(game.boss.hp == GameData.BOSS.health and game.boss.armor == 0,"Twelve AP hits expose armor without red-health damage")
 	game._hit_boss({"penetration": 1, "pos": Vector2(700, 350)})
 	_check(game.boss.hp == GameData.BOSS.health - 1 and game.boss.armor == 0, "Exposed damage must reuse the original Boss health logic without restoring armor")
 	# A full particle telegraph emits one simultaneous fan from the eye marker.
 	game._start_boss()
+	game._update_boss(2.0)
+	game.boss_actor.state_time = 1.15
 	game.boss_actor.next_attack_is_bomb = false
 	game.boss_actor.state_time = 0.0
 	game._update_boss(0.01)
@@ -156,6 +162,8 @@ func _run() -> void:
 	_check(lower_hits_standing, "Fan must still threaten a standing player")
 	_check(game.boss_particles[0].direction.y > 0.0 and is_zero_approx(game.boss_particles[1].direction.y) and game.boss_particles[2].direction.y < 0.0, "Fan must contain lower, center and upper directions")
 	game._start_boss()
+	game._update_boss(2.0)
+	game.boss_actor.state_time = 1.15
 	_check(game.boss_particles.is_empty(), "Boss reset must clear all three projectiles")
 	var initial_position: Vector2 = game.boss_actor.position
 	for frame in range(30):
@@ -168,6 +176,8 @@ func _run() -> void:
 	for shot in game.boss_particles:
 		_check(shot.direction.x < 0.0 and shot.speed == GameData.BOSS.barrage_speed and shot.speed > 300.0 and shot.scale == Vector2.ONE, "Barrage rounds must be faster and use the normal attack size")
 	game._start_boss()
+	game._update_boss(2.0)
+	game.boss_actor.state_time = 1.15
 	_check(game.boss_particles.is_empty() and game.boss_actor.barrage_wave == 0, "Reset must remove barrage projectiles and progress")
 	# Lethal hits clear both collections while _update_boss is iterating them.
 	# Multiple pending attacks must not cause access to the now-empty arrays.
@@ -182,8 +192,9 @@ func _run() -> void:
 		game._update_boss(0.0)
 		_check(game.state == "dead" and game.boss_particles.is_empty() and game.boss_bombs.is_empty(), "Lethal " + attack_kind + " must clear attacks safely")
 		game._request_retry("smoke")
-		game._process(0.36)
-		_check(game.state == "playing" and game.boss_mode and game.boss.hp == GameData.BOSS.health, "Lethal " + attack_kind + " must allow immediate Boss retry")
+		game._retry()
+		game._update_boss(2.0)
+		_check(game.state == "playing" and game.boss_mode and game.boss.hp == GameData.BOSS.health, "Lethal " + attack_kind + " must allow Boss retry")
 	game.world_audio.stop_all()
 	game.weapon_audio.stop_all()
 	game.music.stop()

@@ -48,3 +48,5 @@ Godot 编辑器导入、`tests/progression_smoke.gd`、`tests/campaign_modes_smo
 
 金币完成落地弹跳后以 720 像素/秒飞向角色，飞行阶段不再叠加世界滚动和重力，也不会因为在角色身后而丢失。下落时即便暂时移出画面，也保留到落地飞回。
 原 magnet 节点改为“战斗回能”：击杀恢复 3 点护盾能量；sensor_two 改为“能量回收”：击杀回能再 +2，保留拾取距离 +16。内部 ID、价格和前置保持不变，所以旧存档已购买的节点直接生效，无需重买。回能只影响当前能量，不绕过护盾锁定，不超过能量上限。
+
+Latest combat balance: shield base regeneration is now 6.25/s, intermediate regeneration bonuses are 3.125/s and 6.25/s, and the capstone is 25/s. Sustained drain is 1.5×, impact cost 18 and recharge delay is +0.5s. These supersede the earlier 12.5/50/7 descriptions above. Upgrade costs, prerequisite IDs and saved purchases are unchanged. See COMBAT_BALANCE.md.
