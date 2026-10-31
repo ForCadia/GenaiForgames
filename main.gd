@@ -36,6 +36,7 @@ var restart_mode := "checkpoint"
 var developer_mode := false
 var start_screen: CanvasLayer
 var music: AudioStreamPlayer
+var weapon_audio: Node
 var checkpoint_weapon_index := 0
 var checkpoint_distance := 0.0
 
@@ -93,6 +94,9 @@ func _ready() -> void:
 	music = preload("res://music_player.gd").new()
 	music.name = "Music"
 	add_child(music)
+	weapon_audio = preload("res://weapon_audio.gd").new()
+	weapon_audio.name = "WeaponAudio"
+	add_child(weapon_audio)
 	lab_panel = preload("res://lab_panel.gd").new()
 	lab_panel.game = self
 	lab_panel.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -210,6 +214,7 @@ func _update_player(delta: float) -> void:
 	if reload_left > 0:
 		reload_left = maxf(0, reload_left - delta)
 		if reload_left <= 0:
+			weapon_audio.finish_reload()
 			ammo[weapon_index] = _weapon().magazine
 			_notify("MAGAZINE READY", CYAN)
 		_refresh_player_ui()
@@ -223,6 +228,7 @@ func _update_player(delta: float) -> void:
 func _switch_weapon() -> void:
 	if reload_left > 0: return
 	weapon_index = 1 - weapon_index; selected_slot = weapon_index
+	weapon_audio.switch_weapon()
 	player_visual.set_primary_weapon(weapon_index)
 	_refresh_player_ui()
 	_notify(_weapon().name, _weapon().color)
@@ -233,10 +239,12 @@ func _select_slot(slot: int) -> void:
 		if not has_grenade:
 			_notify("SLOT 3 EMPTY // FIND GRENADE", RED)
 			return
+		if selected_slot != 2: weapon_audio.switch_weapon()
 		selected_slot = 2
 		_refresh_player_ui()
 		_notify("GRENADE LAUNCHER // ONE SHOT", CYAN)
 		return
+	if selected_slot != slot: weapon_audio.switch_weapon()
 	selected_slot = slot
 	weapon_index = slot
 	player_visual.set_primary_weapon(weapon_index)
@@ -246,6 +254,7 @@ func _select_slot(slot: int) -> void:
 func _reload() -> void:
 	if state != "playing" or reload_left > 0 or ammo[weapon_index] >= _weapon().magazine: return
 	reload_left = _reload_duration()
+	weapon_audio.reload(weapon_index, reload_left)
 	player_visual.play_reload(reload_left)
 	_refresh_player_ui()
 
@@ -255,6 +264,7 @@ func _fire() -> void:
 	player_visual.position = player
 	player_visual.set_motion(_grounded(), crouching, weapon_index, aim, guarding, state == "playing")
 	player_visual.play_fire()
+	weapon_audio.fire(weapon_index)
 	var origin := player_visual.muzzle_world_position()
 	var to_target := aim - origin
 	var direction: Vector2 = to_target.normalized() if to_target.length_squared() > 0.001 else player_visual.shot_direction()
@@ -527,6 +537,7 @@ func _receive(unblockable: bool, cause: String) -> void:
 func _die(cause: String) -> void:
 	if not PLAYER_CAN_DIE: return
 	if state != "playing": return
+	weapon_audio.stop_all()
 	lab.finish(score, cause, player, segment, boss_mode, true)
 	retry_requested = false
 	state = "dead"; death_delay = 0.35; banner = cause; _emit(_player_center(), RED, 40, 300)
@@ -624,6 +635,7 @@ func _boss_damage() -> void:
 		score += GD.SCORE.boss
 		lab.finish(score, "victory", player, segment, boss_mode)
 		state = "victory"
+		weapon_audio.stop_all()
 		music.play_track(false)
 		banner = "THE FRONT NEVER STOPS"
 		boss_actor.start_death()
@@ -723,6 +735,7 @@ func start_game(mode := "checkpoint", parameter_index := 0, development := false
 	get_tree().paused = false
 
 func return_to_start() -> void:
+	weapon_audio.stop_all()
 	music.return_to_menu()
 	lab.finish(score, "administrative_return_to_start", player, segment, boss_mode)
 	lab.clear_pending_retry()
@@ -739,6 +752,7 @@ func return_to_start() -> void:
 	queue_redraw()
 
 func _reset_player() -> void:
+	weapon_audio.stop_all()
 	death_delay = 0.0
 	player_visual.set_primary_weapon(weapon_index)
 	player = Vector2(GD.PLAYER_X, GD.GROUND_Y); velocity_y = 0; crouching = false; guarding = false; slide_time_left = 0.0
