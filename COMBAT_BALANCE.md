@@ -24,3 +24,5 @@ Intermediate regeneration bonuses are also halved, to 3.125/s and 6.25/s. Existi
 Values are centralized in combat_balance.gd; game_data.gd and lab-panel defaults remain the historical baseline. Build-tree text reflects the current effective regeneration.
 
 Validation: Boss actor and integrated Boss checks cover twelve-hit armor break, rifle ricochet, layer transitions, attacks, grenades and HUD values. Combat-balance smoke verifies shield rates, break lock and LAB isolation. Progression, start-mode, ground-spike and player-profile checks passed. Real-render screenshot inspected the 27/36 armor bar above full red health. Some smoke runs retain exit-only ObjectDB cleanup warnings. This is engineering validation, not a human balance verdict.
+
+Armor-driven appearance: outer/inner idle damage frames now follow armor thresholds (75%/25%), with the existing cracked-to-detached frames played at 50% and 0% before changing form. Attack animations remain intact; armor amount, AP damage and red-health logic are unchanged. boss_smoke verifies cracked and detached frame IDs for both layers.

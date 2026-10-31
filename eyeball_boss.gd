@@ -135,6 +135,8 @@ func advance(delta: float, player_position: Vector2) -> void:
 				attack_state = AttackState.IDLE
 				state_time = attack_interval
 		AttackState.ARMOR_BREAK:
+			# Existing cracked -> detached frames show the layer actually falling off.
+			visual.frame = int(form) * 8 + (6 if state_time > armor_break_time * 0.5 else 7)
 			if state_time <= 0.0:
 				form = mini(int(form) + 1, int(BossForm.WEAK_POINT)) as BossForm
 				armor_hp = armor_per_layer if form != BossForm.WEAK_POINT else 0
@@ -163,6 +165,7 @@ func receive_shot(penetration: int, impact_position: Vector2) -> void:
 		return
 	armor_hp = maxi(0, armor_hp - penetration)
 	if armor_hp > 0:
+		if attack_state in [AttackState.IDLE, AttackState.RECOVERY]: _animate_idle()
 		feedback.emit(impact_position, Color("63e6f2"), "ARMOR HIT // %d / %d" % [armor_points(), armor_per_layer * 2])
 		return
 	attack_state = AttackState.ARMOR_BREAK
@@ -197,13 +200,19 @@ func _fire_barrage_wave() -> void:
 	state_time = barrage_wave_interval
 
 func _form_row() -> int:
-	return int(form)
+	if attack_state in [AttackState.ARMOR_BREAK, AttackState.DEAD]: return int(form)
+	var remaining := armor_points()
+	if remaining <= 0: return int(BossForm.WEAK_POINT)
+	return int(BossForm.SINGLE_ARMOR) if remaining <= armor_per_layer else int(BossForm.DOUBLE_ARMOR)
+
+func _armor_cracked() -> bool:
+	return form != BossForm.WEAK_POINT and armor_hp > 0 and armor_hp <= armor_per_layer * 0.5
 
 func _animate_idle() -> void:
-	visual.frame = _form_row() * 8 + (int(idle_frame_time * 3.0) % 2)
+	visual.frame = _form_row() * 8 + (6 if _armor_cracked() else int(idle_frame_time * 3.0) % 2)
 
 func _show_form_idle() -> void:
-	visual.frame = _form_row() * 8
+	visual.frame = _form_row() * 8 + (6 if _armor_cracked() else 0)
 
 func _set_hurtbox_enabled(enabled: bool) -> void:
 	if is_instance_valid(hurtbox):
