@@ -16,7 +16,7 @@ func _run() -> void:
 	assert(preview.body.frame == 0)
 	for anim in [&"idle", &"run", &"jump", &"slide", &"death"]:
 		assert(preview.body.sprite_frames.has_animation(anim))
-		assert(preview.body.sprite_frames.get_frame_count(anim) == (10 if anim == &"run" else 8))
+		assert(preview.body.sprite_frames.get_frame_count(anim) == (16 if anim == &"run" else 8))
 	assert(preview.body.sprite_frames.get_animation_loop(&"run"))
 	assert(not preview.body.sprite_frames.get_animation_loop(&"death"))
 	assert(preview.standing_shape.size == Vector2(38, 92))
@@ -26,15 +26,19 @@ func _run() -> void:
 	assert(preview.solid_collision.shape == preview.standing_shape)
 	assert(preview.guard_effect.visible)
 	assert(preview.muzzle_world_position() == preview.muzzle.global_position)
-	preview.body_state = "run"
-	for frame in range(10):
+	preview.start_scrolling()
+	assert(preview.body_state == "run" and preview.body.frame == 0)
+	for frame in range(16):
 		preview.body_time = (float(frame) + 0.1) / 14.0
 		preview._apply_frames()
 		assert(preview.body.frame == frame)
-		var source_column: int = PlayerVisual.RUN_FRAME_ORDER[frame]
-		assert(preview.body.sprite_frames.get_frame_texture(&"run", frame).region.position.x == source_column * 256)
-		assert(preview.body.position.y == 128 - PlayerVisual.RUN_CONTACT_BASELINES[source_column])
-		assert(preview.front_pivot.position == Vector2(PlayerVisual.SOCKET_X[1][source_column] - 128, PlayerVisual.SOCKET_TOP[1][source_column] + 30 - PlayerVisual.RUN_CONTACT_BASELINES[source_column]))
+		var texture: AtlasTexture = preview.body.sprite_frames.get_frame_texture(&"run", frame)
+		assert(texture.atlas.resource_path == "res://assets/player/run_olive_4x4.png")
+		assert(texture.region.position == Vector2(roundi((frame % 4) * 313.5), roundi((frame / 4) * 313.5)))
+		var baseline: float = PlayerVisual.RUN_BASELINES[frame / 4]
+		assert(is_equal_approx(preview.body.position.y, (texture.get_size().y / 2 - baseline) * PlayerVisual.RUN_SCALE))
+		assert(preview.front_pivot.position == Vector2((PlayerVisual.RUN_SOCKETS[frame].x - texture.get_size().x / 2) * PlayerVisual.RUN_SCALE, (PlayerVisual.RUN_SOCKETS[frame].y - baseline) * PlayerVisual.RUN_SCALE))
+
 	assert(preview.solid_collision.shape == preview.standing_shape)
 	preview.set_collision_pose(true)
 	assert(preview.hurtbox_rect() == Rect2(Vector2(-27, -36), Vector2(54, 36)))
@@ -57,7 +61,7 @@ func _run() -> void:
 	assert(game.get_children().filter(func(child: Node) -> bool: return child is PlayerVisual).size() == 1)
 	assert(game.state == "playing")
 	assert(game._player_hitbox() == Rect2(Vector2(171, 540), Vector2(38, 92)))
-	assert(visual.body.sprite_frames.get_frame_texture(&"run", 0).atlas.resource_path == "res://body(2).png")
+	assert(visual.body.sprite_frames.get_frame_texture(&"run", 0).atlas.resource_path == "res://assets/player/run_olive_4x4.png")
 	assert(visual.visual_root.scale == Vector2(0.5, 0.5))
 	assert(visual.helmet.texture.resource_path == "res://helmet_game.png")
 	assert(visual.front_arm.texture.resource_path == "res://low_ap_fire_3x2.png")

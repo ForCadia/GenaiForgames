@@ -15,7 +15,14 @@ const ARM_CELL := Vector2i(192, 204)
 const BODY_BASELINES := [216, 230, 235, 214, 231]
 # Ground-contact frames place a boot on the floor. In-between airborne poses
 # retain a visible rise; only the artwork moves, never the collision root.
-const RUN_CONTACT_BASELINES := [229, 231, 228, 230, 229, 231, 228, 230]
+const RUN_SCALE := 0.8
+const RUN_BASELINES := [290.0, 293.0, 293.0, 283.0]
+const RUN_SOCKETS := [
+ Vector2(174.7,70.2), Vector2(169.8,71.0), Vector2(175.4,71.2), Vector2(175.9,70.8),
+ Vector2(174.9,64.8), Vector2(166.6,63.7), Vector2(165.8,66.4), Vector2(170.5,67.6),
+ Vector2(172.5,65.6), Vector2(173.3,66.0), Vector2(174.5,64.5), Vector2(185.1,67.9),
+ Vector2(167.2,61.9), Vector2(167.2,61.3), Vector2(163.1,62.0), Vector2(167.6,62.2),
+]
 # The prominent dark circle in body(2) is the right-arm socket, not a head.
 # Track it by frame to attach both weapon arm layers to the actual shoulder.
 const SOCKET_X := [
@@ -36,7 +43,7 @@ const HELMET_BOTTOM_FROM_SOCKET_TOP := 20.0
 const HELMET_NECK_SOURCE := Vector2(110, 152)
 const BODY_FPS := 12.0
 const RUN_FPS := 14.0
-const RUN_FRAME_ORDER := [0, 1, 2, 7, 5, 6, 2, 1, 0, 3]
+const RUN_FRAME_COUNT := 16
 const FIRE_FRAME_TIME := 0.05
 const ARM_SCALE := Vector2(0.75, 0.75)
 # Both source rows have their shoulder/upper-arm root near this cell pixel.
@@ -109,7 +116,7 @@ func _update_muzzle() -> void:
 	muzzle.global_position = front_arm.to_global(source)
 
 func start_scrolling() -> void:
-	body_state = "startup"
+	body_state = "run"
 	body_time = 0.0
 	arm_action = ""
 	arm_time = 0.0
@@ -133,7 +140,7 @@ func set_motion(grounded: bool, crouching: bool, primary_weapon: int, target: Ve
 		desired = "jump"
 	elif crouching:
 		desired = "slide"
-	if desired != body_state and not (body_state == "startup" and desired == "run"):
+	if desired != body_state:
 		body_state = desired
 		body_time = 0.0
 	# Both arm rows rotate together about the same shoulder pivot. HIGH/LOW
@@ -199,9 +206,6 @@ func show_idle() -> void:
 
 func _process(delta: float) -> void:
 	body_time += delta
-	if body_state == "startup" and body_time >= 8.0 / BODY_FPS:
-		body_state = "run"
-		body_time -= 8.0 / BODY_FPS
 	if arm_action != "":
 		arm_time += delta
 		var limit := reload_duration if arm_action == "reload" else 3.0 * FIRE_FRAME_TIME
@@ -217,12 +221,9 @@ func _apply_frames() -> void:
 	var column := 0
 	var sequence_frame := 0
 	match body_state:
-		"startup":
-			column = mini(7, int(body_time * BODY_FPS))
 		"run":
 			row = 1
-			sequence_frame = int(body_time * RUN_FPS) % RUN_FRAME_ORDER.size()
-			column = RUN_FRAME_ORDER[sequence_frame]
+			sequence_frame = int(body_time * RUN_FPS) % RUN_FRAME_COUNT
 		"jump":
 			row = 2
 			column = mini(7, int(body_time * BODY_FPS))
@@ -236,14 +237,24 @@ func _apply_frames() -> void:
 	if body.animation != animation_name:
 		body.animation = animation_name
 	body.frame = sequence_frame if row == 1 else column
-	var body_baseline: int = RUN_CONTACT_BASELINES[column] if row == 1 else BODY_BASELINES[row]
-	body.position = Vector2(0, BODY_CELL.y / 2.0 - body_baseline)
-	if row < 4:
-		var socket_x: float = SOCKET_X[row][column]
-		var socket_top: int = SOCKET_TOP[row][column]
-		helmet.position = Vector2(socket_x + HELMET_X_FROM_SOCKET - BODY_CELL.x / 2.0, socket_top + HELMET_BOTTOM_FROM_SOCKET_TOP - body_baseline)
-		back_pivot.position = Vector2(socket_x - BODY_CELL.x / 2.0, socket_top + SOCKET_CENTER_FROM_TOP - body_baseline)
-		front_pivot.position = back_pivot.position
+	body.scale = Vector2.ONE * RUN_SCALE if row == 1 else Vector2.ONE
+	if row == 1:
+		var frame_size: Vector2 = body.sprite_frames.get_frame_texture(&"run", sequence_frame).get_size()
+		var baseline: float = RUN_BASELINES[sequence_frame / 4]
+		var socket: Vector2 = RUN_SOCKETS[sequence_frame]
+		body.position = Vector2(0, (frame_size.y / 2.0 - baseline) * RUN_SCALE)
+		front_pivot.position = Vector2((socket.x - frame_size.x / 2.0) * RUN_SCALE, (socket.y - baseline) * RUN_SCALE)
+		back_pivot.position = front_pivot.position
+		helmet.position = front_pivot.position + Vector2(HELMET_X_FROM_SOCKET, -10)
+	else:
+		var body_baseline: int = BODY_BASELINES[row]
+		body.position = Vector2(0, BODY_CELL.y / 2.0 - body_baseline)
+		if row < 4:
+			var socket_x: float = SOCKET_X[row][column]
+			var socket_top: int = SOCKET_TOP[row][column]
+			helmet.position = Vector2(socket_x + HELMET_X_FROM_SOCKET - BODY_CELL.x / 2.0, socket_top + HELMET_BOTTOM_FROM_SOCKET_TOP - body_baseline)
+			back_pivot.position = Vector2(socket_x - BODY_CELL.x / 2.0, socket_top + SOCKET_CENTER_FROM_TOP - body_baseline)
+			front_pivot.position = back_pivot.position
 
 	var sheet: Texture2D
 	var arm_column := 0
