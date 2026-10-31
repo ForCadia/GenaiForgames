@@ -1286,6 +1286,7 @@ func guard_regen() -> float:
 func _register_kill(kind: String, origin: Vector2) -> void:
 	run_total_kills += 1
 	if not _meta_enabled(): return
+	guard_energy = minf(guard_capacity(), guard_energy + _meta_effect("kill_energy"))
 	var value: int = preload("res://build_data.gd").COIN_VALUES.get(kind, 3)
 	var count := mini(value, 5)
 	for i in range(count):
@@ -1297,28 +1298,29 @@ func _register_kill(kind: String, origin: Vector2) -> void:
 func _update_coins(delta: float) -> void:
 	for i in range(coin_drops.size() - 1, -1, -1):
 		var coin: Dictionary = coin_drops[i]
-		coin.pos.x += (float(coin.vx) - _scroll()) * delta
-		coin.vy += 650 * delta
-		coin.pos.y += float(coin.vy) * delta
-		if coin.pos.y >= GD.GROUND_Y - 10:
-			coin.pos.y = GD.GROUND_Y - 10
-			if not coin.bounced:
-				coin.vy = -absf(coin.vy) * 0.24
-				coin.bounced = true
-			else:
-				coin.vy = 0.0
-				coin.landed = true
-			coin.vx = move_toward(coin.vx, 0, 550 * delta)
 		var target := player + Vector2(0, -18)
-		var magnet := _meta_effect("magnet")
-		if coin.landed and magnet > 0 and coin.pos.distance_to(target) < magnet:
-			coin.pos = coin.pos.move_toward(target, 420 * delta)
+		if not coin.landed:
+			coin.pos.x += (float(coin.vx) - _scroll()) * delta
+			coin.vy += 650 * delta
+			coin.pos.y += float(coin.vy) * delta
+			if coin.pos.y >= GD.GROUND_Y - 10:
+				coin.pos.y = GD.GROUND_Y - 10
+				if not coin.bounced:
+					coin.vy = -absf(coin.vy) * 0.24
+					coin.bounced = true
+				else:
+					coin.vy = 0.0
+					coin.landed = true
+				coin.vx = move_toward(coin.vx, 0, 550 * delta)
+		if coin.landed:
+			# Homing coins leave world scrolling/gravity so they can also catch
+			# a jumping player or return from behind the player.
+			coin.pos = coin.pos.move_toward(target, 720 * delta)
 		if coin.landed and _player_hitbox().grow(24 + _meta_effect("pickup")).has_point(coin.pos):
 			if progression.credit(int(coin.value)):
 				run_coins += int(coin.value)
 				floaters.append({"pos": coin.pos, "text": "+%d G" % coin.value, "color": YELLOW, "life": 0.65})
 				coin_drops.remove_at(i)
-		elif coin.pos.x < -40: coin_drops.remove_at(i)
 
 func _bank_remaining_coins() -> void:
 	if not _meta_enabled(): return

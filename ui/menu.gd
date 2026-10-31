@@ -12,6 +12,7 @@ var settings_view: VBoxContainer
 var level_select: VBoxContainer
 var build_view: VBoxContainer
 var wallet_label: Label
+var center: CenterContainer
 var panel: PanelContainer
 var build_button: Button
 var root: Control
@@ -26,7 +27,7 @@ func _ready() -> void:
 	shade.color = Color(0.02, 0.03, 0.05, 0.40)
 	root.add_child(shade)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var center := CenterContainer.new()
+	center = CenterContainer.new()
 	root.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	panel = PanelContainer.new()
@@ -115,6 +116,7 @@ func _ready() -> void:
 			entrance = create_tween()
 			entrance.tween_property(menu, "modulate:a", 1.0, 0.25))
 	start_button.grab_focus()
+	_position_menu()
 
 static func build_controls(parent: Node, back: Callable) -> void:
 	parent.custom_minimum_size.x = 600
@@ -148,6 +150,7 @@ func show_controls(value: bool) -> void:
 	if is_instance_valid(level_select): level_select.hide()
 	if is_instance_valid(settings_view): settings_view.hide()
 	menu.visible = not value
+	_position_menu()
 	controls.visible = value
 	if value: (controls.get_child(controls.get_child_count() - 1) as Button).grab_focus()
 	else: start_button.grab_focus()
@@ -156,6 +159,7 @@ func show_settings(value: bool) -> void:
 	build_view.hide()
 	level_select.hide()
 	menu.visible = not value
+	_position_menu()
 	controls.hide()
 	settings_view.visible = value
 	if value:
@@ -166,6 +170,7 @@ func show_settings(value: bool) -> void:
 func show_levels(value: bool) -> void:
 	build_view.hide()
 	menu.visible = not value
+	_position_menu()
 	controls.hide()
 	settings_view.hide()
 	level_select.visible = value
@@ -187,6 +192,7 @@ func _process(delta: float) -> void:
 func show_build(value: bool) -> void:
 	panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),12 if value else 20))
 	menu.visible = not value
+	_position_menu()
 	controls.hide()
 	settings_view.hide()
 	level_select.hide()
@@ -196,3 +202,8 @@ func show_build(value: bool) -> void:
 		build_view.refresh()
 		build_view.graph.buttons[build_view.selected].grab_focus()
 	else: start_button.grab_focus()
+
+func _position_menu() -> void:
+	# Offset the title page only; full-sized subpages keep their centered fit.
+	center.offset_left = 120 if menu.visible else 0
+	center.offset_top = -96 if menu.visible else 0

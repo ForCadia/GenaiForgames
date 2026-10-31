@@ -23,6 +23,20 @@ func run() -> void:
 		coin.landed = true
 	game._update_coins(0)
 	assert(game.run_coins == 7 and game.progression.coins == 2007)
+	# Landed coins return even without upgrades, including from behind and
+	# while the player is airborne. Airborne drops do not home early.
+	game.player.y -= 150
+	game.player_visual.position = game.player
+	game.coin_drops.append({"pos":Vector2(50,GameData.GROUND_Y-10),"vx":0.0,"vy":0.0,"value":3,"landed":true,"bounced":true})
+	game.coin_drops.append({"pos":Vector2(800,350),"vx":0.0,"vy":0.0,"value":1,"landed":false,"bounced":false})
+	game._update_coins(0.05)
+	assert(game.coin_drops[0].pos.x > 50 and game.coin_drops[0].pos.y < GameData.GROUND_Y-10)
+	assert(game.coin_drops[1].pos.y > 350)
+	game.coin_drops.remove_at(1)
+	for frame in range(60): game._update_coins(1.0/60.0)
+	assert(game.coin_drops.is_empty() and game.run_coins == 10)
+	game.player.y = GameData.GROUND_Y
+	game.player_visual.position = game.player
 	game._fire()
 	assert(game.run_total_shots == 1)
 	game._settle_run(true)
@@ -33,6 +47,12 @@ func run() -> void:
 		assert(game.progression.buy(id))
 	assert(not game.progression.buy("cell"))
 	assert(game.guard_regen() == 50 and game.guard_capacity() == 150)
+	game.guard_energy = 50
+	game._register_kill("light",Vector2(800,500))
+	assert(game.guard_energy == 55)
+	game.guard_energy = 149
+	game._register_kill("light",Vector2(800,500))
+	assert(game.guard_energy == 150)
 	game._spawn_enemy("heavy", 0, false)
 	var turret = game.turrets.back()
 	turret.position.x = 600
