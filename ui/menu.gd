@@ -3,6 +3,12 @@ extends CanvasLayer
 const F := preload("res://ui/ui_factory.gd")
 const S := preload("res://ui/ui_strings.gd")
 const TERMINAL_TEXTURE := preload("res://assets/ui_title_terminal.png")
+const STANDING_TEXTURE := preload("res://assets/ui_title_terminal_stand.png")
+var terminal_stand: TextureRect
+var submenu_terminal: NinePatchRect
+var submenu_empty := StyleBoxEmpty.new()
+var submenu_padding := 20.0
+var layout_busy := false
 var terminal: NinePatchRect
 var title_empty := StyleBoxEmpty.new()
 var title_style_active := false
@@ -37,15 +43,34 @@ func _ready() -> void:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	terminal = NinePatchRect.new()
 	var atlas := AtlasTexture.new()
-	atlas.atlas = TERMINAL_TEXTURE
-	atlas.region = Rect2(0,105,1254,1000)
+	atlas.atlas = STANDING_TEXTURE
+	atlas.region = Rect2(135,10,1200,780)
 	terminal.texture = atlas
-	terminal.patch_margin_left = 138
-	terminal.patch_margin_right = 138
-	terminal.patch_margin_top = 250
-	terminal.patch_margin_bottom = 135
+	terminal.patch_margin_left = 160
+	terminal.patch_margin_right = 180
+	terminal.patch_margin_top = 270
+	terminal.patch_margin_bottom = 80
 	terminal.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(terminal)
+	terminal_stand = TextureRect.new()
+	var feet := AtlasTexture.new()
+	feet.atlas = STANDING_TEXTURE
+	feet.region = Rect2(135,790,1200,280)
+	terminal_stand.texture = feet
+	terminal_stand.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	terminal_stand.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(terminal_stand)
+	submenu_terminal = NinePatchRect.new()
+	var flat := AtlasTexture.new()
+	flat.atlas = TERMINAL_TEXTURE
+	flat.region = Rect2(0,250,1254,850)
+	submenu_terminal.texture = flat
+	submenu_terminal.patch_margin_left = 138
+	submenu_terminal.patch_margin_right = 138
+	submenu_terminal.patch_margin_top = 105
+	submenu_terminal.patch_margin_bottom = 115
+	submenu_terminal.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(submenu_terminal)
 	center = CenterContainer.new()
 	root.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -146,6 +171,7 @@ func _ready() -> void:
 	start_button.grab_focus()
 	root.resized.connect(_position_menu)
 	panel.minimum_size_changed.connect(_position_menu)
+	panel.item_rect_changed.connect(_position_menu)
 	_position_menu()
 
 static func build_controls(parent: Node, back: Callable) -> void:
@@ -254,30 +280,47 @@ func show_build(value: bool) -> void:
 	else: start_button.grab_focus()
 
 func _position_menu() -> void:
+	if layout_busy: return
+	layout_busy = true
 	terminal.visible = menu.visible
+	terminal_stand.visible = menu.visible
+	submenu_terminal.visible = not menu.visible
 	if menu.visible:
-		if not title_style_active:
-			title_style_active = true
+		title_style_active = true
+		if panel.get_theme_stylebox("panel") != title_empty:
 			panel.add_theme_stylebox_override("panel",title_empty)
-			panel.custom_minimum_size.x = 528
+		panel.custom_minimum_size.x = 448
 		var minimum := panel.get_combined_minimum_size()
-		var frame_width := 704.0
-		var frame_position := Vector2(root.size.x-frame_width-24,24)
-		var image_scale := frame_width/1254.0
-		terminal.position = frame_position
+		var width := 640.0
+		var origin := Vector2(root.size.x-width-24,24)
+		var image_scale := width/1200.0
+		var head_height := minimum.y+208
+		var stand_height := minf(148,maxf(48,root.size.y-origin.y-head_height-16))
+		terminal.position = origin
 		terminal.scale = Vector2.ONE*image_scale
-		terminal.size = Vector2(1254,(minimum.y+240)/image_scale)
-		var content_position := frame_position+Vector2(88,154)
+		terminal.size = Vector2(1200,head_height/image_scale)
+		terminal_stand.position = origin+Vector2(0,head_height)
+		terminal_stand.size = Vector2(width,stand_height)
+		var content_position := origin+Vector2(92,156)
 		center.offset_left = 2*content_position.x+minimum.x-root.size.x
 		center.offset_top = 2*content_position.y+minimum.y-root.size.y
 	else:
-		if title_style_active:
-			title_style_active = false
-			panel.custom_minimum_size.x = 640
-			if panel.get_theme_stylebox("panel") == title_empty:
-				panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),20))
+		title_style_active = false
+		panel.custom_minimum_size.x = 640
+		var current := panel.get_theme_stylebox("panel")
+		if current is StyleBoxFlat: submenu_padding = current.get_content_margin(SIDE_LEFT)
+		for side in [SIDE_LEFT,SIDE_RIGHT,SIDE_TOP,SIDE_BOTTOM]: submenu_empty.set_content_margin(side,submenu_padding)
+		if current != submenu_empty: panel.add_theme_stylebox_override("panel",submenu_empty)
 		center.offset_left = 0
 		center.offset_top = 0
+		var rect := panel.get_global_rect()
+		var content_size := panel.get_combined_minimum_size()-Vector2.ONE*submenu_padding*2
+		var image_scale := minf(0.32,maxf(0.08,(root.size.x-8-content_size.x)/276.0))
+		var border := Vector2(138,105)*image_scale
+		submenu_terminal.position = rect.position+Vector2.ONE*submenu_padding-border
+		submenu_terminal.scale = Vector2.ONE*image_scale
+		submenu_terminal.size = (content_size+Vector2(276,220)*image_scale)/image_scale
+	layout_busy = false
 
 func _load_name() -> void:
 	if game.enter_named_session(name_input.text):
