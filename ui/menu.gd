@@ -116,6 +116,8 @@ func _ready() -> void:
 			entrance = create_tween()
 			entrance.tween_property(menu, "modulate:a", 1.0, 0.25))
 	start_button.grab_focus()
+	root.resized.connect(_position_menu)
+	panel.minimum_size_changed.connect(_position_menu)
 	_position_menu()
 
 static func build_controls(parent: Node, back: Callable) -> void:
@@ -204,6 +206,12 @@ func show_build(value: bool) -> void:
 	else: start_button.grab_focus()
 
 func _position_menu() -> void:
-	# Offset the title page only; full-sized subpages keep their centered fit.
-	center.offset_left = 120 if menu.visible else 0
-	center.offset_top = -96 if menu.visible else 0
+	# Keep the title panel 24 logical pixels from the top and right edges.
+	# Center the larger subpages as before.
+	if menu.visible:
+		var minimum := panel.get_combined_minimum_size()
+		center.offset_left = maxf(0.0, root.size.x - minimum.x - 48.0)
+		center.offset_top = 48.0 + minimum.y - root.size.y
+	else:
+		center.offset_left = 0
+		center.offset_top = 0
