@@ -90,6 +90,11 @@ var floaters: Array[Dictionary] = []
 var boss_bombs: Array[BossBomb] = []
 var boss_particles: Array[BossParticle] = []
 var boss := {}
+var ui_paused := false
+var ui_preview := false
+var run_elapsed := 0.0
+var run_deaths := 0
+var overlays: CanvasLayer
 
 func _ready() -> void:
 	randomize()
@@ -121,12 +126,15 @@ func _ready() -> void:
 	start_screen.game = self
 	start_screen.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(start_screen)
+	overlays = preload("res://ui/overlays.gd").new()
+	overlays.game = self
+	add_child(overlays)
 	return_to_start()
 
 func _process(delta: float) -> void:
-	if state == "start" or lab_panel.blocked: return
+	if state == "start" or ui_paused or lab_panel.blocked: return
 	if lab.active: lab.duration += delta
-	_update_fx(delta)
+	if state != "victory": _update_fx(delta)
 	if state == "dead":
 		death_delay -= delta
 		if Input.is_action_just_pressed("restart") or Input.is_action_just_pressed("jump") or Input.is_action_just_pressed("fire"):
@@ -142,6 +150,7 @@ func _process(delta: float) -> void:
 		return
 	banner_time = maxf(0, banner_time - delta)
 	notice_time = maxf(0, notice_time - delta)
+	run_elapsed += delta
 	segment_time += delta
 	_update_player(delta)
 	player_visual.position = player
@@ -163,10 +172,11 @@ func _process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if state != "start" and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
-		return_to_start()
+		if state == "playing" and not lab_panel.expanded: set_ui_paused(not ui_paused)
+		else: return_to_start()
 		get_viewport().set_input_as_handled()
 		return
-	if state == "start" or lab_panel.blocked: return
+	if state == "start" or ui_paused or lab_panel.blocked: return
 	if state == "dead":
 		for action in ["restart", "jump", "fire"]:
 			if event.is_action_pressed(action) and not event.is_echo():
@@ -564,6 +574,7 @@ func _die(cause: String) -> void:
 	weapon_audio.stop_all()
 	lab.finish(score, cause, player, segment, boss_mode, true)
 	retry_requested = false
+	run_deaths += 1
 	state = "dead"; death_delay = 0.35; banner = cause; _emit(_player_center(), RED, 40, 300)
 	if boss_mode:
 		boss_actor.set_combat_enabled(false)
@@ -743,6 +754,9 @@ func _start_lab_run() -> void:
 	lab_panel.refresh_summary()
 
 func _new_run(reason := "administrative_restart") -> void:
+	run_elapsed = 0
+	run_deaths = 0
+	player_hud.reset_run()
 	lab.finish(score, reason, player, segment, boss_mode)
 	lab.clear_pending_retry()
 	_reset_campaign()
@@ -786,6 +800,8 @@ func start_game(mode := "checkpoint", parameter_index := 0, development := false
 	lab_panel.mode_selector.select(0 if restart_mode == "checkpoint" else 1)
 	lab_panel.apply_preset(parameter_index, false)
 	start_screen.hide()
+	player_visual.show()
+	if has_node("/root/SceneFader"): get_node("/root/SceneFader").reveal()
 	lab_panel.visible = developer_mode
 	lab_panel.expanded = false
 	lab_panel.panel.hide()
@@ -794,6 +810,7 @@ func start_game(mode := "checkpoint", parameter_index := 0, development := false
 	get_tree().paused = false
 
 func return_to_start() -> void:
+	ui_paused = false
 	weapon_audio.stop_all()
 	music.return_to_menu()
 	lab.finish(score, "administrative_return_to_start", player, segment, boss_mode)
@@ -809,6 +826,9 @@ func return_to_start() -> void:
 	lab_panel.release_pending = false
 	lab_panel.hide()
 	start_screen.show()
+	player_visual.hide()
+	if has_node("/root/SceneFader"): get_node("/root/SceneFader").reveal()
+	player_hud.hide()
 	get_tree().paused = true
 	queue_redraw()
 
@@ -868,7 +888,7 @@ func _emit(origin: Vector2, color: Color, count: int, speed: float) -> void:
 
 func _notify(text: String, color: Color, duration := 0.55) -> void:
 	notice = text; notice_time = duration
-	floaters.append({"pos": Vector2(330, 158), "text": text, "color": color, "life": duration})
+	player_hud.toast_label.modulate = color
 
 func _weapon() -> Dictionary: return GD.WEAPONS[weapon_index]
 func _reload_duration() -> float: return float(_weapon().reload) * float(lab_panel.values.reload_multiplier)
@@ -919,10 +939,6 @@ func _draw() -> void:
 	for bullet in shots: _draw_player_shot(bullet)
 	for particle in particles: draw_circle(particle.pos, 3, Color(particle.color, clampf(particle.life * 2, 0, 1)))
 	if state == "playing": _draw_reticle()
-	_draw_hud()
-	for label in floaters: draw_string(ThemeDB.fallback_font, label.pos, label.text, HORIZONTAL_ALIGNMENT_CENTER, 300, 14, Color(label.color, clampf(label.life * 2, 0, 1)))
-	if state == "dead": _draw_death()
-	if state == "victory": _draw_victory()
 
 func _draw_player_shot(bullet: Dictionary) -> void:
 	var direction: Vector2 = bullet.velocity.normalized()
@@ -938,9 +954,15 @@ func _draw_player_shot(bullet: Dictionary) -> void:
 		draw_circle(tip, 2.0, Color("ffe0a3"))
 
 func _draw_reticle() -> void:
-	draw_arc(aim, 11, 0, TAU, 20, _slot_color(), 2)
-	draw_line(aim + Vector2(-17, 0), aim + Vector2(-7, 0), _slot_color(), 2); draw_line(aim + Vector2(7, 0), aim + Vector2(17, 0), _slot_color(), 2)
-	draw_line(aim + Vector2(0, -17), aim + Vector2(0, -7), _slot_color(), 2); draw_line(aim + Vector2(0, 7), aim + Vector2(0, 17), _slot_color(), 2)
+	var color := UIPalette.AMBER
+	if reload_left > 0 or (selected_slot != 2 and ammo[weapon_index] == 0): color = UIPalette.TEXT_DIM
+	else:
+		for turret in turrets:
+			if is_instance_valid(turret) and turret.body_rect().has_point(aim): color = UIPalette.RED
+		if boss_mode and aim.distance_to(boss_actor.position) < 80: color = UIPalette.RED
+	draw_arc(aim, 11, 0, TAU, 20, color, 2)
+	for axis in [Vector2.RIGHT, Vector2.LEFT, Vector2.UP, Vector2.DOWN]:
+		draw_line(aim + axis * 7, aim + axis * 17, color, 2)
 
 func _draw_obstacle(object: Dictionary) -> void:
 	if object.type == "barrel" and object.shot: return
@@ -948,33 +970,6 @@ func _draw_obstacle(object: Dictionary) -> void:
 	draw_rect(rect, YELLOW if object.type == "barrel" else Color("69758a"))
 	if object.type == "barrel": draw_string(ThemeDB.fallback_font, rect.position + Vector2(3, -8), "SHOOT", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, YELLOW)
 	else: draw_line(rect.position + Vector2(8, 8), rect.end - Vector2(8, 8), WHITE, 3)
-
-func _draw_hud() -> void:
-	draw_rect(Rect2(0, 0, 960, 88), Color(0.02, 0.05, 0.12, 0.95)); draw_line(Vector2(0, 88), Vector2(960, 88), CYAN, 1)
-	draw_string(ThemeDB.fallback_font, Vector2(26, 30), "THE FRONT NEVER STOPS", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, CYAN)
-	draw_string(ThemeDB.fallback_font, Vector2(26, 59), "BOSS // PHASE %d" % boss.get("phase", 1) if boss_mode else "SEGMENT %02d / %02d" % [segment + 1, GD.CAMPAIGN_SEGMENT_COUNT], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, DIM)
-	draw_string(ThemeDB.fallback_font, Vector2(304, 31), "SCORE %06d" % score, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, WHITE)
-	draw_string(ThemeDB.fallback_font, Vector2(304, 59), "KILLS %02d" % [stats.unarmored + stats.light + stats.heavy + stats.flyer], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, YELLOW)
-	draw_string(ThemeDB.fallback_font, Vector2(580, 59), "[M] SOUND OFF" if AudioServer.is_bus_mute(0) else "[M] SOUND ON", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, DIM)
-	draw_string(ThemeDB.fallback_font, Vector2(735, 26), "GUARD", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, DIM); draw_rect(Rect2(735, 36, 190, 12), Color("18273b")); draw_rect(Rect2(735, 36, 190 * guard_energy / GD.GUARD.maximum, 12), RED if guard_lock > 0 else CYAN)
-	draw_string(ThemeDB.fallback_font, Vector2(735, 70), "[E/RB] GRENADE" if has_grenade else "GRENADE —", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, CYAN if has_grenade else DIM)
-	if boss_mode:
-		var boss_health: float = float(boss.hp) / float(GD.BOSS.health)
-		draw_rect(Rect2(250, 101, 460, 18), Color("241827"))
-		draw_rect(Rect2(254, 105, 452 * boss_health, 10), RED)
-		draw_string(ThemeDB.fallback_font, Vector2(0, 137), "BOSS HP %d / %d   //   ARMOR %d" % [boss.hp, GD.BOSS.health, boss.armor], HORIZONTAL_ALIGNMENT_CENTER, 960, 14, WHITE if boss.armor == 0 else RED)
-	else: draw_string(ThemeDB.fallback_font, Vector2(0, 116), GD.SEGMENTS[segment].hint, HORIZONTAL_ALIGNMENT_CENTER, 960, 12, DIM)
-	if banner_time > 0: draw_string(ThemeDB.fallback_font, Vector2(0, 157), banner, HORIZONTAL_ALIGNMENT_CENTER, 960, 17, WHITE)
-	draw_string(ThemeDB.fallback_font, Vector2(24, 704), "A/D HOLD MOVE   SPACE/W JUMP   S/CTRL CROUCH   LMB/RT FIRE   RMB/LT GUARD   1/2/3 WEAPONS   Q/Y CYCLE   R/X RELOAD", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, DIM)
-
-func _draw_death() -> void:
-	draw_rect(Rect2(Vector2.ZERO, GD.VIEW_SIZE), Color(0.01, 0.02, 0.06, 0.82)); draw_string(ThemeDB.fallback_font, Vector2(0, 286), "ONE HIT // CHECKPOINT LOST", HORIZONTAL_ALIGNMENT_CENTER, 960, 34, RED); draw_string(ThemeDB.fallback_font, Vector2(0, 332), banner, HORIZONTAL_ALIGNMENT_CENTER, 960, 15, WHITE); draw_string(ThemeDB.fallback_font, Vector2(0, 382), "PRESS R / SPACE / FIRE TO RETRY", HORIZONTAL_ALIGNMENT_CENTER, 960, 14, CYAN)
-
-func _draw_victory() -> void:
-	draw_rect(Rect2(Vector2.ZERO, GD.VIEW_SIZE), Color(0.01, 0.02, 0.06, 0.92)); draw_string(ThemeDB.fallback_font, Vector2(0, 205), "MISSION COMPLETE", HORIZONTAL_ALIGNMENT_CENTER, 960, 38, CYAN); draw_string(ThemeDB.fallback_font, Vector2(0, 258), "FINAL SCORE  %06d" % score, HORIZONTAL_ALIGNMENT_CENTER, 960, 24, WHITE)
-	var lines := [["LIGHT TURRETS", stats.unarmored], ["HEAVY TURRETS", stats.heavy], ["BOSS DEFEATED", "YES"]]
-	for i in range(lines.size()): draw_string(ThemeDB.fallback_font, Vector2(300, 320 + i * 30), lines[i][0], HORIZONTAL_ALIGNMENT_LEFT, 210, 15, DIM); draw_string(ThemeDB.fallback_font, Vector2(560, 320 + i * 30), str(lines[i][1]), HORIZONTAL_ALIGNMENT_LEFT, -1, 15, WHITE)
-	draw_string(ThemeDB.fallback_font, Vector2(0, 550), "PRESS R / SPACE TO REDEPLOY", HORIZONTAL_ALIGNMENT_CENTER, 960, 14, YELLOW)
 
 func lab_parameters_changed(key: String, manual := true) -> void:
 	if not developer_mode: return
@@ -993,3 +988,14 @@ func lab_parameters_changed(key: String, manual := true) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		lab.finish(score, "window_close", player, segment, boss_mode)
+
+func set_ui_paused(value: bool) -> void:
+	if state != "playing": return
+	ui_paused = value
+	get_tree().paused = value
+	if value:
+		weapon_audio.stop_all()
+		lab.record("ui_pause")
+	else:
+		lab.record("ui_resume")
+		_gate_gameplay_input()

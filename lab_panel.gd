@@ -38,11 +38,13 @@ var update_left := 0.0
 func _ready() -> void:
 	layer = 20
 	var root := VBoxContainer.new()
-	root.theme = Theme.new()
-	root.theme.default_font = preload("res://assets/fonts/NotoSansSC.ttf")
-	root.position = Vector2(570, 170)
+	root.theme = preload("res://ui/ui_theme.tres")
 	root.custom_minimum_size.x = 375
 	add_child(root)
+	root.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	root.offset_left = -402
+	root.offset_right = -12
+	root.offset_top = 164
 	var toggle := Button.new()
 	toggle.text = "LAB B / Tuning [F1]"
 	toggle.pressed.connect(toggle_panel)
@@ -50,7 +52,7 @@ func _ready() -> void:
 	panel = PanelContainer.new()
 	root.add_child(panel)
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(375, 430)
+	scroll.custom_minimum_size = Vector2(375, 320)
 	panel.add_child(scroll)
 	body = VBoxContainer.new()
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -68,7 +70,7 @@ func _ready() -> void:
 		var label := Label.new()
 		label.text = "%s [%s..%s]" % [spec[0], spec[2], spec[3]]
 		label.custom_minimum_size.x = 250
-		label.add_theme_font_size_override("font_size", 11)
+		label.theme_type_variation = "SmallLabel"
 		row.add_child(label)
 		var spin := SpinBox.new()
 		spin.min_value = spec[2]
@@ -116,10 +118,11 @@ func _ready() -> void:
 	body.add_child(status_label)
 	panel.visible = false
 	summary_label = Label.new()
-	summary_label.position = Vector2(18, 620)
-	summary_label.add_theme_font_size_override("font_size", 11)
-	summary_label.add_theme_font_override("font", preload("res://assets/fonts/NotoSansSC.ttf"))
-	add_child(summary_label)
+	root.add_child(summary_label)
+	summary_label.theme = root.theme
+	summary_label.theme_type_variation = "MutedLabel"
+	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary_label.custom_minimum_size.x = 375
 	refresh_summary()
 
 func _add_selector(title: String, choices: Array) -> OptionButton:
@@ -142,7 +145,7 @@ func _add_button(text: String, action: Callable) -> void:
 	body.add_child(button)
 
 func _input(event: InputEvent) -> void:
-	if not game.developer_mode or game.state == "start": return
+	if not game.developer_mode or game.state == "start" or game.ui_paused: return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.physical_keycode == KEY_F1:
 			toggle_panel()
