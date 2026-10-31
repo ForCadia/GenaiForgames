@@ -5,13 +5,22 @@ func run() -> void:
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)
 	game.set_process(false)
+	assert(game.progression.coins == 600)
 	game.progression.owned.clear()
 	game.progression.coins = 2000
 	assert(not game.progression.buy("auto_guard"))
 	game.start_level(0)
 	assert(game.guard_regen() == 12.5)
 	game._award_enemy_kill("heavy", game.player)
-	assert(game.run_total_kills == 1 and game.coin_drops.size() == 1)
+	assert(game.run_total_kills == 1 and game.coin_drops.size() == 5)
+	var drop_value := 0
+	for coin in game.coin_drops:
+		drop_value += int(coin.value)
+		assert(not coin.landed and coin.vy < 0)
+	assert(drop_value == 7)
+	for coin in game.coin_drops:
+		coin.pos = game.player - Vector2(0,10)
+		coin.landed = true
 	game._update_coins(0)
 	assert(game.run_coins == 7 and game.progression.coins == 2007)
 	game._fire()
@@ -33,6 +42,12 @@ func run() -> void:
 	turret.state = TurretBase.TurretState.EXPOSED
 	game._auto_select_weapon()
 	assert(game.weapon_index == 0)
+	game._select_slot(1)
+	game.aim = Vector2(900, 100)
+	game._auto_select_weapon()
+	assert(game.weapon_index == 0)
+	assert(game._best_weapon_for_armor(3) == 1)
+	assert(game._best_weapon_for_armor(0) == 0)
 	assert(turret.laser_length == 1400)
 	game.guard_energy = 100
 	game._receive(false, "AUTO GUARD")
@@ -45,6 +60,15 @@ func run() -> void:
 	game.guard_energy = 0
 	game._receive(false, "NO ENERGY")
 	assert(game.state == "dead")
+	game.return_to_start()
+	game.start_level(0)
+	game._start_boss()
+	assert(game.boss_entering and game.boss_actor.position.x > 960)
+	assert(not game.boss_actor.combat_enabled)
+	game._update_boss(0.4)
+	assert(game.boss_entering and game.boss_actor.position.x < 1180)
+	game._update_boss(2)
+	assert(not game.boss_entering and game.boss_actor.combat_enabled)
 	game.return_to_start()
 	game.start_screen.show_build(true)
 	assert(game.start_screen.build_view.visible)

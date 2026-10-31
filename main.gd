@@ -14,6 +14,7 @@ const WHITE := Color("e4f8ff")
 const YELLOW := Color("ffcf70")
 const RED := Color("ff5f6d")
 const DIM := Color("54718e")
+const COIN_TEXTURE := preload("res://assets/items/credit_coin.png")
 const GRENADE_TEXTURE := preload("res://assets/items/grenade.png")
 const PLAYER_CAN_DIE := true
 const BOSS_IDLE_Y := 350.0
@@ -71,6 +72,7 @@ var has_grenade: bool:
 	get: return grenade_count > 0
 	set(value): grenade_count = maxi(1, grenade_count) if value else 0
 var boss_grenade_spawned := false
+var boss_entering := false
 
 var score := 0
 var stats := {"unarmored": 0, "light": 0, "heavy": 0, "flyer": 0}
@@ -696,8 +698,10 @@ func _start_boss(preserve_motion := false) -> void:
 	lab.set_location(segment, true)
 	if lab.active: lab.record("checkpoint_reached", {"score": score})
 	boss = {"armor": GD.BOSS.armor_per_cycle, "hp": GD.BOSS.health, "phase": 1}
-	boss_actor.position = Vector2(785.0, BOSS_IDLE_Y)
+	boss_actor.position = Vector2(GD.VIEW_SIZE.x + 220.0, BOSS_IDLE_Y)
 	boss_actor.reset_for_battle(true)
+	boss_actor.set_combat_enabled(false)
+	boss_entering = true
 	banner = mode_caption() + " // BOSS // BREAK ARMOR"; banner_time = 2.2
 
 func _update_boss(delta: float) -> void:
@@ -705,6 +709,12 @@ func _update_boss(delta: float) -> void:
 	if not boss_grenade_spawned and segment_time >= 0.5:
 		boss_grenade_spawned = true
 		_spawn_grenade_pickup()
+	if boss_entering:
+		boss_actor.position = boss_actor.position.move_toward(Vector2(785.0, BOSS_IDLE_Y), 250.0 * delta)
+		if boss_actor.position.is_equal_approx(Vector2(785.0, BOSS_IDLE_Y)):
+			boss_entering = false
+			boss_actor.set_combat_enabled(true)
+		return
 	# Finish the descent before releasing the low three-shot attack. Bombs and
 	# barrage waves stay in the upper-right flight region.
 	boss_actor.attack_position_ready = absf(boss_actor.position.y - BOSS_ATTACK_Y) < 1.0 if boss_actor.wants_low_flight() else boss_actor.position.y <= BOSS_IDLE_Y + 1.0
@@ -984,6 +994,7 @@ func _reset_player(preserve_motion := false) -> void:
 
 func _clear_world() -> void:
 	world_audio.stop_all()
+	boss_entering = false
 	coin_drops.clear(); enemies.clear(); obstacles.clear(); pickups.clear(); shots.clear(); threats.clear()
 	for spikes in ground_spikes:
 		if is_instance_valid(spikes): spikes.queue_free()
@@ -1072,10 +1083,8 @@ func _line_circle(a: Vector2, b: Vector2, center: Vector2, radius: float) -> boo
 
 func _draw() -> void:
 	for coin in coin_drops:
-		draw_circle(coin.pos, 11, Color(1, 0.65, 0.1, 0.2))
-		draw_circle(coin.pos, 7, YELLOW)
-		draw_circle(coin.pos, 4, Color("aa6c20"))
-		draw_line(coin.pos + Vector2(0,-3), coin.pos + Vector2(0,3), YELLOW, 2)
+		draw_circle(coin.pos, 14, Color(1, 0.65, 0.1, 0.12))
+		draw_texture_rect(COIN_TEXTURE, Rect2(coin.pos - Vector2(13,13), Vector2(26,26)), false)
 	for pickup in pickups:
 		draw_circle(pickup.pos, 31, Color(1.0, 0.7, 0.15, 0.18))
 		var marker := PackedVector2Array([pickup.pos + Vector2(0, -34), pickup.pos + Vector2(33, 0), pickup.pos + Vector2(0, 34), pickup.pos + Vector2(-33, 0), pickup.pos + Vector2(0, -34)])
@@ -1239,21 +1248,34 @@ func _register_kill(kind: String, origin: Vector2) -> void:
 	run_total_kills += 1
 	if not _meta_enabled(): return
 	var value: int = preload("res://build_data.gd").COIN_VALUES.get(kind, 3)
-	coin_drops.append({"pos": origin, "vy": -110.0, "value": value})
+	var count := mini(value, 5)
+	for i in range(count):
+		coin_drops.append({"pos": Vector2(origin.x, minf(origin.y - 22, GD.GROUND_Y - 24)),
+			"vx": lerpf(-130.0, 130.0, float(i) / maxf(1, count - 1)),
+			"vy": randf_range(-280, -190), "landed": false, "bounced": false,
+			"value": int(value / count) + (1 if i < value % count else 0)})
 
 func _update_coins(delta: float) -> void:
 	for i in range(coin_drops.size() - 1, -1, -1):
 		var coin: Dictionary = coin_drops[i]
-		coin.pos.x -= _scroll() * delta
+		coin.pos.x += (float(coin.vx) - _scroll()) * delta
 		coin.vy += 650 * delta
-		coin.pos.y = minf(GD.GROUND_Y - 8, coin.pos.y + coin.vy * delta)
-		if coin.pos.y >= GD.GROUND_Y - 8: coin.vy = 0.0
+		coin.pos.y += float(coin.vy) * delta
+		if coin.pos.y >= GD.GROUND_Y - 10:
+			coin.pos.y = GD.GROUND_Y - 10
+			if not coin.bounced:
+				coin.vy = -absf(coin.vy) * 0.24
+				coin.bounced = true
+			else:
+				coin.vy = 0.0
+				coin.landed = true
+			coin.vx = move_toward(coin.vx, 0, 550 * delta)
 		var target := player + Vector2(0, -18)
 		var magnet := _meta_effect("magnet")
-		if magnet > 0 and coin.pos.distance_to(target) < magnet:
+		if coin.landed and magnet > 0 and coin.pos.distance_to(target) < magnet:
 			coin.pos = coin.pos.move_toward(target, 420 * delta)
-		if _player_hitbox().grow(24 + _meta_effect("pickup")).has_point(coin.pos):
-			if progression.credit(coin.value):
+		if coin.landed and _player_hitbox().grow(24 + _meta_effect("pickup")).has_point(coin.pos):
+			if progression.credit(int(coin.value)):
 				run_coins += int(coin.value)
 				floaters.append({"pos": coin.pos, "text": "+%d G" % coin.value, "color": YELLOW, "life": 0.65})
 				coin_drops.remove_at(i)
@@ -1274,14 +1296,48 @@ func _settle_run(completed: bool) -> void:
 
 func _auto_select_weapon() -> void:
 	if not _upgrade("auto_weapon") or selected_slot == 2 or reload_left > 0: return
-	var desired := -1
+	var armor := 0
+	var nearest := INF
+	var origin := player_visual.muzzle_world_position()
+	var ray_end := origin + (aim - origin).normalized() * 1600.0
 	for turret in turrets:
-		if is_instance_valid(turret) and turret.body_rect().grow(8).has_point(aim) and turret.state not in [TurretBase.TurretState.DEAD, TurretBase.TurretState.BREAKING]:
-			desired = 1 if turret.turret_kind == TurretBase.TurretKind.HEAVY and turret.state != TurretBase.TurretState.EXPOSED else 0
-	if boss_mode and boss_actor.visible and aim.distance_to(_boss_pos()) < 130:
-		desired = 1 if int(boss.get("armor", 0)) > 0 else 0
+		if not is_instance_valid(turret) or turret.state in [TurretBase.TurretState.DEAD, TurretBase.TurretState.BREAKING]: continue
+		if turret.body_rect().grow(8).has_point(aim) or turret.shot_hits(origin, ray_end):
+			var distance_to_target := origin.distance_squared_to(turret.body_rect().get_center())
+			if distance_to_target < nearest:
+				nearest = distance_to_target
+				armor = 3 if turret.turret_kind == TurretBase.TurretKind.HEAVY and turret.state != TurretBase.TurretState.EXPOSED else 0
+	if boss_mode and boss_actor.combat_enabled and boss_actor.shot_hits(origin, ray_end):
+		var distance_to_target := origin.distance_squared_to(_boss_pos())
+		if distance_to_target < nearest:
+			nearest = distance_to_target
+			armor = 3 if boss_actor.armor_layers() > 0 else 0
 	for enemy in enemies:
-		if not enemy.dead and aim.distance_to(enemy.pos) < 55: desired = 1 if enemy.armor > 0 else 0
+		if not enemy.dead and _line_circle(origin, ray_end, enemy.pos, enemy.radius):
+			var distance_to_target := origin.distance_squared_to(enemy.pos)
+			if distance_to_target < nearest:
+				nearest = distance_to_target
+				armor = int(enemy.armor)
 	for gate in laser_gates:
-		if is_instance_valid(gate) and gate.hazard_rect().has_point(aim): desired = 0
-	if desired >= 0 and desired != weapon_index: _select_slot(desired)
+		if is_instance_valid(gate) and gate.shot_hits(origin, ray_end):
+			var distance_to_target := origin.distance_squared_to(gate.global_position)
+			if distance_to_target < nearest:
+				nearest = distance_to_target
+				armor = 0
+	var desired := _best_weapon_for_armor(armor)
+	if desired != weapon_index: _select_slot(desired)
+
+func _best_weapon_for_armor(required: int) -> int:
+	var best := 0
+	var best_dps := -1.0
+	for index in range(GD.WEAPONS.size()):
+		var data := weapon_data(index)
+		if int(data.penetration) < required: continue
+		# Both guns inflict one hit. Include magazine and reload in sustained DPS.
+		var cadence := float(lab_panel.values.rifle_cadence if index == 0 else lab_panel.values.piercer_cadence) * (1.0 + _meta_effect("cadence"))
+		var reload_time := float(data.reload) * float(lab_panel.values.reload_multiplier) * (1.0 + _meta_effect("reload"))
+		var dps := float(data.magazine) / (float(data.magazine) * cadence + reload_time)
+		if dps > best_dps:
+			best_dps = dps
+			best = index
+	return best

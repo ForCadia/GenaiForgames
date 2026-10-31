@@ -2,7 +2,9 @@ extends Node
 
 const DATA := preload("res://build_data.gd")
 const SAVE_PATH := "user://progression.cfg"
-var coins := 0
+const STARTING_COINS := 600
+var coins := STARTING_COINS
+var test_grant_applied := false
 var owned: Dictionary = {}
 var persistence := true
 var load_failed := false
@@ -14,10 +16,19 @@ func _ready() -> void:
 	var error := config.load(SAVE_PATH)
 	if error != OK:
 		load_failed = error != ERR_FILE_NOT_FOUND
+		if not load_failed:
+			test_grant_applied = true
+			save()
 		return
 	coins = maxi(0, int(config.get_value("profile", "coins", 0)))
+	test_grant_applied = bool(config.get_value("profile", "test_grant_600_v1", false))
 	for id in config.get_value("profile", "owned", PackedStringArray()):
 		if DATA.NODES.has(str(id)): owned[str(id)] = true
+
+	if not test_grant_applied:
+		coins = maxi(coins, STARTING_COINS)
+		test_grant_applied = true
+		save()
 
 func has_upgrade(id: String) -> bool:
 	return id == "core" or owned.has(id)
@@ -56,5 +67,6 @@ func save() -> Error:
 	if load_failed: return ERR_FILE_CORRUPT
 	var config := ConfigFile.new()
 	config.set_value("profile", "coins", coins)
+	config.set_value("profile", "test_grant_600_v1", test_grant_applied)
 	config.set_value("profile", "owned", PackedStringArray(owned.keys()))
 	return config.save(SAVE_PATH)
