@@ -50,6 +50,8 @@ No AI-service requests or API keys in game code. Telemetry is local only. Do not
 
 ## Confirmed experiment and start screen
 
+Latest readability revision (2026-10-31): tutorial hints sit below the track in the lower-left, with larger text and translucent shadowed backing. Lower-right weapon slots are grouped, gun icons elongated and the current slot marked with amber fill/underline. Helmet artwork scale is 0.88 and front gun artwork is 1.12 on x, with the shoulder anchor and actual muzzle position kept consistent. Grenade pickups have an amber diamond decal/arrow behind them. Start menu keeps its framed background.
+
 Player run artwork revision (2026-10-31): `assets/player/run_olive_4x4.png` is the user-supplied Downloads/深橄榄装甲4×4精灵表.png (1254×1254). Run uses all 16 cells in row-major order, 22 fps, directly on start; the idle-to-run startup sequence is removed. Integer atlas boundaries alternate 314/313 pixels. Run body scale is 0.64; row baselines align feet and shoulder attachments. A run-only palette shader brings the brighter olive armor toward the original body colors while preserving steel and cyan. Collisions and gameplay movement are unchanged. The start menu uses its original framed theme; gameplay HUD remains frameless.
 
 Latest user revision (2026-10-31): Boss red health is now 24. F consumes one picked-up grenade, flashes the screen, clears visible normal enemies/hazards and all hostile rounds, and deals one direct Boss health damage without removing armor. Each active segment and Boss entry provide one pickup opportunity; capacity remains one. UI panels are frameless, checkpoint text is larger and the weapon HUD is wider at lower right. These changes supersede the earlier Lab C values below and never alter historical telemetry.

@@ -966,6 +966,10 @@ func _line_circle(a: Vector2, b: Vector2, center: Vector2, radius: float) -> boo
 
 func _draw() -> void:
 	for pickup in pickups:
+		draw_circle(pickup.pos, 31, Color(1.0, 0.7, 0.15, 0.18))
+		var marker := PackedVector2Array([pickup.pos + Vector2(0, -34), pickup.pos + Vector2(33, 0), pickup.pos + Vector2(0, 34), pickup.pos + Vector2(-33, 0), pickup.pos + Vector2(0, -34)])
+		draw_polyline(marker, Color(1.0, 0.75, 0.22, 0.85), 2)
+		draw_polyline(PackedVector2Array([pickup.pos + Vector2(-9, -47), pickup.pos + Vector2(0, -39), pickup.pos + Vector2(9, -47)]), Color("ffb32e"), 3)
 		draw_texture_rect(GRENADE_TEXTURE, Rect2(pickup.pos - Vector2(24, 24), Vector2(48, 48)), false)
 	for object in obstacles: _draw_obstacle(object)
 	for bullet in threats:

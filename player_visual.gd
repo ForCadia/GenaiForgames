@@ -82,6 +82,7 @@ var primary_slot := 0
 var guard_visible := false
 
 func _ready() -> void:
+	helmet.scale = Vector2(0.88, 0.88)
 	run_palette.shader = preload("res://assets/player/run_palette.gdshader")
 	set_collision_pose(false)
 	_apply_frames()
@@ -277,6 +278,7 @@ func _apply_frames() -> void:
 	back_arm.position = -RELOAD_BACK_ROOT_SOURCE if arm_action == "reload" else -BACK_ARM_ROOT_SOURCE
 	var front_root: Vector2 = RELOAD_FRONT_ROOT_SOURCE if arm_action == "reload" else ARM_ROOT_SOURCE
 	var front_trim := HIGH_RECOVERY_LEFT_TRIM if primary_slot == 1 and arm_action == "fire" and arm_column == 2 else 0
-	front_arm.position = -front_root + Vector2(front_trim, 0)
+	front_arm.scale = Vector2(1.12, 1.0)
+	front_arm.position = (-front_root + Vector2(front_trim, 0)) * front_arm.scale
 	front_arm.region_rect = Rect2(Vector2(arm_column * ARM_CELL.x + front_trim, 0), Vector2(ARM_CELL.x - front_trim, ARM_CELL.y))
 	_update_muzzle()

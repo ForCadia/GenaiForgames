@@ -1,6 +1,7 @@
 extends PanelContainer
 
 @export var key_text := "SPACE"
+@export var font_size := 12
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -8,4 +9,4 @@ func _ready() -> void:
 	for side in [SIDE_LEFT, SIDE_RIGHT]: style.set_content_margin(side, 6)
 	for side in [SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(side, 3)
 	add_theme_stylebox_override("panel", style)
-	preload("res://ui/ui_factory.gd").label(self, key_text, "SmallLabel")
+	preload("res://ui/ui_factory.gd").label(self, key_text, "SmallLabel").add_theme_font_size_override("font_size", font_size)

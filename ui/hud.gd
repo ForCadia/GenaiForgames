@@ -33,12 +33,17 @@ var banner_tween: Tween
 var tutorial_panel: PanelContainer
 var tutorial_keys: BoxContainer
 var intro_panel: PanelContainer
+var selected_slot_style := StyleBoxFlat.new()
+var inactive_slot_style := StyleBoxEmpty.new()
 
 func _ready() -> void:
 	layer = P.HUD_LAYER
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	game = get_parent()
 	root = F.root(self)
+	selected_slot_style.bg_color = Color(1, 0.65, 0.12, 0.16)
+	selected_slot_style.border_width_bottom = 3
+	selected_slot_style.border_color = P.AMBER
 	var margin := MarginContainer.new()
 	root.add_child(margin)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -88,23 +93,42 @@ func _ready() -> void:
 	banner_center.add_child(banner_panel)
 	banner_label = F.label(banner_panel, "", "LargeLabel")
 	banner_label.modulate = P.AMBER
+	var hints := VBoxContainer.new()
+	root.add_child(hints)
+	hints.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	hints.offset_left = 12
+	hints.offset_right = 538
+	hints.offset_top = -72
+	hints.offset_bottom = -8
+	hints.add_theme_constant_override("separation", 4)
+	var hint_style := StyleBoxFlat.new()
+	hint_style.bg_color = Color(0.02, 0.035, 0.05, 0.78)
+	hint_style.shadow_color = Color(0, 0, 0, 0.55)
+	hint_style.shadow_size = 4
+	for side in [SIDE_LEFT, SIDE_RIGHT]: hint_style.set_content_margin(side, 8)
+	for side in [SIDE_TOP, SIDE_BOTTOM]: hint_style.set_content_margin(side, 3)
 	var tutorial_center := CenterContainer.new()
-	messages.add_child(tutorial_center)
+	hints.add_child(tutorial_center)
+	tutorial_center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tutorial_panel = PanelContainer.new()
+	tutorial_panel.add_theme_stylebox_override("panel", hint_style)
 	tutorial_center.add_child(tutorial_panel)
 	var tutorial_row := F.box(tutorial_panel, true)
 	tutorial_keys = F.box(tutorial_row, true)
 	tutorial_label = F.label(tutorial_row, "", "AmberLabel")
+	tutorial_label.add_theme_font_size_override("font_size", 18)
 	var intro_center := CenterContainer.new()
-	messages.add_child(intro_center)
+	hints.add_child(intro_center)
 	intro_panel = PanelContainer.new()
+	intro_panel.add_theme_stylebox_override("panel", hint_style)
 	intro_center.add_child(intro_panel)
 	var intro := F.box(intro_panel, true)
 	for key in ["A/D", "SPACE", "LMB", "RMB"]:
 		var cap := preload("res://ui/key_cap.tscn").instantiate()
 		cap.key_text = key
+		cap.font_size = 16
 		intro.add_child(cap)
-	F.label(intro, "MOVE / JUMP / FIRE / GUARD", "MutedLabel")
+	F.label(intro, "MOVE / JUMP / FIRE / GUARD", "MutedLabel").add_theme_font_size_override("font_size", 16)
 	toast_label = F.label(messages, "", "SmallLabel")
 	for label in [banner_label, tutorial_label, toast_label]: label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	F.spacer(layout)
@@ -115,18 +139,22 @@ func _ready() -> void:
 	panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	bottom.add_child(panel)
 	var weapon_layout := F.box(panel, true)
-	weapon_layout.add_theme_constant_override("separation", 24)
+	weapon_layout.add_theme_constant_override("separation", 10)
 	var row := F.box(weapon_layout, true)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 3)
 	for i in range(3):
 		var slot := PanelContainer.new()
-		slot.custom_minimum_size = Vector2(52, 24)
+		slot.custom_minimum_size = Vector2(64, 32)
 		slot.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 		slot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(slot)
 		var contents := F.box(slot, true)
+		contents.add_theme_constant_override("separation", 3)
 		F.label(contents, str(i + 1), "MutedLabel")
-		F.icon(contents, ["rifle", "piercer", "grenade"][i]).custom_minimum_size = Vector2(20, 20)
+		var icon := F.icon(contents, ["rifle", "piercer", "grenade"][i])
+		icon.custom_minimum_size = Vector2(44, 20) if i < 2 else Vector2(24, 24)
+		if i < 2: icon.stretch_mode = TextureRect.STRETCH_SCALE
 		slots.append(slot)
 	var weapons := F.box(weapon_layout)
 	weapons.add_theme_constant_override("separation", 2)
@@ -135,7 +163,7 @@ func _ready() -> void:
 	ammo_label = F.label(details, "24 / 24", "Label")
 	F.spacer(details)
 	penetration_label = F.label(details, "PEN ◆", "MutedLabel")
-	ammo_bar = F.bar(weapons, 252, "ReloadBar")
+	ammo_bar = F.bar(weapons, 164, "ReloadBar")
 	ammo_bar.custom_minimum_size.y = 6
 	reload_label = F.label(weapons, "MAGAZINE", "MutedLabel")
 	reload_label.hide()
@@ -165,6 +193,7 @@ func _process(delta: float) -> void:
 		for key in S.TUTORIAL_KEYS[game.segment]:
 			var cap := preload("res://ui/key_cap.tscn").instantiate()
 			cap.key_text = key
+			cap.font_size = 16
 			tutorial_keys.add_child(cap)
 		tutorial_label.text = S.TUTORIALS[game.segment]
 	tutorial_panel.visible = tutorial_left > 0 and not game.boss_mode
@@ -193,6 +222,7 @@ func sync() -> void:
 	boss_hud.visible = game.boss_mode
 	if game.boss_mode and not game.boss.is_empty(): boss_hud.apply_state(game.boss.hp, game.GD.BOSS.health, game.boss.armor, game.boss.phase)
 	for i in range(3):
+		slots[i].add_theme_stylebox_override("panel", selected_slot_style if game.selected_slot == i else inactive_slot_style)
 		slots[i].modulate = P.AMBER if game.selected_slot == i else P.TEXT_DIM
 		slots[i].modulate.a = 0.35 if i == 2 and not game.has_grenade else 1.0
 	if game.selected_slot == 2:
