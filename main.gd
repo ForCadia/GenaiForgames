@@ -35,6 +35,7 @@ var retry_requested := false
 var restart_mode := "checkpoint"
 var developer_mode := false
 var start_screen: CanvasLayer
+var music: AudioStreamPlayer
 var checkpoint_weapon_index := 0
 var checkpoint_distance := 0.0
 
@@ -89,6 +90,9 @@ var boss := {}
 
 func _ready() -> void:
 	randomize()
+	music = preload("res://music_player.gd").new()
+	music.name = "Music"
+	add_child(music)
 	lab_panel = preload("res://lab_panel.gd").new()
 	lab_panel.game = self
 	lab_panel.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -534,6 +538,7 @@ func _die(cause: String) -> void:
 	player_hud.follow_hitbox(_player_hitbox())
 
 func _start_segment(index: int) -> void:
+	music.play_track(false)
 	segment = index; segment_time = 0; next_event = 0; segment_transition_pending = false; boss_mode = false
 	checkpoint_score = score; checkpoint_stats = stats.duplicate(true); checkpoint_ammo = ammo.duplicate()
 	checkpoint_weapon_index = weapon_index; checkpoint_distance = distance
@@ -544,6 +549,7 @@ func _start_segment(index: int) -> void:
 	banner = "CHECKPOINT // " + GD.SEGMENTS[index].title; banner_time = 2
 
 func _start_boss() -> void:
+	music.play_track(true)
 	boss_mode = true; segment_time = 0; segment_transition_pending = false; _clear_world(); _reset_player()
 	player_visual.start_scrolling()
 	checkpoint_score = score; checkpoint_stats = stats.duplicate(true); checkpoint_ammo = ammo.duplicate()
@@ -618,6 +624,7 @@ func _boss_damage() -> void:
 		score += GD.SCORE.boss
 		lab.finish(score, "victory", player, segment, boss_mode)
 		state = "victory"
+		music.play_track(false)
 		banner = "THE FRONT NEVER STOPS"
 		boss_actor.start_death()
 		_clear_boss_attacks()
@@ -716,6 +723,7 @@ func start_game(mode := "checkpoint", parameter_index := 0, development := false
 	get_tree().paused = false
 
 func return_to_start() -> void:
+	music.return_to_menu()
 	lab.finish(score, "administrative_return_to_start", player, segment, boss_mode)
 	lab.clear_pending_retry()
 	retry_requested = false
@@ -852,6 +860,7 @@ func _draw_hud() -> void:
 	draw_string(ThemeDB.fallback_font, Vector2(26, 59), "BOSS // PHASE %d" % boss.get("phase", 1) if boss_mode else "SEGMENT %02d / %02d" % [segment + 1, GD.CAMPAIGN_SEGMENT_COUNT], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, DIM)
 	draw_string(ThemeDB.fallback_font, Vector2(304, 31), "SCORE %06d" % score, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, WHITE)
 	draw_string(ThemeDB.fallback_font, Vector2(304, 59), "KILLS %02d" % [stats.unarmored + stats.light + stats.heavy + stats.flyer], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, YELLOW)
+	draw_string(ThemeDB.fallback_font, Vector2(580, 59), "[M] SOUND OFF" if AudioServer.is_bus_mute(0) else "[M] SOUND ON", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, DIM)
 	draw_string(ThemeDB.fallback_font, Vector2(735, 26), "GUARD", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, DIM); draw_rect(Rect2(735, 36, 190, 12), Color("18273b")); draw_rect(Rect2(735, 36, 190 * guard_energy / GD.GUARD.maximum, 12), RED if guard_lock > 0 else CYAN)
 	draw_string(ThemeDB.fallback_font, Vector2(735, 70), "[E/RB] GRENADE" if has_grenade else "GRENADE —", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, CYAN if has_grenade else DIM)
 	if boss_mode:

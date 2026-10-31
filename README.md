@@ -63,6 +63,8 @@ After death, press R, Space, or Fire to restart the current segment checkpoint. 
 
 ## Lab B additions (2026-10-04)
 
+Music added on 2026-10-30: **Untitled** plays during ordinary stages and **Chase Mode** during Boss encounters. Music starts after clicking either start button, repeats, and continues through same-track retries. Victory or returning to the menu switches to Untitled. **M** mutes/restores all sound, including while the developer panel is paused. Both normal and developer modes have music. Source records and pending listening checks are in [MUSIC.md](MUSIC.md).
+
 Verified engine: **4.7.2.stable.official.ed1daf0bf**. Existing gameplay and art remain. The current active campaign has **four segments followed by Boss**; six timeline segments are defined, so older six-segment/grenade notes above do not describe the full active path.
 
 - Click **开始游戏** for ordinary play with **A + Original**. The start screen has no preset selectors. Ordinary play hides the lab UI and disables test shortcuts and telemetry recording/export. **Esc** returns to the start screen. World and timers stay paused on the menu; held keys and clicks cannot fire through either start button.
