@@ -63,10 +63,12 @@ func play_cue(cue: String, duration := -1.0, source: Node = null) -> void:
 	if duration > 0.0: player.pitch_scale = player.stream.get_length() / duration
 	if cue in ["heavy_turret_charge", "boss_bomb_countdown", "boss_particle_charge"] and is_instance_valid(source):
 		player.set_meta("source_id", source.get_instance_id())
+		var player_ref: WeakRef = weakref(player)
 		source.tree_exiting.connect(func():
-			if is_instance_valid(player):
-				player.stop()
-				player.queue_free(), CONNECT_ONE_SHOT)
+			var active_player = player_ref.get_ref()
+			if is_instance_valid(active_player):
+				active_player.stop()
+				active_player.queue_free(), CONNECT_ONE_SHOT)
 	voices.add_child(player)
 	player.finished.connect(player.queue_free)
 	player.play()

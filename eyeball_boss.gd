@@ -29,6 +29,7 @@ enum AttackState {
 @export var recovery_time := 0.45
 @export var armor_break_time := 0.55
 @export var hit_radius := 88.0
+@export var particle_spread_degrees := 6.0
 
 @onready var visual: Sprite2D = $Visual
 @onready var hurtbox: Area2D = $Hurtbox
@@ -89,7 +90,7 @@ func advance(delta: float, player_position: Vector2) -> void:
 				else:
 					attack_state = AttackState.PARTICLE_ATTACK
 					visual.frame = _form_row() * 8 + 5
-					particle_requested.emit(Vector2(global_position.x - 105.0, 565.0))
+					particle_requested.emit($ProjectileMuzzle.global_position)
 				state_time = 0.18
 		AttackState.BOMB_ATTACK, AttackState.PARTICLE_ATTACK:
 			if state_time <= 0.0:

@@ -629,10 +629,12 @@ func _on_boss_particle_requested(origin: Vector2) -> void:
 	if state != "playing" or not boss_mode:
 		return
 	world_audio.play_cue("boss_particle_fire", -1.0, boss_actor)
-	var projectile: BossParticle = BOSS_PARTICLE_SCENE.instantiate()
-	boss_attack_root.add_child(projectile)
-	projectile.position = Vector2(origin.x, projectile.firing_height)
-	boss_particles.append(projectile)
+	for spread in [-1.0, 0.0, 1.0]:
+		var projectile: BossParticle = BOSS_PARTICLE_SCENE.instantiate()
+		boss_attack_root.add_child(projectile)
+		var direction := Vector2.LEFT.rotated(deg_to_rad(boss_actor.particle_spread_degrees * spread))
+		projectile.launch(origin, direction)
+		boss_particles.append(projectile)
 
 func _on_boss_feedback(origin: Vector2, color: Color, message: String) -> void:
 	_emit(origin, color, 18, 230)

@@ -108,6 +108,27 @@ func _run() -> void:
 	_check(game.boss.hp == 4 and game.boss.armor == 0, "Two AP hits must expose without damaging the weak health")
 	game._hit_boss({"penetration": 1, "pos": Vector2(700, 350)})
 	_check(game.boss.hp == 3 and game.boss.armor == 0, "Exposed damage must reuse the original Boss health logic without restoring armor")
+	# A full particle telegraph emits one simultaneous fan from the eye marker.
+	game._start_boss()
+	game.boss_actor.next_attack_is_bomb = false
+	game.boss_actor.state_time = 0.0
+	game._update_boss(0.01)
+	for frame in range(44):
+		game._update_boss(1.0 / 60.0)
+	_check(game.boss_particles.size() == 3, "Particle attack must emit exactly three projectiles")
+	var muzzle: Vector2 = game.boss_actor.get_node("ProjectileMuzzle").global_position
+	_check(is_equal_approx(muzzle.y, game.boss_actor.global_position.y), "Eye muzzle must follow Boss height")
+	var lower_hits_standing := false
+	for shot in game.boss_particles:
+		_check(shot.global_position.distance_to(muzzle) < 20.0, "Each projectile must begin at the moving eye muzzle")
+		_check(shot.direction.x < 0.0 and is_equal_approx(shot.direction.length(), 1.0), "Fan must travel forward at the existing speed")
+		shot.advance((shot.global_position.x - 190.0) / (-shot.direction.x * shot.speed))
+		_check(not shot.try_damage(crouching), "Crouching must remain clear of the fan at the player lane")
+		if shot.try_damage(standing): lower_hits_standing = true
+	_check(lower_hits_standing, "Fan must still threaten a standing player")
+	_check(game.boss_particles[0].direction.y > 0.0 and is_zero_approx(game.boss_particles[1].direction.y) and game.boss_particles[2].direction.y < 0.0, "Fan must contain lower, center and upper directions")
+	game._start_boss()
+	_check(game.boss_particles.is_empty(), "Boss reset must clear all three projectiles")
 	game.queue_free()
 	boss.queue_free()
 	bomb.queue_free()
