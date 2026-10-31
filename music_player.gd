@@ -23,5 +23,5 @@ func play_track(is_boss: bool) -> void:
 	play()
 
 func return_to_menu() -> void:
-	# Wait for the first Start click before requesting audio in the browser.
-	if started: play_track(false)
+	# Desktop plays immediately; browsers resume their audio context on user input.
+	play_track(false)

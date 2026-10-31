@@ -23,7 +23,7 @@ func _ready() -> void:
 	root = F.root(self)
 	root.theme = preload("res://ui/menu_style.gd").theme()
 	var shade := ColorRect.new()
-	shade.color = Color(0.02, 0.03, 0.05, 0.78)
+	shade.color = Color(0.02, 0.03, 0.05, 0.40)
 	root.add_child(shade)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var center := CenterContainer.new()
@@ -183,7 +183,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if not visible or game.state != "start": return
 	wallet_label.text = "%d G" % game.progression.coins
-	drift += delta * 12
+	drift = game.menu_demo.scroll_distance
 	game.background_layer.scroll_offset.x = -roundf(drift * 0.15)
 	game.middle_layer.scroll_offset.x = -roundf(drift * 0.55)
 	game.track_layer.scroll_offset.x = -roundf(drift)

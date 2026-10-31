@@ -44,6 +44,7 @@ var endless_wave := 1
 var level_segments: Array = []
 var endless_wave_data: Dictionary = {}
 var endless_intermission := 0.0
+var menu_demo: Node2D
 var start_screen: CanvasLayer
 var music: AudioStreamPlayer
 var weapon_audio: Node
@@ -156,6 +157,9 @@ func _ready() -> void:
 	_clear_world()
 	_reset_player()
 	_update_parallax()
+	menu_demo = preload("res://ui/menu_demo.gd").new()
+	menu_demo.game = self
+	add_child(menu_demo)
 	start_screen = preload("res://start_screen.gd").new()
 	start_screen.game = self
 	start_screen.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -528,7 +532,7 @@ func _update_world(delta: float) -> void:
 			spikes.queue_free()
 			ground_spikes.remove_at(i)
 			continue
-		if guarding and spikes.hits_rect(_guard_hitbox()):
+		if guarding and guard_energy > 0 and spikes.hits_rect(_guard_hitbox()):
 			_emit(spikes.global_position + Vector2(0, -40), CYAN, 24, 260)
 			_notify("SHIELD IMPACT // OBSTACLE DESTROYED", CYAN)
 			spikes.queue_free()
@@ -537,7 +541,12 @@ func _update_world(delta: float) -> void:
 			continue
 		var touching := spikes.hits_rect(_player_hitbox())
 		if touching and not spikes.touching_player:
-			_receive(true, "GROUND SPIKES // UNBLOCKABLE")
+			_receive(false, "GROUND SPIKES")
+			if state == "playing" and guarding:
+				_emit(spikes.global_position + Vector2(0,-40), CYAN,24,260)
+				spikes.queue_free()
+				ground_spikes.remove_at(i)
+				continue
 		spikes.touching_player = touching
 	for obstacle in obstacles:
 		obstacle.x -= scroll * delta
@@ -936,6 +945,7 @@ func start_game(mode := "checkpoint", parameter_index := 0, development := false
 	lab_panel.mode_selector.select(0 if restart_mode == "checkpoint" else 1)
 	lab_panel.apply_preset(parameter_index, false)
 	start_screen.hide()
+	menu_demo.set_active(false)
 	player_visual.show()
 	if has_node("/root/SceneFader"): get_node("/root/SceneFader").reveal()
 	lab_panel.visible = developer_mode
@@ -967,6 +977,7 @@ func return_to_start() -> void:
 	lab_panel.release_pending = false
 	lab_panel.hide()
 	start_screen.show()
+	menu_demo.set_active(true)
 	player_visual.hide()
 	if has_node("/root/SceneFader"): get_node("/root/SceneFader").reveal()
 	player_hud.hide()

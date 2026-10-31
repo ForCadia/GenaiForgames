@@ -34,7 +34,7 @@ const CONTROLS_ROWS := [
 	["1 / 2 / 3", "--", "WEAPON SLOTS"], ["Q / WHEEL", "Y / TRIANGLE", "CYCLE WEAPON"],
 	["R", "X / SQUARE", "RELOAD"], ["F", "RB / R1", "SCREEN-CLEAR GRENADE"], ["ESC", "--", "PAUSE / BACK"],
 ]
-const CAUSES := {"HOSTILE FIRE":"Hit by enemy fire", "BOSS HIGH PARTICLE":"Hit by Boss energy fire", "BOSS BOMB":"Caught in a Boss bomb blast", "HEAVY TURRET LASER":"Hit by a heavy turret laser", "TURRET COLLISION":"Collided with a turret", "GROUND SPIKES // UNBLOCKABLE":"Hit ground spikes", "LASER GATE":"Hit a laser wall"}
+const CAUSES := {"GROUND SPIKES":"Hit ground spikes","HOSTILE FIRE":"Hit by enemy fire", "BOSS HIGH PARTICLE":"Hit by Boss energy fire", "BOSS BOMB":"Caught in a Boss bomb blast", "HEAVY TURRET LASER":"Hit by a heavy turret laser", "TURRET COLLISION":"Collided with a turret", "GROUND SPIKES // UNBLOCKABLE":"Hit ground spikes", "LASER GATE":"Hit a laser wall"}
 
 static func death_cause(raw: String) -> String:
 	return CAUSES.get(raw, raw.replace("_", " ").capitalize())
