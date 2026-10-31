@@ -183,10 +183,6 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if not visible or game.state != "start": return
 	wallet_label.text = "%d G" % game.progression.coins
-	drift = game.menu_demo.scroll_distance
-	game.background_layer.scroll_offset.x = -roundf(drift * 0.15)
-	game.middle_layer.scroll_offset.x = -roundf(drift * 0.55)
-	game.track_layer.scroll_offset.x = -roundf(drift)
 
 func show_build(value: bool) -> void:
 	panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),12 if value else 20))

@@ -1,160 +1,129 @@
 ﻿extends Node2D
-# A visual-only attract loop. No gameplay, profile, input or telemetry callbacks.
+# Runs the actual main.tscn in a separate world. This node only supplies controls.
 const GD := preload("res://game_data.gd")
-const PLAYER := preload("res://Player.tscn")
-const LIGHT := preload("res://light_turret_frames.tres")
-const HEAVY := preload("res://heavy_turret_frames.tres")
 var game: Node
-var actor: PlayerVisual
+var session: Node
+var viewport: SubViewport
+var picture: Sprite2D
 var active := false
-var elapsed := 0.0
-var scroll_distance := 0.0
-var spawn_left := 0.0
-var fire_left := 0.0
-var magazine := 0
-var reload_left := 0.0
-var enemies: Array[Dictionary] = []
-var bullets: Array[Dictionary] = []
-var sparks: Array[Dictionary] = []
+var previous: Dictionary = {}
+var victory_wait := 0.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	actor = PLAYER.instantiate()
-	actor.collision_layer = 0
-	actor.collision_mask = 0
-	add_child(actor)
-	disable_collisions(actor)
-	set_active(false)
-
-func disable_collisions(node: Node) -> void:
-	if node is CollisionObject2D:
-		node.collision_layer = 0
-		node.collision_mask = 0
-	for child in node.get_children(): disable_collisions(child)
+	process_priority = -100
+	viewport = SubViewport.new()
+	viewport.size = Vector2i(960,720)
+	viewport.disable_3d = true
+	viewport.world_2d = World2D.new()
+	viewport.gui_disable_input = true
+	viewport.handle_input_locally = true
+	viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	add_child(viewport)
+	picture = Sprite2D.new()
+	picture.centered = false
+	picture.texture = viewport.get_texture()
+	picture.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(picture)
+	hide()
 
 func set_active(value: bool) -> void:
 	active = value
 	visible = value
-	for enemy in enemies:
-		if is_instance_valid(enemy.sprite): enemy.sprite.queue_free()
-	enemies.clear()
-	bullets.clear()
-	sparks.clear()
-	elapsed = 0
-	scroll_distance = 0
-	spawn_left = 1.2
-	fire_left = 0.2
-	magazine = 0
-	reload_left = 0
-	actor.set_process(value)
-	if value:
-		actor.start_scrolling()
-		spawn_enemy(620,false)
-		spawn_enemy(930,true)
-		actor.position = Vector2(130,GD.GROUND_Y)
-	queue_redraw()
-
-func spawn_enemy(x: float, heavy: bool) -> void:
-	var sprite := AnimatedSprite2D.new()
-	sprite.sprite_frames = HEAVY if heavy else LIGHT
-	sprite.scale = Vector2(0.7,0.7)
-	sprite.position = Vector2(x,GD.GROUND_Y-44)
-	add_child(sprite)
-	sprite.play(&"armored_idle" if heavy else &"idle")
-	enemies.append({"sprite":sprite,"heavy":heavy,"armor":heavy,"hp":2,"dead":false,"life":0.0,"fire":0.9,"flash":0.0})
+	previous.clear()
+	victory_wait = 0
+	if is_instance_valid(session):
+		viewport.remove_child(session)
+		session.queue_free()
+		session = null
+	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if value else SubViewport.UPDATE_DISABLED
+	if not value: return
+	# Use a runtime load to avoid recursively preloading main -> menu -> main.
+	session = load("res://main.tscn").instantiate()
+	session.attract_mode = true
+	session.attract_settings = game.settings
+	session.process_mode = Node.PROCESS_MODE_ALWAYS
+	session.process_priority = -50
+	viewport.add_child(session)
+	session.start_level(0)
 
 func _process(delta: float) -> void:
-	if not active: return
+	if not active or not is_instance_valid(session): return
 	if game.state != "start": set_active(false); return
-	elapsed += delta
-	scroll_distance += 170 * delta
-	spawn_left -= delta
-	if spawn_left <= 0:
-		spawn_enemy(1040,fmod(elapsed,7.0)>3.5)
-		spawn_left = 2.4
-	var jump_phase := fmod(elapsed,5.4)
-	var jump := sin((jump_phase-2.8)/1.1*PI)*155 if jump_phase>2.8 and jump_phase<3.9 else 0.0
-	actor.position = Vector2(130+sin(elapsed*0.6)*20,GD.GROUND_Y-jump)
-	var target := Vector2(820,GD.GROUND_Y-55)
-	var weapon := 0
-	for enemy in enemies:
-		if not enemy.dead and enemy.sprite.position.x > actor.position.x+80:
-			target = enemy.sprite.position
-			weapon = 1 if enemy.armor else 0
-			break
-	var guarding := fmod(elapsed,8.0)>6.8
-	actor.set_motion(jump<=0,false,weapon,target,guarding,true)
-	reload_left = maxf(0,reload_left-delta)
-	fire_left -= delta
-	if fire_left <= 0 and reload_left <= 0:
-		if magazine >= 10:
-			magazine = 0
-			reload_left = 1.2
-			actor.play_reload(reload_left)
-		else:
-			actor.play_fire()
-			var muzzle := actor.muzzle_world_position()
-			bullets.append({"pos":muzzle,"velocity":(target-muzzle).normalized()*1000,"hostile":false,"ap":weapon==1})
-			magazine += 1
-		fire_left = 0.38 if weapon==1 else 0.16
-	for enemy in enemies:
-		var sprite: AnimatedSprite2D = enemy.sprite
-		sprite.position.x -= 170*delta
-		enemy.flash = maxf(0,enemy.flash-delta)
-		if enemy.dead:
-			enemy.life += delta
-			continue
-		enemy.fire -= delta
-		if enemy.fire <= 0 and sprite.position.x > 280 and sprite.position.x < 900:
-			bullets.append({"pos":sprite.position+Vector2(-30,-12),"velocity":Vector2(-390,0),"hostile":true,"ap":enemy.heavy})
-			if not enemy.heavy: sprite.play(&"shoot")
-			enemy.fire = 1.3
-		if enemy.flash <= 0 and sprite.animation in [&"shoot",&"damaged_shoot"] and not sprite.is_playing(): sprite.play(&"idle")
-	for index in range(bullets.size()-1,-1,-1):
-		var bullet: Dictionary = bullets[index]
-		var previous: Vector2 = bullet.pos
-		bullet.pos += bullet.velocity*delta
-		var consumed := false
-		if not bullet.hostile:
-			for enemy in enemies:
-				if enemy.dead: continue
-				if Geometry2D.get_closest_point_to_segment(enemy.sprite.position,previous,bullet.pos).distance_to(enemy.sprite.position)<36:
-					consumed = true
-					if enemy.armor:
-						if bullet.ap:
-							enemy.armor = false
-							enemy.sprite.play(&"armor_break")
-							enemy.flash = 0.5
-					else:
-						enemy.hp -= 1
-						if enemy.hp <= 0:
-							enemy.dead = true
-							enemy.sprite.play(&"explode")
-							burst(enemy.sprite.position,Color("ffb224"))
-					break
-		elif bullet.pos.x < actor.position.x+45:
-			burst(bullet.pos,Color("3de0f2"))
-			consumed = true
-		if consumed or bullet.pos.x < -40 or bullet.pos.x > 1080: bullets.remove_at(index)
-	for index in range(enemies.size()-1,-1,-1):
-		var enemy: Dictionary = enemies[index]
-		if enemy.sprite.position.x < -100 or enemy.life>0.65:
-			enemy.sprite.queue_free()
-			enemies.remove_at(index)
-	for index in range(sparks.size()-1,-1,-1):
-		var spark: Dictionary = sparks[index]
-		spark.pos += spark.velocity*delta
-		spark.life -= delta
-		if spark.life<=0: sparks.remove_at(index)
-	queue_redraw()
+	var actions := {}
+	if session.state == "dead":
+		if session.death_ui_ready: actions.restart = true
+	elif session.state == "victory":
+		victory_wait += delta
+		if victory_wait >= 2.5:
+			victory_wait = 0
+			if session.selected_level < 2: session.next_level()
+			else:
+				session.selected_level = 0
+				session._new_run()
+	elif session.state == "playing":
+		actions = choose_controls()
+	session.attract_taps.clear()
+	for action in actions:
+		if bool(actions[action]) and not bool(previous.get(action,false)): session.attract_taps[action] = true
+	session.attract_input = actions
+	previous = actions.duplicate()
 
-func burst(origin: Vector2, color: Color) -> void:
-	for index in range(10):
-		sparks.append({"pos":origin,"velocity":Vector2.from_angle(index*TAU/10)*90,"life":0.35,"color":color})
-
-func _draw() -> void:
-	for bullet in bullets:
-		var color := Color("389cff") if bullet.ap else Color("ff9638")
-		draw_line(bullet.pos-bullet.velocity.normalized()*(28 if bullet.ap else 10),bullet.pos,color,3)
-	for spark in sparks: draw_circle(spark.pos,2,spark.color)
+func choose_controls() -> Dictionary:
+	var actions := {}
+	var target := Vector2(850,500)
+	var required := 0
+	var distance_to_target := INF
+	var has_target := false
+	for turret in session.turrets:
+		if not is_instance_valid(turret) or turret.state in [TurretBase.TurretState.DEAD,TurretBase.TurretState.BREAKING]: continue
+		var center: Vector2 = turret.body_rect().get_center()
+		if center.x < session.player.x+30 or center.x > 1020: continue
+		var dx: float = center.x-session.player.x
+		if dx < distance_to_target:
+			distance_to_target = dx
+			target = center
+			has_target = true
+			required = 3 if turret.turret_kind == TurretBase.TurretKind.HEAVY and turret.state != TurretBase.TurretState.EXPOSED else 0
+	for gate in session.laser_gates:
+		if not is_instance_valid(gate) or gate.state != "Hover": continue
+		var center: Vector2 = gate.left_hit.global_position
+		if center.x > session.player.x and center.x-session.player.x < distance_to_target:
+			distance_to_target = center.x-session.player.x
+			target = center
+			has_target = true
+			required = 0
+	if session.boss_mode and session.boss_actor.combat_enabled:
+		target = session.boss_actor.position
+		required = 3 if session.boss_actor.armor_layers()>0 else 0
+		has_target = true
+	session.aim = target
+	var weapon: int = session._best_weapon_for_armor(required)
+	if session.weapon_index != weapon and session.reload_left <= 0:
+		actions["weapon_slot_%d" % (weapon+1)] = true
+	if session.ammo[session.weapon_index] <= 0: actions.reload = true
+	actions.fire = has_target
+	var jump := false
+	for spikes in session.ground_spikes:
+		if is_instance_valid(spikes):
+			var dx: float = spikes.position.x-session.player.x
+			if dx > -85 and dx < 225: jump = true
+	for obstacle in session.obstacles:
+		if obstacle.danger and obstacle.x-session.player.x > -50 and obstacle.x-session.player.x < 210: jump = true
+	if jump: actions.jump = true
+	for gate in session.laser_gates:
+		if is_instance_valid(gate) and gate.state == "Hover":
+			var hazard: Rect2 = gate.hazard_rect()
+			if not jump and hazard.position.x-session.player.x < 220 and hazard.end.x>session.player.x-45: actions.crouch = true
+	var danger := false
+	for bullet in session.threats:
+		if not bullet.unblockable and bullet.pos.distance_to(session._player_center()) < 190: danger = true
+	for turret in session.turrets:
+		if is_instance_valid(turret) and turret.state == TurretBase.TurretState.FIRING: danger = true
+	for bullet in session.boss_particles:
+		if is_instance_valid(bullet) and bullet.global_position.distance_to(session._player_center()) < 220: danger = true
+	for bomb in session.boss_bombs:
+		if is_instance_valid(bomb) and bomb.global_position.distance_to(session._player_center()) < 220: danger = true
+	if danger and session.guard_energy >= 12: actions.guard = true
+	if danger and session.has_grenade and (session.boss_particles.size()>8 or session.threats.size()>7): actions.use_grenade = true
+	return actions

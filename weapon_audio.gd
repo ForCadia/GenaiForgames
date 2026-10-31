@@ -6,6 +6,7 @@ const FIRE_SOUNDS := [preload("res://assets/sfx/rifle_fire.wav"), preload("res:/
 const RELOAD_SOUNDS := [preload("res://assets/sfx/rifle_reload.mp3"), preload("res://assets/sfx/piercer_reload.wav")]
 const SWITCH_SOUND := preload("res://assets/sfx/weapon_switch.wav")
 
+var silent := false
 var fire_players: Array[AudioStreamPlayer] = []
 var reload_player: AudioStreamPlayer
 var switch_player: AudioStreamPlayer
@@ -29,10 +30,12 @@ func _make_player(gain_db: float) -> AudioStreamPlayer:
 	return player
 
 func fire(weapon: int) -> void:
+	if silent: return
 	# Keep the original speed and permit shot tails to overlap.
 	fire_players[weapon].play()
 
 func reload(weapon: int, duration: float) -> void:
+	if silent: return
 	reload_player.stop()
 	reload_player.stream = RELOAD_SOUNDS[weapon]
 	reload_player.volume_db = MIX.gain(RELOAD_SOUNDS[weapon].resource_path)
@@ -45,6 +48,7 @@ func finish_reload() -> void:
 	reload_player.stop()
 
 func switch_weapon() -> void:
+	if silent: return
 	switch_player.play()
 
 func stop_all() -> void:

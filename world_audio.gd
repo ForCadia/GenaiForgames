@@ -37,6 +37,7 @@ func _ready() -> void:
 	add_child(shield_player)
 
 func set_shield_active(active: bool) -> void:
+	if game.attract_mode: return
 	# One sustained voice, tied to the actual shield rather than a button press.
 	if active and game.state == "playing":
 		if not shield_player.playing: shield_player.play()
@@ -44,6 +45,7 @@ func set_shield_active(active: bool) -> void:
 		shield_player.stop()
 
 func set_drone_active(active: bool) -> void:
+	if game.attract_mode: return
 	# Several gates share one ambience voice instead of stacking loud loops.
 	if active and game.state == "playing":
 		if not drone_player.playing: drone_player.play()
@@ -51,6 +53,7 @@ func set_drone_active(active: bool) -> void:
 		drone_player.stop()
 
 func play_cue(cue: String, duration := -1.0, source: Node = null) -> void:
+	if game.attract_mode: return
 	if cue == "stop":
 		stop_for(source)
 		return

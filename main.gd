@@ -44,6 +44,10 @@ var endless_wave := 1
 var level_segments: Array = []
 var endless_wave_data: Dictionary = {}
 var endless_intermission := 0.0
+var attract_mode := false
+var attract_settings: Node
+var attract_input: Dictionary = {}
+var attract_taps: Dictionary = {}
 var menu_demo: Node2D
 var start_screen: CanvasLayer
 var music: AudioStreamPlayer
@@ -129,14 +133,20 @@ var settings: Node
 func _ready() -> void:
 	randomize()
 	progression = preload("res://progression.gd").new()
+	progression.preview_only = attract_mode
 	add_child(progression)
-	settings = preload("res://game_settings.gd").new()
-	settings.name = "Settings"
-	add_child(settings)
+	if attract_mode:
+		settings = attract_settings
+	else:
+		settings = preload("res://game_settings.gd").new()
+		settings.name = "Settings"
+		add_child(settings)
 	music = preload("res://music_player.gd").new()
+	music.silent = attract_mode
 	music.name = "Music"
 	add_child(music)
 	weapon_audio = preload("res://weapon_audio.gd").new()
+	weapon_audio.silent = attract_mode
 	weapon_audio.name = "WeaponAudio"
 	add_child(weapon_audio)
 	world_audio = preload("res://world_audio.gd").new()
@@ -157,6 +167,18 @@ func _ready() -> void:
 	_clear_world()
 	_reset_player()
 	_update_parallax()
+	if attract_mode:
+		start_screen = CanvasLayer.new()
+		add_child(start_screen)
+		overlays = preload("res://ui/overlays.gd").new()
+		overlays.game = self
+		add_child(overlays)
+		overlays.set_process(false)
+		lab_panel.set_process(false)
+		player_hud.set_process(false)
+		player_hud.hide()
+		player_hud.hints_layer.hide()
+		return
 	menu_demo = preload("res://ui/menu_demo.gd").new()
 	menu_demo.game = self
 	add_child(menu_demo)
@@ -176,7 +198,7 @@ func _process(delta: float) -> void:
 	if state == "dead":
 		death_delay -= delta
 		var over_button := get_viewport().gui_get_hovered_control() is BaseButton
-		if Input.is_action_just_pressed("restart") or Input.is_action_just_pressed("jump") or (Input.is_action_just_pressed("fire") and not over_button):
+		if _control_tapped("restart") or _control_tapped("jump") or (_control_tapped("fire") and not over_button):
 			_request_retry("polled_input")
 		if death_delay <= 0 and not death_camera_started:
 			_start_death_camera()
@@ -190,7 +212,7 @@ func _process(delta: float) -> void:
 		queue_redraw()
 		return
 	if state == "victory":
-		if Input.is_action_just_pressed("restart") or Input.is_action_just_pressed("jump"):
+		if _control_tapped("restart") or _control_tapped("jump"):
 			_new_run()
 		queue_redraw()
 		return
@@ -217,6 +239,7 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if attract_mode: return
 	if state != "start" and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if state in ["playing", "intermission"] and not lab_panel.expanded: set_ui_paused(not ui_paused)
 		else: return_to_start()
@@ -235,16 +258,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		_switch_weapon()
 
 func _update_player(delta: float) -> void:
-	var horizontal_input := Input.get_axis("move_back", "move_forward")
+	var horizontal_input := float(_control_held("move_forward")) - float(_control_held("move_back")) if attract_mode else Input.get_axis("move_back", "move_forward")
 	if not is_zero_approx(horizontal_input):
 		player.x = clampf(player.x + horizontal_input * GD.PLAYER.horizontal_speed * delta,
 			GD.PLAYER_X - GD.PLAYER.horizontal_range, GD.PLAYER_X + GD.PLAYER.horizontal_range)
 	else:
 		player.x = move_toward(player.x, GD.PLAYER_X, GD.PLAYER.horizontal_return_speed * delta)
 	player_visual.position = player
-	var stick := Vector2(Input.get_joy_axis(0, 2), Input.get_joy_axis(0, 3))
+	var stick := Vector2.ZERO if attract_mode else Vector2(Input.get_joy_axis(0, 2), Input.get_joy_axis(0, 3))
 	if stick.length() > 0.28: aim = _player_center() + stick.normalized() * 420
-	var crouch_pressed := Input.is_action_pressed("crouch") and _grounded()
+	var crouch_pressed := _control_held("crouch") and _grounded()
 	if crouch_pressed and not crouching:
 		slide_time_left = float(lab_panel.values.slide_time)
 	slide_time_left = maxf(0.0, slide_time_left - delta)
@@ -252,7 +275,7 @@ func _update_player(delta: float) -> void:
 	if crouching and not wants_crouch and _grounded() and not _can_stand():
 		wants_crouch = true
 	crouching = wants_crouch
-	if Input.is_action_just_pressed("jump") and _grounded() and not crouching:
+	if _control_tapped("jump") and _grounded() and not crouching:
 		velocity_y = -float(lab_panel.values.jump_speed)
 		_emit(_player_center(), CYAN, 7, 115)
 	if not _grounded(): velocity_y += float(lab_panel.values.gravity) * delta
@@ -263,8 +286,8 @@ func _update_player(delta: float) -> void:
 
 	guard_lock = maxf(0, guard_lock - delta)
 	auto_guard_left = maxf(0, auto_guard_left - delta)
-	if Input.is_action_pressed("guard"): auto_guard_left = 0
-	guarding = (Input.is_action_pressed("guard") or auto_guard_left > 0) and guard_energy > 0 and guard_lock <= 0
+	if _control_held("guard"): auto_guard_left = 0
+	guarding = (_control_held("guard") or auto_guard_left > 0) and guard_energy > 0 and guard_lock <= 0
 	if guarding:
 		guard_idle = 0
 		guard_energy = maxf(0, guard_energy - float(lab_panel.values.guard_drain) * (1.0 + _meta_effect("drain")) * delta)
@@ -277,12 +300,12 @@ func _update_player(delta: float) -> void:
 			guard_energy = minf(guard_capacity(), guard_energy + guard_regen() * delta)
 
 	world_audio.set_shield_active(guarding)
-	if Input.is_action_just_pressed("switch_weapon"): _switch_weapon()
-	if Input.is_action_just_pressed("weapon_slot_1"): _select_slot(0)
-	if Input.is_action_just_pressed("weapon_slot_2"): _select_slot(1)
-	if Input.is_action_just_pressed("weapon_slot_3"): _select_slot(2)
-	if Input.is_action_just_pressed("reload"): _reload()
-	if Input.is_action_just_pressed("use_grenade") and has_grenade: _grenade()
+	if _control_tapped("switch_weapon"): _switch_weapon()
+	if _control_tapped("weapon_slot_1"): _select_slot(0)
+	if _control_tapped("weapon_slot_2"): _select_slot(1)
+	if _control_tapped("weapon_slot_3"): _select_slot(2)
+	if _control_tapped("reload"): _reload()
+	if _control_tapped("use_grenade") and has_grenade: _grenade()
 	shot_left = maxf(0, shot_left - delta)
 	if reload_left > 0:
 		reload_left = maxf(0, reload_left - delta)
@@ -291,7 +314,7 @@ func _update_player(delta: float) -> void:
 			ammo[weapon_index] = _weapon().magazine
 			_notify("MAGAZINE READY", CYAN)
 		_refresh_player_ui()
-	if Input.is_action_pressed("fire") and reload_left <= 0 and shot_left <= 0:
+	if _control_held("fire") and reload_left <= 0 and shot_left <= 0:
 		if selected_slot == 2:
 			if has_grenade: _grenade()
 			else: _notify("GRENADE SLOT EMPTY", RED, 0.35)
@@ -651,7 +674,7 @@ func _update_threats(delta: float) -> void:
 
 func _receive(unblockable: bool, cause: String) -> void:
 	if state != "playing": return
-	if not unblockable and not guarding and not Input.is_action_pressed("guard") and _upgrade("auto_guard") and guard_energy >= 7 and guard_lock <= 0:
+	if not unblockable and not guarding and not _control_held("guard") and _upgrade("auto_guard") and guard_energy >= 7 and guard_lock <= 0:
 		auto_guard_left = 0.22
 		guarding = true
 		guard_idle = 0
@@ -926,6 +949,10 @@ func set_restart_mode(mode: String) -> void:
 	lab_panel.refresh_summary()
 
 func _gate_gameplay_input() -> void:
+	if attract_mode:
+		lab_panel.blocked = false
+		lab_panel.release_pending = false
+		return
 	lab_panel.blocked = true
 	lab_panel.release_pending = not lab_panel.expanded
 	lab_panel.release_frames = 1
@@ -945,15 +972,15 @@ func start_game(mode := "checkpoint", parameter_index := 0, development := false
 	lab_panel.mode_selector.select(0 if restart_mode == "checkpoint" else 1)
 	lab_panel.apply_preset(parameter_index, false)
 	start_screen.hide()
-	menu_demo.set_active(false)
+	if is_instance_valid(menu_demo): menu_demo.set_active(false)
 	player_visual.show()
-	if has_node("/root/SceneFader"): get_node("/root/SceneFader").reveal()
+	if not attract_mode and has_node("/root/SceneFader"): get_node("/root/SceneFader").reveal()
 	lab_panel.visible = developer_mode
 	lab_panel.expanded = false
 	lab_panel.panel.hide()
 	_new_run()
 	_gate_gameplay_input()
-	get_tree().paused = false
+	if not attract_mode: get_tree().paused = false
 
 func return_to_start() -> void:
 	_reset_death_camera()
@@ -977,11 +1004,11 @@ func return_to_start() -> void:
 	lab_panel.release_pending = false
 	lab_panel.hide()
 	start_screen.show()
-	menu_demo.set_active(true)
+	if is_instance_valid(menu_demo): menu_demo.set_active(true)
 	player_visual.hide()
-	if has_node("/root/SceneFader"): get_node("/root/SceneFader").reveal()
+	if not attract_mode and has_node("/root/SceneFader"): get_node("/root/SceneFader").reveal()
 	player_hud.hide()
-	get_tree().paused = true
+	if not attract_mode: get_tree().paused = true
 	queue_redraw()
 
 func _reset_player(preserve_motion := false) -> void:
@@ -1109,7 +1136,7 @@ func _draw() -> void:
 		draw_circle(bullet.pos, bullet.radius, threat_color)
 	for bullet in shots: _draw_player_shot(bullet)
 	for particle in particles: draw_circle(particle.pos, 3, Color(particle.color, clampf(particle.life * 2, 0, 1)))
-	if state == "playing" and not ui_paused: _draw_reticle()
+	if state == "playing" and not ui_paused and not attract_mode: _draw_reticle()
 
 func _draw_player_shot(bullet: Dictionary) -> void:
 	var direction: Vector2 = bullet.velocity.normalized()
@@ -1164,7 +1191,7 @@ func set_ui_paused(value: bool) -> void:
 	if state not in ["playing", "intermission"]: return
 	ui_paused = value
 	queue_redraw()
-	get_tree().paused = value
+	if not attract_mode: get_tree().paused = value
 	if value:
 		weapon_audio.stop_all()
 		lab.record("ui_pause")
@@ -1353,3 +1380,9 @@ func _best_weapon_for_armor(required: int) -> int:
 			best_dps = dps
 			best = index
 	return best
+
+func _control_held(action: String) -> bool:
+	return bool(attract_input.get(action,false)) if attract_mode else Input.is_action_pressed(action)
+
+func _control_tapped(action: String) -> bool:
+	return bool(attract_taps.get(action,false)) if attract_mode else Input.is_action_just_pressed(action)

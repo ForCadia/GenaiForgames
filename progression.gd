@@ -6,11 +6,12 @@ const STARTING_COINS := 600
 var coins := STARTING_COINS
 var test_grant_applied := false
 var owned: Dictionary = {}
+var preview_only := false
 var persistence := true
 var load_failed := false
 
 func _ready() -> void:
-	persistence = not "--lab-test" in OS.get_cmdline_user_args()
+	persistence = not preview_only and not "--lab-test" in OS.get_cmdline_user_args()
 	if not persistence: return
 	var config := ConfigFile.new()
 	var error := config.load(SAVE_PATH)

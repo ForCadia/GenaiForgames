@@ -4,6 +4,7 @@ const MIX := preload("res://audio_mix.gd")
 
 var normal_music: AudioStreamMP3 = preload("res://assets/music/untitled.mp3").duplicate()
 var boss_music: AudioStreamMP3 = preload("res://assets/music/chase_mode.mp3").duplicate()
+var silent := false
 var started := false
 
 func _ready() -> void:
@@ -14,6 +15,7 @@ func _ready() -> void:
 	boss_music.loop = true
 
 func play_track(is_boss: bool) -> void:
+	if silent: return
 	var next_track := boss_music if is_boss else normal_music
 	volume_db = MIX.gain("chase_mode.mp3" if is_boss else "untitled.mp3")
 	started = true
