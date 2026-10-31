@@ -55,7 +55,7 @@ func _ready() -> void:
 	terminal_stand = TextureRect.new()
 	var feet := AtlasTexture.new()
 	feet.atlas = STANDING_TEXTURE
-	feet.region = Rect2(135,790,1200,280)
+	feet.region = Rect2(135,790,1200,270)
 	terminal_stand.texture = feet
 	terminal_stand.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	terminal_stand.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -295,7 +295,7 @@ func _position_menu() -> void:
 		var origin := Vector2(root.size.x-width-24,24)
 		var image_scale := width/1200.0
 		var head_height := minimum.y+208
-		var stand_height := minf(148,maxf(48,root.size.y-origin.y-head_height-16))
+		var stand_height := maxf(0.0,root.size.y-origin.y-head_height)
 		terminal.position = origin
 		terminal.scale = Vector2.ONE*image_scale
 		terminal.size = Vector2(1200,head_height/image_scale)
