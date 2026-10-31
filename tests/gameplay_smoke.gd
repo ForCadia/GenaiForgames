@@ -86,7 +86,7 @@ func _run() -> void:
 	game._die("AIRBORNE_RETRY_CHECK")
 	game._request_retry("keyboard")
 	game._process(game.player_visual.death_animation_duration())
-	game.death_camera_tween.custom_step(game.DEATH_CAMERA_DURATION + 0.01)
+	game.death_camera_tween.custom_step(game.DEATH_CAMERA_DURATION + game.DEATH_CAMERA_HOLD + 0.01)
 	game._process(0.01)
 	assert(game.state == "playing" and game.boss_mode)
 	assert(game.player.y == GameData.GROUND_Y and game.velocity_y == 0.0)

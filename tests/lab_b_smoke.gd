@@ -110,7 +110,7 @@ func _run() -> void:
 	Input.action_release("restart")
 	assert(game.retry_requested)
 	game._process(game.player_visual.death_animation_duration())
-	game.death_camera_tween.custom_step(game.DEATH_CAMERA_DURATION + 0.01)
+	game.death_camera_tween.custom_step(game.DEATH_CAMERA_DURATION + game.DEATH_CAMERA_HOLD + 0.01)
 	game._process(0.01)
 	assert(game.state == "playing" and not game.retry_requested)
 	var retries: Array = game.lab.events.filter(func(e): return e.event == "retry")

@@ -80,6 +80,7 @@ var state := "start"
 var death_delay := 0.0
 var death_ui_ready := false
 const DEATH_CAMERA_DURATION := 1.2
+const DEATH_CAMERA_HOLD := 0.5
 var death_camera_started := false
 var death_camera_tween: Tween
 var banner := ""
@@ -1070,6 +1071,7 @@ func _start_death_camera() -> void:
 	var target := Transform2D(Vector2(zoom, 0), Vector2(0, zoom), screen_anchor - focus * zoom)
 	death_camera_tween = create_tween()
 	death_camera_tween.tween_property(get_viewport(), "canvas_transform", target, DEATH_CAMERA_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	death_camera_tween.tween_interval(DEATH_CAMERA_HOLD)
 	death_camera_tween.tween_callback(func(): death_ui_ready = true)
 
 func _reset_death_camera() -> void:

@@ -24,7 +24,7 @@ func _ready() -> void:
 	root.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size.x = 520
+	panel.custom_minimum_size.x = 640
 	center.add_child(panel)
 	menu = F.box(panel)
 	menu.add_theme_constant_override("separation", 16)
@@ -35,14 +35,14 @@ func _ready() -> void:
 	stripe.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	stripe.stretch_mode = TextureRect.STRETCH_TILE
 	stripe.custom_minimum_size.y = 8
-	stripe.custom_minimum_size.x = 288
+	stripe.custom_minimum_size.x = 400
 	stripe.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	menu.add_child(stripe)
 	F.label(menu, S.SUBTITLE, "EnergyLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var button_center := CenterContainer.new()
 	menu.add_child(button_center)
 	var buttons := F.box(button_center)
-	buttons.custom_minimum_size.x = 280
+	buttons.custom_minimum_size.x = 400
 	start_button = F.button(buttons, S.START, func(): game.start_game())
 	F.button(buttons, S.CONTROLS, func(): show_controls(true))
 	if not OS.has_feature("web"): F.button(buttons, S.QUIT, func(): get_tree().quit(), true)
