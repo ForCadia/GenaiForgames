@@ -2,6 +2,10 @@ extends CanvasLayer
 
 const F := preload("res://ui/ui_factory.gd")
 const S := preload("res://ui/ui_strings.gd")
+const TERMINAL_TEXTURE := preload("res://assets/ui_title_terminal.png")
+var terminal: NinePatchRect
+var title_empty := StyleBoxEmpty.new()
+var title_style_active := false
 var game: Node
 var start_button: Button
 var developer_button: Button
@@ -31,6 +35,17 @@ func _ready() -> void:
 	shade.color = Color(0.02, 0.03, 0.05, 0.40)
 	root.add_child(shade)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	terminal = NinePatchRect.new()
+	var atlas := AtlasTexture.new()
+	atlas.atlas = TERMINAL_TEXTURE
+	atlas.region = Rect2(0,105,1254,1000)
+	terminal.texture = atlas
+	terminal.patch_margin_left = 138
+	terminal.patch_margin_right = 138
+	terminal.patch_margin_top = 250
+	terminal.patch_margin_bottom = 135
+	terminal.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(terminal)
 	center = CenterContainer.new()
 	root.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -38,7 +53,7 @@ func _ready() -> void:
 	panel.custom_minimum_size.x = 640
 	center.add_child(panel)
 	menu = F.box(panel)
-	menu.add_theme_constant_override("separation", 14)
+	menu.add_theme_constant_override("separation", 10)
 	F.label(menu, "// FRONTLINE SYSTEMS / READY", "AmberLabel")
 	F.label(menu, S.TITLE, "TitleLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var stripe := TextureRect.new()
@@ -239,13 +254,28 @@ func show_build(value: bool) -> void:
 	else: start_button.grab_focus()
 
 func _position_menu() -> void:
-	# Keep the title panel 24 logical pixels from the top and right edges.
-	# Center the larger subpages as before.
+	terminal.visible = menu.visible
 	if menu.visible:
+		if not title_style_active:
+			title_style_active = true
+			panel.add_theme_stylebox_override("panel",title_empty)
+			panel.custom_minimum_size.x = 528
 		var minimum := panel.get_combined_minimum_size()
-		center.offset_left = maxf(0.0, root.size.x - minimum.x - 48.0)
-		center.offset_top = 48.0 + minimum.y - root.size.y
+		var frame_width := 704.0
+		var frame_position := Vector2(root.size.x-frame_width-24,24)
+		var image_scale := frame_width/1254.0
+		terminal.position = frame_position
+		terminal.scale = Vector2.ONE*image_scale
+		terminal.size = Vector2(1254,(minimum.y+240)/image_scale)
+		var content_position := frame_position+Vector2(88,154)
+		center.offset_left = 2*content_position.x+minimum.x-root.size.x
+		center.offset_top = 2*content_position.y+minimum.y-root.size.y
 	else:
+		if title_style_active:
+			title_style_active = false
+			panel.custom_minimum_size.x = 640
+			if panel.get_theme_stylebox("panel") == title_empty:
+				panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),20))
 		center.offset_left = 0
 		center.offset_top = 0
 
