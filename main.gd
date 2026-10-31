@@ -621,7 +621,7 @@ func _on_boss_bomb_requested(target_x: float) -> void:
 		return
 	var bomb: BossBomb = BOSS_BOMB_SCENE.instantiate()
 	boss_attack_root.add_child(bomb)
-	bomb.position = Vector2(target_x, 115.0)
+	bomb.launch(boss_attack_root.to_local(boss_actor.global_position), target_x)
 	bomb.sound_requested.connect(func(cue: String, duration: float): world_audio.play_cue(cue, duration, bomb))
 	boss_bombs.append(bomb)
 

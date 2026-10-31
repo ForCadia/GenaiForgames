@@ -25,10 +25,16 @@ enum BombState {
 var state: BombState = BombState.FALLING
 var state_time := 0.0
 var damage_consumed := false
+var velocity_x := 0.0
 
 func _ready() -> void:
 	collision.disabled = true
 	visual.frame = 0
+
+func launch(origin: Vector2, landing_x: float) -> void:
+	position = origin
+	var fall_duration := maxf((ground_y - position.y) / fall_speed, 0.001)
+	velocity_x = (landing_x - position.x) / fall_duration
 
 func advance(delta: float, track_speed := 0.0) -> void:
 	# Once planted on the rail, the bomb belongs to the scrolling world. This
@@ -37,6 +43,10 @@ func advance(delta: float, track_speed := 0.0) -> void:
 		position.x -= track_speed * delta
 	match state:
 		BombState.FALLING:
+			# Throw from the Boss to the landing point; stop horizontal flight
+			# exactly on landing, even if this frame overshoots the fall time.
+			var falling_delta := minf(delta, maxf(ground_y - position.y, 0.0) / fall_speed)
+			position.x += velocity_x * falling_delta
 			position.y = minf(ground_y, position.y + fall_speed * delta)
 			if position.y >= ground_y:
 				state = BombState.GROUNDED

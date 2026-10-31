@@ -38,8 +38,15 @@ func _run() -> void:
 
 	boss.reset_for_battle(true)
 	boss.advance(1.2, Vector2(190, 586))
+	_check(not boss.wants_low_flight(), "Bomb telegraph must keep the Boss hovering")
 	boss.advance(0.8, Vector2(190, 586))
 	_check(bombs_requested == 1, "One telegraph must create exactly one bomb")
+	_check(not boss.wants_low_flight(), "Bomb release must not lower the Boss")
+	boss.advance(0.2, Vector2(190, 586))
+	_check(not boss.wants_low_flight(), "Bomb recovery must not lower the Boss")
+	boss.advance(0.5, Vector2(190, 586))
+	boss.advance(boss.attack_interval, Vector2(190, 586))
+	_check(boss.wants_low_flight(), "Particle telegraph must retain its low attack altitude")
 
 	var particle_scene := load("res://BossParticle.tscn") as PackedScene
 	var particle := particle_scene.instantiate() as BossParticle
@@ -65,12 +72,14 @@ func _run() -> void:
 	_check(bomb.try_damage(Rect2(421, 540, 38, 92)), "Grounded explosion must overlap a nearby grounded player")
 	var moving_bomb := bomb_scene.instantiate() as BossBomb
 	root.add_child(moving_bomb)
-	moving_bomb.position = Vector2(440, 115)
+	moving_bomb.launch(Vector2(785, 350), 440.0)
+	moving_bomb.advance(0.1, 277.5)
+	_check(moving_bomb.position.x < 785.0 and moving_bomb.position.x > 440.0 and moving_bomb.position.y > 350.0, "Thrown bomb must travel from Boss toward the landing point")
 	moving_bomb.advance(1.0, 277.5)
 	var landed_x := moving_bomb.position.x
 	moving_bomb.advance(moving_bomb.ground_hold_time, 277.5)
 	moving_bomb.advance(moving_bomb.explosion_warning_time, 277.5)
-	_check(is_equal_approx(landed_x, 440.0), "Falling bomb must not drift before touching the track")
+	_check(is_equal_approx(landed_x, 440.0), "Thrown bomb must land at its intended point even with a large frame delta")
 	_check(absf(moving_bomb.position.x - 190.0) < 2.0, "Track-locked bomb must reach the player lane before exploding")
 
 	var main_scene := load("res://main.tscn") as PackedScene
@@ -81,11 +90,15 @@ func _run() -> void:
 	game.lab_panel._process(0.01)
 	game.lab_panel._process(0.01)
 	await process_frame
+	game.set_process(false)
 	game._start_boss()
 	_check(game.boss.hp == 4 and game.boss.armor == 2, "Boss checkpoint must preserve original four-point weak health")
 	game._update_boss(1.2)
-	_check(is_equal_approx(game.boss_actor.position.y, 520.0), "Boss must descend to its low attack altitude during telegraph")
+	_check(absf(game.boss_actor.position.y - game.BOSS_IDLE_Y) <= 22.0, "Boss must keep its hover altitude during bomb telegraph")
 	_check(game.boss_actor.position.y + 111.0 < GameData.GROUND_Y, "Boss artwork must remain airborne above the track while attacking")
+	game.boss_actor.advance(game.boss_actor.telegraph_time, game._player_center())
+	_check(game.boss_bombs.size() == 1, "Boss release must create one bomb in the game")
+	_check(game.boss_bombs.back().global_position.is_equal_approx(game.boss_actor.global_position), "Bomb must originate at the Boss, not above the landing point")
 	game._hit_boss({"penetration": 1, "pos": Vector2(700, 350)})
 	_check(game.boss.hp == 4 and game.boss.armor == 2, "Armored rifle impact must not update the Boss health bar")
 	game._hit_boss({"penetration": 3, "pos": Vector2(700, 350)})

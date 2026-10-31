@@ -145,9 +145,8 @@ func armor_layers() -> int:
 	return 2 - int(form)
 
 func wants_low_flight() -> bool:
-	return attack_state in [
+	return not next_attack_is_bomb and attack_state in [
 		AttackState.TELEGRAPH,
-		AttackState.BOMB_ATTACK,
 		AttackState.PARTICLE_ATTACK,
 		AttackState.RECOVERY,
 	]
