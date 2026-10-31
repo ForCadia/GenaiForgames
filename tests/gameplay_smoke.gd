@@ -17,14 +17,23 @@ func _run() -> void:
 			if event.kind == "enemy":
 				assert(event.type in ["unarmored", "light", "heavy"])
 
-	# The muzzle-to-cursor line is the projectile path, even when the visible
-	# weapon pivot is near its limited aiming angle.
+	# Visible barrel and projectile both follow the muzzle-to-cursor line.
 	game.aim = Vector2(380, 110)
 	game._fire()
 	var shot: Dictionary = game.shots.back()
 	var expected: Vector2 = (game.aim - shot.pos).normalized()
 	assert(shot.velocity.normalized().distance_to(expected) < 0.0001)
+	assert(game.player_visual.shot_direction().dot(expected) > 0.9999)
 	game.shots.clear()
+	for weapon in range(2):
+		for target in [Vector2(380, 110), Vector2(700, 590), Vector2(100, 300)]:
+			game.player_visual.set_motion(true, false, weapon, target, false, true)
+			game.player_visual.play_fire()
+			for elapsed in [0.0, 0.11]:
+				game.player_visual.arm_time = elapsed
+				game.player_visual._apply_frames()
+				var direction: Vector2 = (target - game.player_visual.muzzle_world_position()).normalized()
+				assert(game.player_visual.shot_direction().dot(direction) > 0.9999)
 
 	# The old weakpoint location must no longer bypass heavy armor.
 	game._spawn_enemy("heavy", 0, false)

@@ -56,8 +56,8 @@ const BACK_ARM_ROOT_SOURCE := Vector2(50, 95)
 const RELOAD_FRONT_ROOT_SOURCE := Vector2(40, 105)
 const RELOAD_BACK_ROOT_SOURCE := Vector2(40, 110)
 const HIGH_RECOVERY_LEFT_TRIM := 25
-const LOW_MUZZLE_SOURCE := Vector2(174, 107)
-const HIGH_MUZZLE_SOURCE := Vector2(187, 106)
+const LOW_MUZZLES := [Vector2(180, 114), Vector2(180, 114), Vector2(170, 114)]
+const HIGH_MUZZLES := [Vector2(190, 117), Vector2(190, 117), Vector2(183, 92)]
 const HEAD_AIM_LIMIT := 0.28
 
 @onready var visual_root: Node2D = $VisualRoot
@@ -81,6 +81,11 @@ var arm_time := 0.0
 var reload_duration := 1.0
 var primary_slot := 0
 var guard_visible := false
+var aim_target := Vector2.ZERO
+var has_aim_target := false
+var front_trim_pixels := 0
+var front_frame := 0
+var barrel_tilt := 0.0
 
 func _ready() -> void:
 	helmet.scale = Vector2(0.88, 0.88)
@@ -116,8 +121,24 @@ func guard_rect() -> Rect2:
 	return Rect2(top_left, bottom_right - top_left).abs()
 
 func _update_muzzle() -> void:
-	var source: Vector2 = HIGH_MUZZLE_SOURCE if primary_slot == 1 else LOW_MUZZLE_SOURCE
-	muzzle.global_position = front_arm.to_global(source)
+	muzzle.global_position = front_arm.to_global(_muzzle_source())
+
+func _muzzle_source() -> Vector2:
+	var frame := front_frame if arm_action == "fire" else 0
+	var source: Vector2 = HIGH_MUZZLES[frame] if primary_slot == 1 else LOW_MUZZLES[frame]
+	return source - Vector2(front_trim_pixels, 0)
+
+func _align_weapon() -> void:
+	if not has_aim_target or body_state == "death": return
+	# Solve from the muzzle-offset barrel line, in the shoulder's parent space.
+	var target := visual_root.to_local(aim_target) - front_pivot.position
+	if target.length_squared() < 0.001: return
+	var muzzle_offset := (front_arm.position + _muzzle_source() * front_arm.scale) * front_pivot.scale
+	var axis := Vector2.RIGHT.rotated(barrel_tilt)
+	var side_offset := axis.cross(muzzle_offset)
+	var angle := target.angle() - asin(clampf(side_offset / target.length(), -1.0, 1.0)) - barrel_tilt
+	front_pivot.rotation = angle
+	back_pivot.rotation = angle
 
 func start_scrolling() -> void:
 	body_state = "run"
@@ -135,6 +156,8 @@ func set_motion(grounded: bool, crouching: bool, primary_weapon: int, target: Ve
 	if body_state == "death":
 		return
 	primary_slot = primary_weapon
+	aim_target = target
+	has_aim_target = true
 	guard_visible = guard_on
 	guard_effect.position.y = -121 if crouching else -135
 	guard_effect.visible = guard_on
@@ -147,12 +170,8 @@ func set_motion(grounded: bool, crouching: bool, primary_weapon: int, target: Ve
 	if desired != body_state:
 		body_state = desired
 		body_time = 0.0
-	# Both arm rows rotate together about the same shoulder pivot. HIGH/LOW
-	# selects the source art only; it never changes projectile direction.
+	# Reapply aim after every pose/frame update so the shoulder cannot drift.
 	_apply_frames()
-	var angle := clampf((target - to_global(front_pivot.position)).angle(), -1.1, 1.1)
-	back_pivot.rotation = angle
-	front_pivot.rotation = angle
 	helmet.rotation = clampf((target - helmet.global_position).angle() * 0.65, -HEAD_AIM_LIMIT, HEAD_AIM_LIMIT)
 	_update_muzzle()
 
@@ -204,7 +223,7 @@ func muzzle_world_position() -> Vector2:
 	return muzzle.global_position
 
 func shot_direction() -> Vector2:
-	return Vector2.RIGHT.rotated(front_pivot.global_rotation)
+	return Vector2.RIGHT.rotated(front_pivot.global_rotation + barrel_tilt)
 
 func show_idle() -> void:
 	if body_state == "death":
@@ -286,7 +305,11 @@ func _apply_frames() -> void:
 	back_arm.position = -RELOAD_BACK_ROOT_SOURCE if arm_action == "reload" else -BACK_ARM_ROOT_SOURCE
 	var front_root: Vector2 = RELOAD_FRONT_ROOT_SOURCE if arm_action == "reload" else ARM_ROOT_SOURCE
 	var front_trim := HIGH_RECOVERY_LEFT_TRIM if primary_slot == 1 and arm_action == "fire" and arm_column == 2 else 0
+	front_trim_pixels = front_trim
+	front_frame = mini(arm_column, 2)
 	front_arm.scale = Vector2(1.12, 1.0)
+	barrel_tilt = (Vector2(100, -23) * front_arm.scale).angle() if primary_slot == 1 and arm_action == "fire" and arm_column == 2 else 0.0
 	front_arm.position = (-front_root + Vector2(front_trim, 0)) * front_arm.scale
 	front_arm.region_rect = Rect2(Vector2(arm_column * ARM_CELL.x + front_trim, 0), Vector2(ARM_CELL.x - front_trim, ARM_CELL.y))
+	_align_weapon()
 	_update_muzzle()
