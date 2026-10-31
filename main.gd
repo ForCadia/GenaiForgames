@@ -1098,7 +1098,7 @@ func _draw() -> void:
 		draw_circle(bullet.pos, bullet.radius, threat_color)
 	for bullet in shots: _draw_player_shot(bullet)
 	for particle in particles: draw_circle(particle.pos, 3, Color(particle.color, clampf(particle.life * 2, 0, 1)))
-	if state == "playing": _draw_reticle()
+	if state == "playing" and not ui_paused: _draw_reticle()
 
 func _draw_player_shot(bullet: Dictionary) -> void:
 	var direction: Vector2 = bullet.velocity.normalized()
@@ -1152,6 +1152,7 @@ func _notification(what: int) -> void:
 func set_ui_paused(value: bool) -> void:
 	if state not in ["playing", "intermission"]: return
 	ui_paused = value
+	queue_redraw()
 	get_tree().paused = value
 	if value:
 		weapon_audio.stop_all()

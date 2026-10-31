@@ -12,6 +12,8 @@ var settings_view: VBoxContainer
 var level_select: VBoxContainer
 var build_view: VBoxContainer
 var wallet_label: Label
+var panel: PanelContainer
+var build_button: Button
 var root: Control
 var drift := 0.0
 var entrance: Tween
@@ -19,7 +21,7 @@ var entrance: Tween
 func _ready() -> void:
 	layer = 40
 	root = F.root(self)
-	root.theme = preload("res://ui/ui_theme.tres")
+	root.theme = preload("res://ui/menu_style.gd").theme()
 	var shade := ColorRect.new()
 	shade.color = Color(0.02, 0.03, 0.05, 0.78)
 	root.add_child(shade)
@@ -27,11 +29,11 @@ func _ready() -> void:
 	var center := CenterContainer.new()
 	root.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var panel := PanelContainer.new()
+	panel = PanelContainer.new()
 	panel.custom_minimum_size.x = 640
 	center.add_child(panel)
 	menu = F.box(panel)
-	menu.add_theme_constant_override("separation", 16)
+	menu.add_theme_constant_override("separation", 14)
 	F.label(menu, "// FRONTLINE SYSTEMS / READY", "AmberLabel")
 	F.label(menu, S.TITLE, "TitleLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var stripe := TextureRect.new()
@@ -39,20 +41,36 @@ func _ready() -> void:
 	stripe.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	stripe.stretch_mode = TextureRect.STRETCH_TILE
 	stripe.custom_minimum_size.y = 8
-	stripe.custom_minimum_size.x = 400
+	stripe.custom_minimum_size.x = 440
 	stripe.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	menu.add_child(stripe)
 	F.label(menu, S.SUBTITLE, "EnergyLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var button_center := CenterContainer.new()
 	menu.add_child(button_center)
 	var buttons := F.box(button_center)
-	buttons.custom_minimum_size.x = 400
-	start_button = F.button(buttons, S.START, func(): show_levels(true))
-	F.button(buttons, "BUILD TREE / 构筑树", func(): show_build(true))
-	wallet_label = F.label(buttons, "", "AmberLabel")
-	F.button(buttons, S.SETTINGS, func(): show_settings(true))
-	F.button(buttons, S.CONTROLS, func(): show_controls(true))
-	if not OS.has_feature("web"): F.button(buttons, S.QUIT, func(): get_tree().quit(), true)
+	buttons.custom_minimum_size.x = 440
+	buttons.add_theme_constant_override("separation", 12)
+	start_button = preload("res://ui/menu_style.gd").primary(F.button(buttons, S.START + "  [ENTER]", func(): show_levels(true)))
+	start_button.custom_minimum_size.y = 56
+	build_button = F.button(buttons, "", func(): show_build(true))
+	build_button.custom_minimum_size.y = 48
+	var build_row := HBoxContainer.new()
+	build_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	build_button.add_child(build_row)
+	build_row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	build_row.offset_left = 16
+	build_row.offset_right = -16
+	F.label(build_row,"BUILD TREE / 构筑树","SmallLabel").size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	F.spacer(build_row)
+	wallet_label = F.label(build_row,"","AmberLabel")
+	wallet_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var secondary := HBoxContainer.new()
+	secondary.alignment = BoxContainer.ALIGNMENT_CENTER
+	secondary.add_theme_constant_override("separation", 10)
+	buttons.add_child(secondary)
+	F.button(secondary, S.SETTINGS, func(): show_settings(true), true).size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	F.button(secondary, S.CONTROLS, func(): show_controls(true), true).size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if not OS.has_feature("web"): F.button(secondary, S.QUIT, func(): get_tree().quit(), true).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var tests := F.box(root, true)
 	tests.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	tests.grow_horizontal = Control.GROW_DIRECTION_BEGIN
@@ -61,9 +79,14 @@ func _ready() -> void:
 	tests.offset_bottom = -12
 	developer_button = F.button(tests, S.DEVELOPER, func(): game.start_game("checkpoint", 0, true), true)
 	boss_test_button = F.button(tests, S.BOSS_TEST, func(): game.start_game("checkpoint", 0, false, true), true)
+	developer_button.text = "DEV / 开发"
+	boss_test_button.text = "DEV / BOSS"
+	for button in [developer_button,boss_test_button]:
+		button.theme_type_variation = "MenuCompact"
+		button.custom_minimum_size = Vector2(112,32)
 	developer_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	boss_test_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	F.label(menu, S.VERSION, "MutedLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	F.label(menu, "v0.1", "MutedLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	controls = F.box(panel)
 	build_controls(controls, func(): show_controls(false))
 	controls.hide()
@@ -93,21 +116,32 @@ func _ready() -> void:
 	start_button.grab_focus()
 
 static func build_controls(parent: Node, back: Callable) -> void:
+	parent.custom_minimum_size.x = 600
+	parent.add_theme_constant_override("separation", 12)
 	F.label(parent, S.CONTROLS, "LargeLabel")
 	var grid := GridContainer.new()
 	grid.columns = 3
+	grid.add_theme_constant_override("h_separation",12)
+	grid.add_theme_constant_override("v_separation",6)
 	parent.add_child(grid)
-	for heading in ["KEYBOARD", "CONTROLLER", "ACTION"]: F.label(grid, heading, "AmberLabel")
+	for heading in ["ACTION", "KEYBOARD", "CONTROLLER"]: F.label(grid,heading,"AmberLabel")
 	for row in S.CONTROLS_ROWS:
-		for i in range(row.size()):
-			if i < 2:
-				var cap := preload("res://ui/key_cap.tscn").instantiate()
-				cap.key_text = row[i]
-				grid.add_child(cap)
-			else: F.label(grid, row[i])
-	F.button(parent, S.BACK, back)
+		var action := str(row[2])
+		if action.begins_with("HOLD TO MOVE"): action = "MOVE / RETURN"
+		var label := F.label(grid,action,"MutedLabel")
+		label.custom_minimum_size = Vector2(208,28)
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		for index in range(2):
+			var cap := PanelContainer.new()
+			cap.custom_minimum_size = Vector2(176,28)
+			cap.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("111b2a"),Color("44586f"),5))
+			grid.add_child(cap)
+			F.label(cap,str(row[index]),"MutedLabel")
+	F.label(parent,"Hold A / D to adjust position; release to return.","MutedLabel")
+	preload("res://ui/menu_style.gd").primary(F.button(parent,S.BACK,back))
 
 func show_controls(value: bool) -> void:
+	panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),20))
 	if is_instance_valid(build_view): build_view.hide()
 	if is_instance_valid(developer_button): developer_button.get_parent().show()
 	if is_instance_valid(level_select): level_select.hide()
@@ -147,18 +181,21 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	if not visible or game.state != "start": return
-	wallet_label.text = "COINS  %d G" % game.progression.coins
+	wallet_label.text = "%d G" % game.progression.coins
 	drift += delta * 12
 	game.background_layer.scroll_offset.x = -roundf(drift * 0.15)
 	game.middle_layer.scroll_offset.x = -roundf(drift * 0.55)
 	game.track_layer.scroll_offset.x = -roundf(drift)
 
 func show_build(value: bool) -> void:
+	panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),8 if value else 20))
 	menu.visible = not value
 	controls.hide()
 	settings_view.hide()
 	level_select.hide()
 	build_view.visible = value
 	developer_button.get_parent().visible = not value
-	if value: build_view.refresh()
+	if value:
+		build_view.refresh()
+		build_view.graph.buttons[build_view.selected].grab_focus()
 	else: start_button.grab_focus()
