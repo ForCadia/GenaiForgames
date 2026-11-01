@@ -7,6 +7,8 @@ var warning := false
 var clock := 0.0
 var trail_left := 0.0
 var last_state := ""
+var effect_kind := ""
+var effect_direction := Vector2.LEFT
 var slash: Sprite2D
 
 func _ready() -> void:
@@ -52,15 +54,24 @@ func advance_effects(delta: float, boss: Node2D) -> void:
 		var side: Vector2 = direction.orthogonal()*(DATA.STAB_HIT_RADIUS+30.0)
 		band = PackedVector2Array([to_local(core-side),to_local(end-side),to_local(end+side),to_local(core+side)])
 	if state in ["slash","stab"] and state != last_state:
-		trail_left = DATA.MELEE_TRAIL_TIME
+		effect_kind = state
+		effect_direction = boss.stab_direction if state == "stab" else Vector2.LEFT
+		trail_left = DATA.SLASH_TIME if state == "slash" else DATA.MELEE_TRAIL_TIME
 	trail_left = maxf(0.0,trail_left-delta)
 	slash.visible = trail_left > 0.0
 	if slash.visible:
-		var direction: Vector2 = boss.stab_direction if state == "stab" else Vector2.LEFT
-		slash.position = to_local(core+direction*90.0)
-		slash.flip_h = true
-		slash.rotation = direction.angle()-PI
-		slash.scale = Vector2(4.0,3.8) if state == "slash" else Vector2(3.6,3.0)
+		if effect_kind == "slash":
+			# Turn the crescent into a low horizontal sweep around the actual blade band.
+			# The previous upright crescent covered the whole torso and floated too high.
+			slash.position = to_local(core+Vector2(-57.0,30.5))
+			slash.flip_h = false
+			slash.rotation = PI*0.5
+			slash.scale = Vector2(0.85,3.4)
+		else:
+			slash.position = to_local(core+effect_direction*90.0)
+			slash.flip_h = true
+			slash.rotation = effect_direction.angle()-PI
+			slash.scale = Vector2(3.6,3.0)
 		slash.modulate.a = minf(1.0,trail_left/0.07)
 	last_state = state
 	queue_redraw()

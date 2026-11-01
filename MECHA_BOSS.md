@@ -49,3 +49,6 @@ Mecha melee readability revision (2026-10-31): larger backpack exhaust and leftw
 
 
 Melee warning presentation follow-up: removed warning outlines; widened ground warning from 37px to 73px and thrust warning from 36px to 80px. Enlarged cosmetic crescent artwork to 4.0x3.8 (slash) and 3.6x3.0 (thrust). Actual damage shapes and timing are unchanged. Source edits only, no runtime tests.
+
+
+Ground slash effect alignment: rotate the red crescent into a broad, low horizontal arc centered on the actual blade band (core offset -57,30.5), following Boss charge travel for its 0.32-second execution. Retain the last attack kind/direction during fading so recovery cannot switch its orientation. Aerial thrust artwork, damage and warning geometry remain unchanged. No runtime testing.
