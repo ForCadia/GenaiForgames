@@ -5,7 +5,9 @@ extends Node2D
 const SHEET := preload("res://assets/player/cape_red_ivory_atlas.png")
 const GD := preload("res://game_data.gd")
 const LINKS := 12
-const LINK_LENGTH := 6.5
+var segment_length := 6.5
+var small_ribbon := false
+var back_ribbon := false
 const STEP := 1.0/60.0
 var actor: Node2D
 var points: Array[Vector2] = []
@@ -21,20 +23,31 @@ var anchor_velocity := Vector2.ZERO
 var movement_acceleration := Vector2.ZERO
 
 func _ready() -> void:
-	z_index = 1
+	z_index = -1 if small_ribbon and back_ribbon else 1
+	if small_ribbon:
+		segment_length = 3.0 if back_ribbon else 3.5
+		clock = 1.7 if back_ribbon else 0.6
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	outer.texture = SHEET
+	outer.texture = preload("res://assets/player/red_ribbons_pair.png") if small_ribbon else SHEET
 	outer.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(outer)
-	_configure_mesh(outer,Rect2(40,140,1210,490))
+	if small_ribbon:
+		var half := float(outer.texture.get_width())*0.5
+		_configure_mesh(outer,Rect2((half if back_ribbon else 0.0)+half*0.18,0,half*0.64,outer.texture.get_height()))
+	else:
+		_configure_mesh(outer,Rect2(40,140,1210,490))
 
 func _configure_mesh(mesh: Polygon2D, region: Rect2) -> void:
 	var uv := PackedVector2Array()
 	var faces: Array[PackedInt32Array] = []
 	for index in range(LINKS+1):
 		var t := float(index)/float(LINKS)
-		uv.append(region.position+Vector2(t*region.size.x,0))
-		uv.append(region.position+Vector2(t*region.size.x,region.size.y))
+		if small_ribbon:
+			uv.append(region.position+Vector2(0,t*region.size.y))
+			uv.append(region.position+Vector2(region.size.x,t*region.size.y))
+		else:
+			uv.append(region.position+Vector2(t*region.size.x,0))
+			uv.append(region.position+Vector2(t*region.size.x,region.size.y))
 		if index < LINKS:
 			faces.append(PackedInt32Array([index*2,index*2+1,index*2+3]))
 			faces.append(PackedInt32Array([index*2,index*2+3,index*2+2]))
@@ -49,13 +62,15 @@ func _anchor() -> Vector2:
 	if actor.body_state == "death":
 		var t := clampf(float(actor.body_time)/maxf(0.01,actor.death_animation_duration()),0.0,1.0)
 		socket = socket.lerp(Vector2(-18,-12),t)
-	return get_parent().to_global(socket+Vector2(-12,-6))
+	var attachment := Vector2(2,22) if back_ribbon else Vector2(18,22)
+	return get_parent().to_global(socket+(attachment if small_ribbon else Vector2(-12,-6)))
 
 func _reset_strip(anchor: Vector2) -> void:
 	points.clear()
 	previous.clear()
 	for index in range(LINKS+1):
-		var point := anchor+Vector2(-float(index)*LINK_LENGTH,float(index)*1.5)
+		var direction := Vector2(-cos(0.65),sin(0.65)) if small_ribbon else Vector2(-1,0.23)
+		var point := anchor+direction*float(index)*segment_length
 		points.append(point)
 		previous.append(point)
 	last_anchor = anchor
@@ -126,7 +141,8 @@ func _simulate(anchor: Vector2) -> void:
 			# Upward player velocity trails downward; falling lifts the trailing end.
 			var vertical_drag := -clampf(anchor_velocity.y/620.0,-1.0,1.0)*1.05
 			var bend := (flutter_bend+vertical_drag)*envelope
-			rest_target += Vector2(-cos(bend),sin(bend))*LINK_LENGTH
+			if small_ribbon: bend = clampf(bend+0.65,-1.1,1.3)
+			rest_target += Vector2(-cos(bend),sin(bend))*segment_length
 			acceleration += (rest_target-points[index])*lerpf(85.0,65.0,t)
 		points[index] += inertia+acceleration*STEP*STEP
 		previous[index] = old
@@ -135,7 +151,7 @@ func _simulate(anchor: Vector2) -> void:
 		for index in range(LINKS):
 			var offset: Vector2 = points[index+1]-points[index]
 			var length := maxf(offset.length(),0.001)
-			var correction: Vector2 = offset*(1.0-LINK_LENGTH/length)
+			var correction: Vector2 = offset*(1.0-segment_length/length)
 			if index == 0:
 				points[index+1] -= correction
 			else:
@@ -145,7 +161,7 @@ func _simulate(anchor: Vector2) -> void:
 			# Two-link chord constraints prevent sharp accordion folds.
 			for index in range(LINKS-1):
 				var chord: Vector2 = points[index+2]-points[index]
-				var minimum := LINK_LENGTH*lerpf(1.85,1.65,float(index)/float(LINKS))
+				var minimum := segment_length*lerpf(1.85,1.65,float(index)/float(LINKS))
 				if chord.length() < minimum:
 					var direction := chord.normalized() if chord.length_squared() > 0.001 else Vector2.LEFT
 					var push := direction*(minimum-chord.length())
@@ -153,11 +169,11 @@ func _simulate(anchor: Vector2) -> void:
 					else:
 						points[index] -= push*0.5
 						points[index+2] += push*0.5
-			points[1] = anchor+Vector2(-LINK_LENGTH,0.7)
+			points[1] = anchor+(Vector2(-cos(0.65),sin(0.65))*segment_length if small_ribbon else Vector2(-segment_length,0.7))
 		for index in range(1,LINKS+1):
 			# Keep the cloth behind the torso and above the track.
 			if not dead:
-				points[index].x = minf(points[index].x,points[index-1].x-LINK_LENGTH*0.5)
+				points[index].x = minf(points[index].x,points[index-1].x-segment_length*(0.15 if small_ribbon else 0.5))
 				points[index] = _outside_shoulder(points[index])
 			points[index].y = minf(points[index].y,floor_y)
 
@@ -185,7 +201,9 @@ func _draw_strip() -> void:
 		var tangent := (after-before).normalized()
 		# Stable downward-facing width axis; never swap UV edges at a sharp bend.
 		var normal := Vector2(clampf(tangent.y,-0.45,0.45),maxf(0.75,-tangent.x)).normalized()
-		var half_width := lerpf(4.0,17.0,sin(t*PI*0.5))
+		if small_ribbon:
+			normal = Vector2(maxf(0.7,absf(tangent.y)),clampf(-tangent.x,-0.65,0.65)).normalized()
+		var half_width := lerpf(3.0,5.5,t) if small_ribbon else lerpf(4.0,17.0,sin(t*PI*0.5))
 		if actor.body_state == "slide": half_width *= 0.8
 		for side in [-1.0,1.0]:
 			var world_point: Vector2 = points[index]+normal*half_width*side

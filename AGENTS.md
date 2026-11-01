@@ -187,3 +187,6 @@ Latest cape vertical inertia (2026-10-31): replace full-body translation with pr
 
 
 Latest cape run tuning (2026-10-31): calm run pose only—wave22%, flutter20%, damping retention0.93. Keep jump/fall inertia and airborne tuning unchanged. File-only, user tests.
+
+
+Latest underarm ribbons (2026-10-31): user restores two narrow pure-red cloth strips with shared player_cape.gd simulation and separate atlas halves (assets/player/red_ribbons_pair.png, imagegen reference extraction). Front42px/rear36px lengths, narrower widths, underarm attachments and different phases; rear z-1 < body0 < front/main cape1 < arms/helmet2. No neck scarf/ivory restored. Inherit jump inertia, run damping/floor/shoulder constraints; no gameplay changes. File-only, user tests.
