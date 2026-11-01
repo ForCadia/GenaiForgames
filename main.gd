@@ -78,6 +78,7 @@ var weapon_index := 0
 var selected_slot := 0
 var manual_piercer_lock := false
 var endless_fire_count := 0
+var legacy_shot_target_serial := 0
 var ammo := [GD.WEAPONS[0].magazine, GD.WEAPONS[1].magazine]
 var reload_left := 0.0
 var shot_left := 0.0
@@ -423,7 +424,9 @@ func _fire() -> void:
 
 func _emit_player_round(origin: Vector2, direction: Vector2, penetration: int, color: Color) -> void:
 	shots.append({"pos":origin,"previous":origin,"velocity":direction*_weapon().projectile_speed,
-		"penetration":penetration,"color":color,"style":_weapon().projectile_style})
+		"penetration":penetration,"color":color,"style":_weapon().projectile_style,
+		"pierce_left":int(_meta_effect("pierce_targets")),"homing":_meta_effect("homing")>0,
+		"hit_ids":[],"target_id":0,"age":0.0})
 	run_total_shots += 1
 
 func _grenade() -> void:
@@ -717,30 +720,94 @@ func _enemy_contact(enemy: Dictionary) -> void:
 		else: _kill_enemy(enemy); _notify("STOMP", CYAN)
 	else: _receive(false, "ENEMY COLLISION")
 
+func _round_targets() -> Array[Dictionary]:
+	var targets: Array[Dictionary] = []
+	for turret in turrets:
+		if is_instance_valid(turret) and not turret.is_queued_for_deletion() and turret.state not in [TurretBase.TurretState.BREAKING,TurretBase.TurretState.DEAD]:
+			targets.append({"id":turret.get_instance_id(),"kind":"turret","actor":turret,"point":turret.hurt_collision.global_position})
+	for gate in laser_gates:
+		if is_instance_valid(gate) and not gate.is_queued_for_deletion() and gate.state == "Hover":
+			# Aim at an actual drone hitbox, not the gap between laser emitters.
+			targets.append({"id":gate.get_instance_id(),"kind":"gate","actor":gate,"point":gate.left_hit.global_position})
+	for drone in kamikaze_drones:
+		if is_instance_valid(drone) and not drone.is_queued_for_deletion() and drone.state != "explode":
+			targets.append({"id":drone.get_instance_id(),"kind":"drone","actor":drone,"point":drone.body_rect().get_center()})
+	for enemy in enemies:
+		if enemy.dead: continue
+		if not enemy.has("shot_target_id"):
+			legacy_shot_target_serial += 1
+			enemy.shot_target_id = -legacy_shot_target_serial
+		targets.append({"id":enemy.shot_target_id,"kind":"legacy","actor":enemy,"point":enemy.pos})
+	if boss_mode and boss_actor.combat_enabled and boss_actor.attack_state not in [EyeballBoss.AttackState.ARMOR_BREAK,EyeballBoss.AttackState.DEAD]:
+		targets.append({"id":boss_actor.get_instance_id(),"kind":"boss","actor":boss_actor,"point":boss_actor.global_position})
+	return targets
+
+func _round_hits_target(bullet: Dictionary, target: Dictionary) -> bool:
+	if target.kind == "legacy":
+		return _line_circle(bullet.previous,bullet.pos,target.actor.pos,target.actor.radius)
+	return target.actor.shot_hits(bullet.previous,bullet.pos)
+
+func _steer_homing_round(bullet: Dictionary, targets: Array[Dictionary], delta: float) -> void:
+	var chosen: Dictionary = {}
+	var nearest := INF
+	for target in targets:
+		if target.id in bullet.hit_ids: continue
+		if int(target.id) == int(bullet.target_id):
+			chosen = target
+			break
+		var distance_squared: float = bullet.pos.distance_squared_to(target.point)
+		if distance_squared < nearest:
+			nearest = distance_squared
+			chosen = target
+	if chosen.is_empty():
+		bullet.target_id = 0
+		return
+	bullet.target_id = chosen.id
+	var offset: Vector2 = chosen.point-bullet.pos
+	var speed: float = bullet.velocity.length()
+	if offset.length_squared() > 0.001:
+		bullet.velocity = offset.normalized()*speed
+	# At contact distance, end at the real hitbox center instead of overshooting
+	# and repeatedly turning around it. Collision still resolves normally below.
+	if offset.length() <= speed*delta:
+		bullet.pos = chosen.point
+	else:
+		bullet.pos += bullet.velocity*delta
+
 func _update_shots(delta: float) -> void:
-	for i in range(shots.size() - 1, -1, -1):
-		var bullet := shots[i]; bullet.previous = bullet.pos; bullet.pos += bullet.velocity * delta
-		var hit := false
-		for gate in laser_gates:
-			if is_instance_valid(gate) and gate.shot_hits(bullet.previous, bullet.pos):
-				gate.take_damage()
-				hit = true
+	for i in range(shots.size()-1,-1,-1):
+		var bullet: Dictionary = shots[i]
+		bullet.previous = bullet.pos
+		bullet.age = float(bullet.get("age",0.0))+delta
+		if not bullet.has("hit_ids"): bullet.hit_ids = []
+		var targets := _round_targets()
+		if bool(bullet.get("homing",false)):
+			var previous_position: Vector2 = bullet.pos
+			_steer_homing_round(bullet,targets,delta)
+			if bullet.pos == previous_position: bullet.pos += bullet.velocity*delta
+		else:
+			bullet.pos += bullet.velocity*delta
+		# Resolve multiple crossed hitboxes in travel order, including same-frame hits.
+		targets.sort_custom(func(a: Dictionary,b: Dictionary): return bullet.previous.distance_squared_to(a.point)<bullet.previous.distance_squared_to(b.point))
+		var consumed := false
+		for target in targets:
+			if target.id in bullet.hit_ids or not _round_hits_target(bullet,target): continue
+			bullet.hit_ids.append(target.id)
+			match target.kind:
+				"turret": target.actor.take_damage(int(bullet.penetration),bullet.pos)
+				"gate": target.actor.take_damage()
+				"drone": target.actor.take_damage(int(bullet.penetration))
+				"legacy": _hit_enemy(target.actor,bullet)
+				"boss": _hit_boss(bullet)
+			if int(bullet.get("pierce_left",0)) > 0:
+				bullet.pierce_left -= 1
+			else:
+				consumed = true
 				break
-		for turret in turrets:
-			if not hit and is_instance_valid(turret) and turret.shot_hits(bullet.previous, bullet.pos):
-				turret.take_damage(bullet.penetration, bullet.pos)
-				hit = true
-				break
-		for drone in kamikaze_drones:
-			if not hit and is_instance_valid(drone) and drone.shot_hits(bullet.previous,bullet.pos):
-				drone.take_damage(int(bullet.penetration))
-				hit = true
-		for enemy in enemies:
-			if not hit and not enemy.dead and _line_circle(bullet.previous, bullet.pos, enemy.pos, enemy.radius): _hit_enemy(enemy, bullet); hit = true; break
-		if not hit and boss_mode and boss_actor.shot_hits(bullet.previous, bullet.pos):
-			_hit_boss(bullet)
-			hit = true
-		if hit or bullet.pos.x > 1010 or bullet.pos.y < 80 or bullet.pos.y > 720: shots.remove_at(i)
+		var homing: bool = bool(bullet.get("homing",false))
+		var outside := bullet.pos.x > (1100 if homing else 1010) or bullet.pos.y < (40 if homing else 80) or bullet.pos.y > (800 if homing else 720)
+		if consumed or outside or bullet.pos.x < -120 or bullet.age > 4.0:
+			shots.remove_at(i)
 
 func _hit_enemy(enemy: Dictionary, bullet: Dictionary) -> void:
 	if enemy.armor > 0:

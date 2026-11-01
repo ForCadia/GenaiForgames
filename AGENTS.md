@@ -163,3 +163,6 @@ Latest Endless reward presentation (2026-10-31): user replaces paused black over
 
 
 Latest Endless count/card tuning (2026-10-31): Easy/Normal/Hard total starts18/22/28 and grows+2 per five waves to+10; caps50/100/150/pacing retained. Split/third_fan each+1 round/rank, repeatable uncapped; alternating spread preserves center aim. Reward UI removes yellow focus rectangle, highlights monitor brightness; existing pedestal_v2 leg atlas at native aspect rotated as overhead mount replaces plain rods. Fonts22 title/18 description/15 rank. User tests; file edits only.
+
+
+Latest Endless homing/piercing revision (2026-10-31): user changes homing to single-rank complete tracking, no graded steering. main rounds snapshot homing/pierce rank, steer toward actual valid hurtbox/emitter center and switch when target gone/hit, preserve speed and avoid overshoot orbit. Piercing ranks1–4 allow that many extra unique actors, independent of armor penetration, deduplicate per-round hits and support same-frame multiple hits. All extra projectiles inherit effects. No permanent tree changes, no tests/import/game/captures.

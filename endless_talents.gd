@@ -2,6 +2,8 @@ extends RefCounted
 
 # Run-only rewards; never written to progression profiles.
 const POOL := {
+	"homing":{"name":"追踪子弹","text":"子弹完全追踪敌人，目标消失后自动换目标（限1层）","effects":{"homing":1.0},"max_rank":1},
+	"pierce":{"name":"穿透子弹","text":"每层可额外穿过1个敌人，最多额外穿过4个；不增加破甲能力","effects":{"pierce_targets":1.0},"max_rank":4},
 	"split":{"name":"分裂弹头","text":"每层额外发射1发散射弹，不额外耗弹，可持续叠加","effects":{"multishot":1.0},"repeatable":true},
 	"third_fan":{"name":"三拍齐射","text":"每第3次开火追加1发散射弹，可持续叠加","effects":{"third_fan":1.0},"repeatable":true},
 	"third_ap":{"name":"三拍破甲","text":"每第3次开火的全部子弹至少具有3点穿甲（限1层）","effects":{"third_ap":1.0},"max_rank":1},
