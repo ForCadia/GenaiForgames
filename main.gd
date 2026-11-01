@@ -805,7 +805,7 @@ func _update_shots(delta: float) -> void:
 				consumed = true
 				break
 		var homing: bool = bool(bullet.get("homing",false))
-		var outside := bullet.pos.x > (1100 if homing else 1010) or bullet.pos.y < (40 if homing else 80) or bullet.pos.y > (800 if homing else 720)
+		var outside: bool = bullet.pos.x > (1100 if homing else 1010) or bullet.pos.y < (40 if homing else 80) or bullet.pos.y > (800 if homing else 720)
 		if consumed or outside or bullet.pos.x < -120 or bullet.age > 4.0:
 			shots.remove_at(i)
 
