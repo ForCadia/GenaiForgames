@@ -1,7 +1,7 @@
 extends RefCounted
 const GD := preload("res://game_data.gd")
-const HEALTH := 24
-const CANNON_HP := 8
+const HEALTH := 48
+const CANNON_HP := 16
 const LAUNCHER_HP := 8
 const PLATE_HP := 6
 const ARMOR: int = GD.ENEMIES.heavy.armor
@@ -54,3 +54,10 @@ const CHASSIS_BOUNCE := [Vector2(0,0),Vector2(0,-2),Vector2(0,1),Vector2(0,-1)]
 const SHELL_DRAW_SIZE := Vector2(56,42)
 const DEATH_BURST_TIME := 0.45
 const FORTRESS_DEATH_TIME := 1.1
+
+const FRAGMENT_ANGLES := [-170.0,-150.0,-130.0,-110.0,-70.0,-50.0,-30.0,-10.0]
+const FRAGMENT_SPEED := 300.0
+const FRAGMENT_GRAVITY := 180.0
+const FRAGMENT_RADIUS := 5.0
+const FRAGMENT_LIFETIME := 1.6
+const FRAGMENT_DRAW_SIZE := Vector2(18,10)

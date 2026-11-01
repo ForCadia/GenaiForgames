@@ -34,6 +34,7 @@ var hull_textures: Array[Texture2D] = []
 var cannon_textures: Array[Texture2D] = []
 var target_x := 190.0
 var projectiles: Array[Dictionary] = []
+var pending_fragments: Array[Dictionary] = []
 var foreground_hitboxes: Array[Rect2] = []
 var rng := RandomNumberGenerator.new()
 var mount_motion := Vector2.ZERO
@@ -234,7 +235,19 @@ func _deploy(index: int) -> void:
 	var origin: Vector2 = to_global(DATA.DEPLOY_ORIGIN+Vector2(index*16.0,0))
 	reinforcement_requested.emit(DATA.DEPLOY_ROSTER[index],origin)
 
+func _detonate_shell(round: Dictionary) -> void:
+	if bool(round.get("fragmented",false)): return
+	round.fragmented = true
+	round.explode = DATA.EXPLOSION_TIME
+	var origin: Vector2 = Vector2(round.p)-Vector2(0,12.0)
+	for degrees in DATA.FRAGMENT_ANGLES:
+		var velocity: Vector2 = Vector2.from_angle(deg_to_rad(float(degrees)))*DATA.FRAGMENT_SPEED
+		pending_fragments.append({"kind":"fragment","p":origin,"previous":origin,"v":velocity,"life":DATA.FRAGMENT_LIFETIME,"explode":0.0,"spent":false})
+	sound_requested.emit("boss_bomb_explode")
+
 func _advance_projectiles(delta: float) -> void:
+	projectiles.append_array(pending_fragments)
+	pending_fragments.clear()
 	for index in range(projectiles.size()-1,-1,-1):
 		var round: Dictionary = projectiles[index]
 		round.life = float(round.life)-delta
@@ -243,25 +256,29 @@ func _advance_projectiles(delta: float) -> void:
 			if float(round.explode) <= 0: projectiles.remove_at(index)
 			continue
 		round.previous = round.p
-		if round.kind == "shell": round.v = Vector2(round.v)+Vector2(0,DATA.SHELL_GRAVITY)*delta
+		var gravity: float = DATA.SHELL_GRAVITY if round.kind == "shell" else DATA.FRAGMENT_GRAVITY
+		round.v = Vector2(round.v)+Vector2(0,gravity)*delta
 		round.p = Vector2(round.p)+Vector2(round.v)*delta
 		if Vector2(round.p).y >= GD.GROUND_Y:
 			round.p = Vector2(Vector2(round.p).x,GD.GROUND_Y)
-			round.explode = DATA.EXPLOSION_TIME
-			sound_requested.emit("boss_bomb_explode")
+			if round.kind == "shell": _detonate_shell(round)
+			else:
+				projectiles.remove_at(index)
+				continue
 		if float(round.life) <= 0 or Vector2(round.p).x < -120: projectiles.remove_at(index)
 
 func try_melee(player_rect: Rect2, guard_rect: Rect2) -> bool:
 	if not combat_enabled: return false
 	for round in projectiles:
 		if bool(round.spent): continue
-		var radius: float = DATA.EXPLOSION_RADIUS if float(round.explode) > 0 else DATA.SHELL_RADIUS
+		var radius: float = DATA.EXPLOSION_RADIUS if float(round.explode) > 0 else (DATA.FRAGMENT_RADIUS if round.kind == "fragment" else DATA.SHELL_RADIUS)
 		for candidate in [guard_rect,player_rect]:
 			var rect: Rect2 = candidate
 			if not rect.has_area(): continue
 			if _segment_rect(Vector2(round.previous),Vector2(round.p),rect.grow(radius)):
 				round.spent = true
-				round.explode = DATA.EXPLOSION_TIME
+				if round.kind == "shell": _detonate_shell(round)
+				else: round.life = 0.0
 				return true
 	return false
 
@@ -367,6 +384,7 @@ func core_position() -> Vector2:
 
 func clear_projectiles() -> void:
 	projectiles.clear()
+	pending_fragments.clear()
 	_redraw_projectiles()
 
 func start_death() -> void:
@@ -397,6 +415,7 @@ func _redraw_projectiles() -> void:
 
 func _draw_projectiles() -> void:
 	for round in projectiles:
+		if round.kind == "fragment" and bool(round.spent): continue
 		var p: Vector2 = to_local(Vector2(round.p))
 		if float(round.explode) > 0:
 			var progress: float = 1.0-float(round.explode)/DATA.EXPLOSION_TIME
@@ -406,7 +425,10 @@ func _draw_projectiles() -> void:
 			continue
 		var direction: Vector2 = Vector2(round.v).normalized()
 		projectile_visual.draw_set_transform(p,direction.angle()-PI)
-		projectile_visual.draw_texture_rect_region(VFX,Rect2(-DATA.SHELL_DRAW_SIZE*0.5,DATA.SHELL_DRAW_SIZE),Rect2(28,40,95,68))
+		var size: Vector2 = DATA.FRAGMENT_DRAW_SIZE if round.kind == "fragment" else DATA.SHELL_DRAW_SIZE
+		var source: Rect2 = Rect2(29,146,111,40) if round.kind == "fragment" else Rect2(28,40,95,68)
+		projectile_visual.draw_texture_rect_region(VFX,Rect2(-size*0.5,size),source)
 		projectile_visual.draw_set_transform(Vector2.ZERO,0.0)
+		if round.kind == "fragment": continue
 		var landing := Vector2(float(round.target)-global_position.x,GD.GROUND_Y-global_position.y)
 		projectile_visual.draw_line(landing-Vector2(25,0),landing+Vector2(25,0),Color(1,0.15,0.07,0.8),3)

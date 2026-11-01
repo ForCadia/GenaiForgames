@@ -56,3 +56,6 @@ Iron motion/layer follow-up2026-11-01: lower the assembled Boss18px via root gro
 
 
 Iron destruction simplification2026-11-01: stop using cannon/hangar destruction flipbooks. Destroyed cannon hides and triggers3 staggered cosmetic atlas bursts; Boss death freezes hull, triggers7 distributed bursts, then hides hull after1.1s. Existing neon atlas effects rendered in a separate world layer over hull, with no damage or UI overlay. Reset clears bursts and restores sprites. Mortar projectile grows32x24->56x42 and collision radius9->16, keeping trajectory and ground explosion radius unchanged. Source destruction PNGs retained but not preloaded/played. No engine/tests.
+
+
+Iron HP/fragmentation revision2026-11-01: user asks+1x health, interpreted as double: exposed core24->48, cannon8->16. Mortar shell detonation (ground or direct/shield contact) emits8 discrete shrapnel rounds into the upward hemisphere,300px/s, gravity180, radius5, lifetime1.6s. One fragment generation per parent shell, no chain fragmentation; pending fragments join on next update to avoid mutating collision iteration. Every fragment uses swept guard/player hit and consumes contact once; grenade/reset/death clear both live/pending rounds. Atlas red slugs represent fragments, separate from large mortar orb. Landing marker and blast radius unchanged; no engine/tests.
