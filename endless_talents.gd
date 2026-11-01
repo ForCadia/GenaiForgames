@@ -2,8 +2,8 @@ extends RefCounted
 
 # Run-only rewards; never written to progression profiles.
 const POOL := {
-	"split":{"name":"分裂弹头","text":"每次开火额外发射2发散射弹，不额外耗弹（最多2层）","effects":{"multishot":2.0},"max_rank":2},
-	"third_fan":{"name":"三拍齐射","text":"每第3次开火追加2发散射弹（最多2层）","effects":{"third_fan":2.0},"max_rank":2},
+	"split":{"name":"分裂弹头","text":"每层额外发射1发散射弹，不额外耗弹，可持续叠加","effects":{"multishot":1.0},"repeatable":true},
+	"third_fan":{"name":"三拍齐射","text":"每第3次开火追加1发散射弹，可持续叠加","effects":{"third_fan":1.0},"repeatable":true},
 	"third_ap":{"name":"三拍破甲","text":"每第3次开火的全部子弹至少具有3点穿甲（限1层）","effects":{"third_ap":1.0},"max_rank":1},
 	"third_energy":{"name":"三拍充能","text":"每第3次开火恢复4点护盾能量（最多3层）","effects":{"third_energy":4.0},"max_rank":3},
 	"hit_saving":{"name":"缓冲护盾","text":"每次格挡命中消耗减少3能量（最多3层）","effects":{"hit_saving":3.0},"max_rank":3},

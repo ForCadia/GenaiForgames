@@ -20,7 +20,7 @@ static func generate_wave(wave: int, difficulty: String = "normal") -> Dictionar
 		var rolled := float(weight)*rng.randf_range(0.7,1.3)
 		weights.append(rolled)
 		weight_sum += rolled
-	var normal_count := 22 + mini(10,int(maxi(0,wave-1)/5)*2)
+	var normal_count := int({"easy":18,"normal":22,"hard":28}.get(difficulty,22)) + mini(10,int(maxi(0,wave-1)/5)*2)
 	var quotas: Array[int] = []
 	var assigned := 0
 	for weight in weights:

@@ -3,6 +3,7 @@ const F := preload("res://ui/ui_factory.gd")
 const STYLE := preload("res://ui/menu_style.gd")
 const TALENTS := preload("res://endless_talents.gd")
 const SCREEN := preload("res://assets/ui_title_terminal.png")
+const SUPPORT := preload("res://assets/ui_title_terminal_pedestal_v2.png")
 const ICON := preload("res://assets/items/endless_upgrade_chip.png")
 var game: Node
 var choices: Array[String] = []
@@ -30,15 +31,22 @@ func _ready() -> void:
 		button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		for state in ["normal","hover","pressed","disabled"]:
 			button.add_theme_stylebox_override(state,StyleBoxEmpty.new())
-		button.add_theme_stylebox_override("focus",STYLE.frame(Color.TRANSPARENT,STYLE.AMBER,0))
+		button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 		cards.append(button)
-		for x in [side*0.23,side*0.77]:
-			var cable := ColorRect.new()
-			cable.color = Color("526371")
-			cable.position = Vector2(x-2.0,-500.0)
-			cable.size = Vector2(4.0,510.0)
-			cable.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			button.add_child(cable)
+		# Reuse the mechanical leg at uniform scale, inverted as an overhead mount.
+		var support := TextureRect.new()
+		var support_atlas := AtlasTexture.new()
+		support_atlas.atlas = SUPPORT
+		support_atlas.region = Rect2(285,135,400,540)
+		support.texture = support_atlas
+		support.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		support.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		support.size = Vector2(80,108)
+		support.position = Vector2(side*0.5-40,-102)
+		support.pivot_offset = support.size*0.5
+		support.rotation = PI
+		support.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		button.add_child(support)
 		var monitor := NinePatchRect.new()
 		var atlas := AtlasTexture.new()
 		atlas.atlas = SCREEN
@@ -62,22 +70,25 @@ func _ready() -> void:
 		icon.texture = ICON
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon.custom_minimum_size = Vector2(48,48)
+		icon.custom_minimum_size = Vector2(44,44)
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		content.add_child(icon)
 		var title := F.label(content,str(data.name),"SmallLabel")
 		title.modulate = STYLE.AMBER
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		title.add_theme_font_size_override("font_size",18)
+		title.add_theme_font_size_override("font_size",22)
 		var rank := int(game.endless_talent_ranks.get(id,0))
-		var rank_label := F.label(content,"可重复选择" if data.get("repeatable",false) else "Lv.%d → %d" % [rank,rank+1],"MutedLabel")
+		var rank_label := F.label(content,"可重复选择" if data.get("repeatable",false) and data.effects.is_empty() else "Lv.%d → %d" % [rank,rank+1],"MutedLabel")
 		rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		rank_label.add_theme_font_size_override("font_size",15)
 		var description := F.label(content,str(data.text),"SmallLabel")
 		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		description.add_theme_font_size_override("font_size",15)
+		description.add_theme_font_size_override("font_size",18)
 		button.mouse_entered.connect(func(): monitor.modulate = Color(1.15,1.15,1.15))
-		button.mouse_exited.connect(func(): monitor.modulate = Color.WHITE)
+		button.mouse_exited.connect(func(): monitor.modulate = Color(1.15,1.15,1.15) if button.has_focus() else Color.WHITE)
+		button.focus_entered.connect(func(): monitor.modulate = Color(1.15,1.15,1.15))
+		button.focus_exited.connect(func(): monitor.modulate = Color.WHITE)
 	motion = create_tween().set_parallel(true)
 	for index in range(cards.size()):
 		motion.tween_property(cards[index],"position:y",68.0,0.65).set_delay(float(index)*0.1).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)

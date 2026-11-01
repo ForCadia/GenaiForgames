@@ -408,10 +408,11 @@ func _fire() -> void:
 		color = CYAN
 	# Keep the aimed center round; extra rounds form symmetric pairs.
 	_emit_player_round(origin,direction,penetration,color)
-	for pair in range(int(extra/2)):
-		var angle := deg_to_rad(5.0*float(pair+1))
+	for index in range(extra):
+		# One extra round per rank; alternate above/below, retain aimed center.
+		var spread := 28.0*(1.0-exp(-float(int(index/2)+1)/5.0))
+		var angle := deg_to_rad(spread)*(-1.0 if index % 2 == 0 else 1.0)
 		_emit_player_round(origin,direction.rotated(angle),penetration,color)
-		_emit_player_round(origin,direction.rotated(-angle),penetration,color)
 	if third_shot and _meta_effect("third_energy") > 0:
 		guard_energy = minf(guard_capacity(),guard_energy+_meta_effect("third_energy"))
 		_emit(_player_center(),CYAN,6,90)

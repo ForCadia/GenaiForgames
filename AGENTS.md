@@ -160,3 +160,6 @@ Latest smart weapon/manual priority and Endless synergies (2026-10-31): manual A
 
 
 Latest Endless reward presentation (2026-10-31): user replaces paused black overlay with empty moving track plus three square hanging monitors. main talent/talent_exit states update player motion and parallax only; clear enemies/rounds at wave clear, no next wave until selection/retraction. ui/endless_reward.gd uses existing flat terminal NinePatch art with scaled borders, generated transparent assets/items/endless_upgrade_chip.png, staggered descent/retraction; no blackout. Mouse/key/gamepad card selection and Esc title remain; input gate on next wave. Supersedes frozen reward UI descriptions. No game/import/tests/captures.
+
+
+Latest Endless count/card tuning (2026-10-31): Easy/Normal/Hard total starts18/22/28 and grows+2 per five waves to+10; caps50/100/150/pacing retained. Split/third_fan each+1 round/rank, repeatable uncapped; alternating spread preserves center aim. Reward UI removes yellow focus rectangle, highlights monitor brightness; existing pedestal_v2 leg atlas at native aspect rotated as overhead mount replaces plain rods. Fonts22 title/18 description/15 rank. User tests; file edits only.
