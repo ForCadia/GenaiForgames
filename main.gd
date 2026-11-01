@@ -514,7 +514,7 @@ func _update_segment() -> void:
 			var event: Dictionary = data.events[next_event]
 			var cost: int = THREAT_BUDGET.event_cost(event)
 			if _uses_threat_budget() and cost > 0:
-				if segment_time < next_budget_spawn_at or _active_threat_points()+cost > _threat_limit():
+				if segment_time < next_budget_spawn_at or _active_threat_points()+cost > maxi(_threat_limit(),cost):
 					break
 				# Reserve offscreen arrivals too; never burst a delayed queue at once.
 				next_budget_spawn_at = segment_time+(THREAT_BUDGET.endless_gap(endless_difficulty) if endless_mode else THREAT_BUDGET.SPAWN_GAP)

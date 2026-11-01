@@ -102,3 +102,6 @@ Latest Endless Boss-clear correction: the existing1s death showcase previously u
 
 
 Mecha mission integration (2026-10-31): campaign Level03 now ends with the gunblade mecha; Levels01/02 retain the eye. Endless Boss encounters remain every fifth wave, alternating mecha at5/15/25 and eye at10/20/30. Explicit Boss-test selection still overrides mission selection; historical LAB remains on eye. Mecha current cadence is normal: Endless easy multiplies preparation/recovery waits by1.5, hard by0.75, normal1.0. Fixed combat animation/damage/HP/projectile and movement speeds stay unchanged. Campaign03 and Boss test always use normal, independent of last selected Endless difficulty. Telegraph cross progress follows the adjusted windup. Existing retry, shared kill/reward, grenade and Boss HUD paths dispatch to selected Boss. Source inspection only, no engine/tests per user.
+
+
+Latest heavy pressure cost: heavy turret now reserves75 points (formerly50), independent of kill score. Applies wherever shared threat budget is enabled. An event costing more than the configured cap may spawn alone on an empty field, preventing easy Endless cap50 from permanently blocking its75-point heavy event; no additional combat event fits until that reservation releases. Other limits/costs/rewards unchanged. Source edits only, no runtime tests.
