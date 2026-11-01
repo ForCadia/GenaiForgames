@@ -42,6 +42,7 @@ var developer_mode := false
 var boss_test_mode := false
 var selected_level := 0
 var endless_mode := false
+var endless_difficulty := "normal"
 var endless_wave := 1
 var level_segments: Array = []
 var endless_wave_data: Dictionary = {}
@@ -924,7 +925,7 @@ func _reset_campaign() -> void:
 	level_segments = CAMPAIGNS.segments(selected_level,not developer_mode)
 	endless_wave = 1
 	endless_intermission = 0
-	if endless_mode: endless_wave_data = CAMPAIGNS.endless_wave(endless_wave)
+	if endless_mode: endless_wave_data = CAMPAIGNS.endless_wave(endless_wave,endless_difficulty)
 	_apply_level_look()
 	grenade_count = 0
 	retry_requested = false
@@ -1259,7 +1260,10 @@ func _reset_death_camera() -> void:
 func start_level(index: int) -> void:
 	start_game("checkpoint", 0, false, false, index)
 
-func start_endless() -> void:
+func start_endless(difficulty := "") -> void:
+	if state != "start" or not mission_unlocked(3): return
+	if not difficulty.is_empty():
+		endless_difficulty = difficulty if difficulty in ["easy","normal","hard"] else "normal"
 	start_game("campaign", 0, false, false, 0, true)
 
 func next_level() -> void:
@@ -1277,12 +1281,12 @@ func current_stage_name() -> String:
 	return str(current_segment().title).get_slice("//", 1).strip_edges()
 
 func mode_caption() -> String:
-	if endless_mode: return "ENDLESS / WAVE %02d" % endless_wave
+	if endless_mode: return "ENDLESS / %s / WAVE %02d" % [endless_difficulty.to_upper(),endless_wave]
 	if boss_test_mode: return "BOSS TEST"
 	return "LEVEL %02d" % (selected_level + 1)
 
 func record_key() -> String:
-	if endless_mode: return "endless_best_score"
+	if endless_mode: return "endless_best_score" if endless_difficulty == "normal" else "endless_%s_best_score" % endless_difficulty
 	return "best_score" if selected_level == 0 else "level_%d_best_score" % (selected_level + 1)
 
 func _advance_endless() -> void:
@@ -1293,7 +1297,7 @@ func _advance_endless() -> void:
 		segment = 3
 		_start_boss(true)
 	else:
-		endless_wave_data = CAMPAIGNS.endless_wave(endless_wave)
+		endless_wave_data = CAMPAIGNS.endless_wave(endless_wave,endless_difficulty)
 		_start_segment((endless_wave - 1) % 5, true)
 
 func _apply_level_look() -> void:
@@ -1521,3 +1525,6 @@ func _update_kamikaze_drones(delta: float) -> void:
 		if drone.is_finished():
 			drone.queue_free()
 			kamikaze_drones.remove_at(index)
+
+func endless_wave_record_key() -> String:
+	return "endless_best_wave" if endless_difficulty == "normal" else "endless_%s_best_wave" % endless_difficulty

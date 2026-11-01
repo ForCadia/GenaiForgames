@@ -187,11 +187,14 @@ func record_result() -> Dictionary:
 	var best: int = maxi(previous, game.score)
 	if game.play_profile != "development":
 		game.progression.records[key] = best
+		if game.endless_mode:
+			var wave_key: String = game.endless_wave_record_key()
+			game.progression.records[wave_key] = maxi(int(game.progression.records.get(wave_key,0)),game.endless_wave)
 		game.progression.save()
 	if game.play_profile == "development" and not game.attract_mode and not game.ui_preview and not "--lab-test" in OS.get_cmdline_user_args():
 		config.set_value("record", key, best)
 		if game.endless_mode:
-			config.set_value("record", "endless_best_wave", maxi(int(config.get_value("record", "endless_best_wave", 0)), game.endless_wave))
+			config.set_value("record", game.endless_wave_record_key(), maxi(int(config.get_value("record", game.endless_wave_record_key(), 0)), game.endless_wave))
 		config.save("user://ui_record.cfg")
 	game.run_record = {"best": best, "new_record": game.score > previous}
 	return game.run_record
