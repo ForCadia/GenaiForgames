@@ -6,7 +6,7 @@ const LAUNCHER_HP := 8
 const PLATE_HP := 6
 const ARMOR: int = GD.ENEMIES.heavy.armor
 const CORE_ARMOR: int = GD.ENEMIES.light.armor
-const HOME_X := 670.0
+const HOME_X := 790.0
 const ENTRY_SPEED := 430.0
 const HULL_SCALE := 0.45
 const HULL_ORIGIN := Vector2(-300.0,-475.0)
@@ -41,3 +41,5 @@ const INTRO_FOCUS := Vector2(0,-267)
 const CANNON_REGIONS := [Rect2(0,0,700,512),Rect2(700,0,836,512),Rect2(0,504,768,520),Rect2(768,504,768,520)]
 const CANNON_ANCHORS := [Vector2(445,500),Vector2(1177,501),Vector2(478,1005),Vector2(1180,1005)]
 const CANNON_MUZZLES := [Vector2(205,155),Vector2(950,195),Vector2(232,671),Vector2(940,680)]
+
+const DEPLOY_ORIGIN := Vector2(-60,-395)

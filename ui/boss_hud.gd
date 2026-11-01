@@ -67,10 +67,9 @@ func apply_mecha_state(hp: int, maximum: int) -> void:
 	armor.hide()
 	armor_bar.hide()
 
-func apply_iron_state(hp: int, maximum: int, cannon_hp: int, launcher_hp: int, plate_hp: int) -> void:
+func apply_iron_state(hp: int, maximum: int, cannon_hp: int, _launcher_hp: int, _plate_hp: int) -> void:
 	apply_state(hp,maximum,0,1,0,1)
 	title.text = "IRON BASTION"
 	armor.show()
 	armor_bar.hide()
-	armor.text = "CANNON %d / HANGAR %d / COVER %d" % [cannon_hp,launcher_hp,plate_hp]
-	if plate_hp <= 0: armor.text += " / CORE EXPOSED"
+	armor.text = "CANNON %d / AIR SUPPORT / CORE EXPOSED" % cannon_hp

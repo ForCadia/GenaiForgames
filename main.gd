@@ -591,6 +591,7 @@ func _spawn_enemy(kind: String, _y: float, _returns: bool, spawn_origin: Vector2
 			soldier.hover_x = soldier.position.x-60.0
 			soldier.orbit_anchor_x = clampf(soldier.position.x-150.0,360.0,520.0)
 			soldier.set_meta("iron_support",true)
+			soldier.z_index = 6
 		soldier.base_y = soldier.position.y
 		soldier.projectile_requested.connect(_on_aerial_projectile)
 		soldier.killed.connect(func(actor: Node2D): _award_enemy_kill("aerial",actor.global_position))
@@ -604,6 +605,7 @@ func _spawn_enemy(kind: String, _y: float, _returns: bool, spawn_origin: Vector2
 		if spawn_origin.is_finite():
 			drone.position = turret_root.to_local(spawn_origin)
 			drone.set_meta("iron_support",true)
+			drone.z_index = 6
 		drone.base_y = drone.position.y
 		drone.killed.connect(func(actor: Node2D): _award_enemy_kill("kamikaze",actor.global_position))
 		drone.exploded.connect(func(_actor: Node2D): world_audio.play_cue("enemy_explode"))
@@ -881,6 +883,12 @@ func _steer_homing_round(bullet: Dictionary, targets: Array[Dictionary], delta: 
 		bullet.pos += bullet.velocity*delta
 
 func _update_shots(delta: float) -> void:
+	if boss_mode and is_iron_boss():
+		iron_actor.foreground_hitboxes.clear()
+		for soldier in aerial_riflemen:
+			if is_instance_valid(soldier) and soldier.state != "dead": iron_actor.foreground_hitboxes.append(soldier.body_rect())
+		for drone in kamikaze_drones:
+			if is_instance_valid(drone) and drone.state != "explode": iron_actor.foreground_hitboxes.append(drone.body_rect())
 	for i in range(shots.size()-1,-1,-1):
 		var bullet: Dictionary = shots[i]
 		bullet.previous = bullet.pos

@@ -33,6 +33,7 @@ var emitted := 0
 var cannon_frame := 0
 var target_x := 190.0
 var projectiles: Array[Dictionary] = []
+var foreground_hitboxes: Array[Rect2] = []
 var rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
@@ -102,8 +103,8 @@ func reset_for_battle(enabled: bool) -> void:
 	state = "entry" if enabled else "inactive"
 	elapsed = 0.0
 	cannon_hp = DATA.CANNON_HP
-	launcher_hp = DATA.LAUNCHER_HP
-	plate_hp = DATA.PLATE_HP
+	launcher_hp = 0
+	plate_hp = 0
 	cannon_death = -1.0
 	launcher_death = -1.0
 	attack = "cannon"
@@ -113,7 +114,9 @@ func reset_for_battle(enabled: bool) -> void:
 	position = Vector2(GD.VIEW_SIZE.x+200.0,GD.GROUND_Y)
 	_pose(cannon,"cannon",0,DATA.CANNON_MOUNT)
 	_pose(launcher,"launcher",0,DATA.LAUNCHER_MOUNT)
-	_update_plate()
+	launcher.hide()
+	plate.hide()
+	foreground_hitboxes.clear()
 	set_process(false)
 
 func set_combat_enabled(enabled: bool) -> void:
@@ -132,8 +135,7 @@ func _enter(next: String) -> void:
 	elapsed = 0.0
 	emitted = 0
 	if next == "prepare":
-		if attack == "cannon" and cannon_hp <= 0: attack = "launcher"
-		if attack == "launcher" and launcher_hp <= 0: attack = "cannon"
+		if attack == "cannon" and cannon_hp <= 0: attack = "deploy"
 
 func advance(delta: float, target: Vector2) -> void:
 	if not combat_enabled: return
@@ -145,7 +147,6 @@ func advance(delta: float, target: Vector2) -> void:
 			position = position.move_toward(Vector2(DATA.HOME_X,GD.GROUND_Y),DATA.ENTRY_SPEED*delta)
 			if position.x <= DATA.HOME_X+1.0: _enter("intro_hold")
 		"prepare":
-			if cannon_hp <= 0 and launcher_hp <= 0: return
 			if elapsed >= maxf(0.65,DATA.PREPARE*wait_multiplier):
 				target_x = clampf(target.x+rng.randf_range(-65,65),90,350)
 				_enter("fire")
@@ -155,20 +156,17 @@ func advance(delta: float, target: Vector2) -> void:
 				if emitted == 0 and elapsed >= DATA.FIRE_TIME*0.25:
 					_shell()
 					emitted = 1
-			elif attack == "launcher" and launcher_hp > 0:
-				var frame: int = 1 if elapsed < DATA.DEPLOY_ROSTER.size()*DATA.DEPLOY_INTERVAL else 2
-				_pose(launcher,"launcher",frame,DATA.LAUNCHER_MOUNT)
+			elif attack == "deploy":
 				if emitted < DATA.DEPLOY_ROSTER.size() and elapsed >= emitted*DATA.DEPLOY_INTERVAL:
 					_deploy(emitted)
 					emitted += 1
 			var duration: float = DATA.FIRE_TIME if attack == "cannon" else DATA.DEPLOY_ROSTER.size()*DATA.DEPLOY_INTERVAL+0.25
 			if elapsed >= duration:
 				if cannon_hp > 0: _pose(cannon,"cannon",0,DATA.CANNON_MOUNT)
-				if launcher_hp > 0: _pose(launcher,"launcher",0,DATA.LAUNCHER_MOUNT)
 				_enter("recover")
 		"recover":
 			if elapsed >= maxf(0.3,DATA.RECOVERY*wait_multiplier):
-				attack = "launcher" if attack == "cannon" else "cannon"
+				attack = "deploy" if attack == "cannon" else "cannon"
 				_enter("prepare")
 	queue_redraw()
 
@@ -186,7 +184,7 @@ func _shell() -> void:
 	sound_requested.emit("iron_cannon_fire")
 
 func _deploy(index: int) -> void:
-	var origin: Vector2 = launcher.to_global(DATA.LAUNCH_PORTS[index])
+	var origin: Vector2 = to_global(DATA.DEPLOY_ORIGIN+Vector2(index*16.0,0))
 	reinforcement_requested.emit(DATA.DEPLOY_ROSTER[index],origin)
 
 func _advance_projectiles(delta: float) -> void:
@@ -239,17 +237,30 @@ func _pixel_hit(sprite: Sprite2D, key: String, point: Vector2) -> bool:
 
 func shot_contact(from: Vector2, to: Vector2) -> Dictionary:
 	if not combat_enabled or state in ["entry","intro_hold","dead","inactive"]: return {}
+	# Foreground flyers take priority over the large background fortress along this aim.
+	var direction: Vector2 = (to-from).normalized()
+	if not direction.is_zero_approx():
+		for box in foreground_hitboxes:
+			if _segment_rect(from,from+direction*1400.0,box): return {}
 	var steps: int = maxi(1,int(ceil(from.distance_to(to)*2.0)))
 	for index in range(steps+1):
 		var p: Vector2 = from.lerp(to,float(index)/float(steps))
 		var local: Vector2 = to_local(p)
-		if plate_hp > 0 and DATA.PLATE_RECT.has_point(local): return {"position":p,"module":"plate"}
-		if plate_hp <= 0 and DATA.CORE_RECT.has_point(local): return {"position":p,"module":"core"}
+		# Flying enemies are drawn in front and own these overlapping shot regions.
+		var foreground := false
+		for box in foreground_hitboxes:
+			if box.has_point(p):
+				foreground = true
+				break
+		if foreground: continue
+		if DATA.CORE_RECT.has_point(local): return {"position":p,"module":"core"}
 		if cannon_hp > 0 and _pixel_hit(cannon,"cannon",p): return {"position":p,"module":"cannon"}
-		if launcher_hp > 0 and _pixel_hit(launcher,"launcher",p): return {"position":p,"module":"launcher"}
-		# Do not let front hull/pipe pixels swallow shots headed for the cover/core.
-		var core_lane: bool = local.y >= DATA.PLATE_RECT.position.y and local.y <= DATA.PLATE_RECT.end.y and local.x <= DATA.PLATE_RECT.end.x
-		if DATA.BODY_RECT.has_point(local) and not core_lane: return {"position":p,"module":"body"}
+		# Restrict hull collision to opaque artwork instead of its broad rectangular bounds.
+		var core_lane: bool = local.y >= DATA.CORE_RECT.position.y and local.y <= DATA.CORE_RECT.end.y and local.x <= DATA.CORE_RECT.end.x
+		var source: Vector2 = hull.to_local(p)
+		var image: Image = images.hull
+		if not core_lane and source.x >= 0 and source.y >= 0 and source.x < image.get_width() and source.y < image.get_height():
+			if image.get_pixel(int(source.x),int(source.y)).a > 0.9: return {"position":p,"module":"body"}
 	return {}
 
 func shot_hits(from: Vector2, to: Vector2) -> bool:
@@ -271,17 +282,12 @@ func receive_shot_segment(penetration: int, from: Vector2, to: Vector2) -> void:
 		return
 	match module:
 		"core": damage_requested.emit(origin)
-		"plate":
-			plate_hp -= 1
-			_update_plate()
 		"cannon":
 			cannon_hp -= 1
-			if cannon_hp == 0: cannon_death = 0.0
-		"launcher":
-			launcher_hp -= 1
-			if launcher_hp == 0: launcher_death = 0.0
-	if module != "core": feedback.emit(origin,Color("ffb347"),"CORE EXPOSED" if module == "plate" and plate_hp == 0 else "")
-	if module in ["cannon","launcher"] and (cannon_hp == 0 if module == "cannon" else launcher_hp == 0): sound_requested.emit("enemy_explode")
+			if cannon_hp == 0:
+				cannon_death = 0.0
+				sound_requested.emit("enemy_explode")
+	if module == "cannon": feedback.emit(origin,Color("ffb347"),"")
 
 func _update_plate() -> void:
 	var frame: int = clampi(int((1.0-float(plate_hp)/DATA.PLATE_HP)*7.0),0,7)
@@ -314,7 +320,6 @@ func start_death() -> void:
 	plate_hp = 0
 	cannon_death = maxf(0.0,cannon_death)
 	launcher_death = maxf(0.0,launcher_death)
-	_update_plate()
 	elapsed = 0.0
 	set_process(true)
 
@@ -325,10 +330,8 @@ func _process(delta: float) -> void:
 	hull.modulate = Color(0.45,0.45,0.45)
 
 func _draw() -> void:
-	if combat_enabled and state == "prepare":
-		var module: Sprite2D = cannon if attack == "cannon" else launcher
-		if (cannon_hp > 0 if attack == "cannon" else launcher_hp > 0):
-			draw_circle(to_local(module.to_global(Vector2(300,250))),9.0+sin(elapsed*14.0)*2.0,Color(1,0.2,0.05,0.8))
+	if combat_enabled and state == "prepare" and attack == "cannon" and cannon_hp > 0:
+		draw_circle(to_local(cannon.to_global(Vector2(300,250))),9.0+sin(elapsed*14.0)*2.0,Color(1,0.2,0.05,0.8))
 	for round in projectiles:
 		var p: Vector2 = to_local(Vector2(round.p))
 		if float(round.explode) > 0:
