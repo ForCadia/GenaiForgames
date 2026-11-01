@@ -100,6 +100,7 @@ func _process(delta: float) -> void:
 func _simulate(anchor: Vector2) -> void:
 	var dead: bool = actor.body_state == "death"
 	var running: bool = actor.body_state in ["run","slide","jump"]
+	var ground_running: bool = actor.body_state == "run"
 	var wind := -35.0 if running and not dead else -8.0
 	var floor_y := _track_floor_y()-2.0
 	points[0] = anchor
@@ -107,9 +108,10 @@ func _simulate(anchor: Vector2) -> void:
 	var rest_target := anchor
 	for index in range(1,LINKS+1):
 		var old: Vector2 = points[index]
-		var inertia: Vector2 = (points[index]-previous[index])*(0.9 if dead else 0.962)
+		var inertia: Vector2 = (points[index]-previous[index])*(0.9 if dead else (0.93 if ground_running else 0.962))
 		var t := float(index)/float(LINKS)
 		var flutter := (sin(clock*8.5-float(index)*0.6)*180.0+sin(clock*14.0-float(index)*0.8)*55.0)*t*t if not dead else 0.0
+		if ground_running: flutter *= 0.2
 		var acceleration := Vector2(wind,(250.0 if dead else 85.0)+flutter)
 		if not dead:
 			acceleration -= movement_acceleration*0.25*t
@@ -119,7 +121,7 @@ func _simulate(anchor: Vector2) -> void:
 			# The root stays braced; amplitude grows toward the trailing edge.
 			var envelope := pow(t,1.25)*(1.0 if running else 0.45)
 			var airborne: bool = actor.body_state == "jump"
-			var wave_strength := 0.35 if airborne else 1.0
+			var wave_strength := 0.35 if airborne else (0.22 if ground_running else 1.0)
 			var flutter_bend := (sin(clock*8.5-float(index)*0.52)*0.85+sin(clock*3.7-float(index)*0.3)*0.18)*wave_strength
 			# Upward player velocity trails downward; falling lifts the trailing end.
 			var vertical_drag := -clampf(anchor_velocity.y/620.0,-1.0,1.0)*1.05

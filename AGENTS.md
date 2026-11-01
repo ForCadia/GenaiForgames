@@ -184,3 +184,6 @@ Latest cape flutter tuning (2026-10-31): reduce constant backward wind, add prom
 
 
 Latest cape vertical inertia (2026-10-31): replace full-body translation with progressively lagging carry, distinguish actor body movement from animated shoulder socket. Filter body velocity; rise pulls tail down and fall lifts it via rest-angle/relative airflow, airborne decorative waves35%. Keep fixed root, dimensions, shoulder avoidance/world-floor/triangles. File edits only, user tests.
+
+
+Latest cape run tuning (2026-10-31): calm run pose only—wave22%, flutter20%, damping retention0.93. Keep jump/fall inertia and airborne tuning unchanged. File-only, user tests.

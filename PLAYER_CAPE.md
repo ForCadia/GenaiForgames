@@ -22,3 +22,6 @@ Latest flutter revision: reduce constant rearward wind110→35, reduce live damp
 
 
 Latest jump inertia: animation socket motion is still carried fully, but each successive strip point follows less actual player motion (tail retains85% of vertical displacement as lag). Filter actual body velocity separately from sprite socket bob. Rising applies downward tail drag; falling applies upward drag via velocity-dependent rest bend and relative-air acceleration. Airborne decorative wave amplitude is reduced to35% so jump direction dominates. Preserve length, shoulder exclusion and true world-floor fixes. No runtime tests.
+
+
+Running-only calming: run pose angular-wave amplitude22%, flutter force20%, velocity retention0.93 for stronger damping. Airborne wave/vertical lag behavior unchanged; other poses unchanged. No runtime tests.
