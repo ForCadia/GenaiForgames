@@ -10,3 +10,6 @@ Audio with directly checked source pages on1 November2026:
 - Sword Fire01, supplied filename names sonofxAudio and649361. Direct source could not be accessed during this audit; exact license is unresolved. https://freesound.org/people/sonofxAudio/sounds/649361/
 
 Other user supplied artwork, music and sounds: see ASSET_LOG.csv. A local source filename is evidence of origin, not proof of a license. These credits do not certify unresolved materials for commercial release. Creator names inferred only from filenames are labeled as such in the asset log.
+
+
+Author confirmation, 1 November 2026: all supplied game artwork is AI-generated; sound effects are from Freesound; Chase Mode and Untitled BGM are from Suno. The author confirms the browser acceptance passed. This is author confirmation, separately attributed from automated measurements. Exact historical stage times/charges remain not recorded; no reconstruction is requested. Per-file Freesound licenses and generation-account terms are not inferred from platform names.

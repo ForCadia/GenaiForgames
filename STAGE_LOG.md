@@ -331,3 +331,6 @@ Evidence: docs/voice-script.md.
 
 
 Author confirmation on 1 November 2026: tool/plan was reported verbatim as "gpt pro6.1sol" (GPT Pro / 6.1 sol). This identifies the author-reported tool and plan, not a verified invoice, subscription price, or confirmation of every historical asset generator. Actual charges, stage times and Suno/image generation account tiers remain NR unless separately evidenced. The author also explicitly authorized current gameplay recording, two-browser checks and fresh Windows/Web exports.
+
+
+Author confirmation, 1 November 2026: all supplied game artwork is AI-generated; sound effects are from Freesound; Chase Mode and Untitled BGM are from Suno. The author confirms the browser acceptance passed. This is author confirmation, separately attributed from automated measurements. Exact historical stage times/charges remain not recorded; no reconstruction is requested. Per-file Freesound licenses and generation-account terms are not inferred from platform names.

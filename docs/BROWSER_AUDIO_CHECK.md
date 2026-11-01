@@ -14,3 +14,6 @@ Findings/fixes: the default Web Sample route produced zero measured game output 
 Both browsers loaded the real menu without JS exceptions or Godot script errors. They reported WebGL buffer warnings, retained in the JSON console evidence rather than hidden. Rendering was visually checked in saved screenshots. No claim is made of exhaustive gameplay testing, subjective loop-seam approval, speaker/headphone balance or the deployed public URL.
 
 Raw evidence: evidence/browser-audio-results.json. Final exports completed with exit 0. Video decode check completed with no errors; native mixed comparison audio peak is -4.2 dBFS. Final source has no online AI/runtime dependency.
+
+
+Author confirmation, 1 November 2026: all supplied game artwork is AI-generated; sound effects are from Freesound; Chase Mode and Untitled BGM are from Suno. The author confirms the browser acceptance passed. This is author confirmation, separately attributed from automated measurements. Exact historical stage times/charges remain not recorded; no reconstruction is requested. Per-file Freesound licenses and generation-account terms are not inferred from platform names.
