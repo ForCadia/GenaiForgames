@@ -60,3 +60,22 @@ Latest Endless entry UI: mission selector now shows three direct-start buttons l
 
 
 Latest UI simplification: Endless section shows only ENDLESS and 简单无尽 / 普通无尽 / 困难无尽 entry labels, without budget numbers or rules copy. Upper-center temporary combat notices and phase banners are hidden; progress/Boss HUD and lower tutorial remain. Gameplay unchanged. File-only edits, no tests.
+
+
+## Expanded Endless combat synergies — 2026-10-31
+
+Existing fire-rate, magazine and shield-stat talents remain. New run-only choices:
+
+| Talent | Effect | Rank limit |
+|---|---|---|
+| Split rounds | +2 symmetric extra rounds per trigger, one ammunition consumed; retains center aim | 2 |
+| Third-shot volley | Every third trigger adds2 more rounds; stacks with split | 2 |
+| Third-shot AP | Every third trigger gives all its rounds at least3 armor penetration | 1 |
+| Third-shot charging | Every third trigger restores4 shield energy per rank | 3 |
+| Buffer shield | Reduce block hit cost by3 per rank, minimum6 energy | 3 |
+| Reload capacitor | A completed normal reload restores10 shield energy per rank | 3 |
+| Explosive recycling | Every eighth cumulative run kill grants one grenade | 1 |
+
+Trigger cadence is shared across guns and waves, independent of the number of spawned bullets; extra bullets cannot recursively trigger rewards. Split/volley ranks combine up to9 rounds on a third trigger at maximum ranks. All rounds use normal hit/armor checks. Shot statistics count actual emitted bullets. A new run or return to title clears trigger cadence and talents. Reward descriptions wrap within taller choice buttons. Campaigns gain none of these talents.
+
+Design reference: SYNTHETIK developer updates (https://www.synthetikgame.com/updates), for ammunition/weapon/shield item synergies; these particular numeric rules are authored for EverFront, not copied as game facts. No game/import/tests/captures were run.

@@ -30,6 +30,7 @@ func _ready() -> void:
 		var rank := int(game.endless_talent_ranks.get(id,0))
 		var title: String = data.name + ("  Lv.%d → %d" % [rank,rank+1] if not data.get("repeatable",false) else "")
 		var button := STYLE.primary(F.button(column,title+"\n"+str(data.text),func(): game.choose_endless_talent(id)))
-		button.custom_minimum_size.y = 86
+		button.custom_minimum_size.y = 100
+		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		if id == choices[0]: button.grab_focus()
 	F.label(column,"选择后进入下一波 · Esc 返回标题","MutedLabel")

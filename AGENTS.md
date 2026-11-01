@@ -154,3 +154,6 @@ Latest Endless entry UI (2026-10-31): mission page replaces Endless-plus-difficu
 
 
 Latest UI simplification (2026-10-31): Endless selector contains only ENDLESS plus 简单无尽 / 普通无尽 / 困难无尽; remove visible50/100/150 and rules copy. Hide HUD upper-center banner/toast messages during combat, retaining progress/Boss HUD/tutorial. No gameplay changes or runtime tests.
+
+
+Latest smart weapon/manual priority and Endless synergies (2026-10-31): manual AP selection locks smart switching until manual rifle selection; auto-selected AP does not lock. Q/wheel follow same rule, grenade preserves lock, auto reload remains. Natural transitions preserve lock; new run/title clears it. Endless adds2-round split (rank2), every-third-trigger extra pair(rank2), AP>=3(rank1), shield+4(rank3), block cost-3(rank3, floor6), completed reload shield+10(rank3), every8 run kills grenade+1(rank1). Existing fire rate/magazine/shield talents retained. Trigger count once per actual firing action, extra projectiles never recurse; shot stats count emitted rounds. User tests; no runtime checks.

@@ -1,4 +1,4 @@
-﻿# 金币与三向构筑树
+# 金币与三向构筑树
 
 本次为用户授权的游戏成长系统，不改历史实验记录。普通三关和无尽模式启用；开发模式与 Boss 测试不应用购买效果、不产生金币，保留原始测试参数。
 
@@ -52,3 +52,6 @@ Godot 编辑器导入、`tests/progression_smoke.gd`、`tests/campaign_modes_smo
 Latest combat balance: shield base regeneration is now 6.25/s, intermediate regeneration bonuses are 3.125/s and 6.25/s, and the capstone is 25/s. Sustained drain is 1.5×, impact cost 18 and recharge delay is +0.5s. These supersede the earlier 12.5/50/7 descriptions above. Upgrade costs, prerequisite IDs and saved purchases are unchanged. See COMBAT_BALANCE.md.
 
 智能切枪终极节点现在同时提供自动换弹：当前枪弹匣为空且最后一发冷却结束后，按正常换弹时间装填，不需要按 R。保留目标护甲/DPS 选枪与手雷选择，价格、前置、ID 和已购存档不变。tests/smart_weapon_smoke.gd 验证两把枪、正常换弹时长、未购买状态、手雷槽与 LAB 隔离。
+
+
+Latest manual weapon priority (2026-10-31): manually selecting AP via slot2, Q or wheel sets a run-local AP lock. Smart selection cannot return to rifle while locked, even after armor breaks or aim leaves the enemy. Manually selecting rifle clears the lock and restores armor/DPS automation. Automatic AP selection never creates a manual lock. Grenade selection preserves the lock, auto-reload remains active, natural stage transitions preserve it; new runs/title clear it. No persistence or upgrade cost changes. No runtime tests.

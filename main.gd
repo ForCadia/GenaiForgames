@@ -76,6 +76,8 @@ var guard_lock := 0.0
 var aim := Vector2(700, 350)
 var weapon_index := 0
 var selected_slot := 0
+var manual_piercer_lock := false
+var endless_fire_count := 0
 var ammo := [GD.WEAPONS[0].magazine, GD.WEAPONS[1].magazine]
 var reload_left := 0.0
 var shot_left := 0.0
@@ -326,6 +328,7 @@ func _update_player(delta: float) -> void:
 		if reload_left <= 0:
 			weapon_audio.finish_reload()
 			ammo[weapon_index] = _weapon().magazine
+			guard_energy = minf(guard_capacity(),guard_energy+_meta_effect("reload_energy"))
 			_notify("MAGAZINE READY", CYAN)
 		_refresh_player_ui()
 	if _control_held("fire") and reload_left <= 0 and shot_left <= 0:
@@ -341,12 +344,13 @@ func _update_player(delta: float) -> void:
 func _switch_weapon() -> void:
 	if reload_left > 0: return
 	weapon_index = 1 - weapon_index; selected_slot = weapon_index
+	manual_piercer_lock = weapon_index == 1
 	weapon_audio.switch_weapon()
 	player_visual.set_primary_weapon(weapon_index)
 	_refresh_player_ui()
 	_notify(_weapon().name, _weapon().color)
 
-func _select_slot(slot: int) -> void:
+func _select_slot(slot: int, automatic := false) -> void:
 	if reload_left > 0: return
 	if slot == 2:
 		if not has_grenade:
@@ -358,6 +362,7 @@ func _select_slot(slot: int) -> void:
 		_notify("GRENADE LAUNCHER // ONE SHOT", CYAN)
 		return
 	if selected_slot != slot: weapon_audio.switch_weapon()
+	if not automatic: manual_piercer_lock = slot == 1
 	selected_slot = slot
 	weapon_index = slot
 	player_visual.set_primary_weapon(weapon_index)
@@ -381,12 +386,33 @@ func _fire() -> void:
 	var origin := player_visual.muzzle_world_position()
 	var to_target := aim - origin
 	var direction: Vector2 = to_target.normalized() if to_target.length_squared() > 0.001 else player_visual.shot_direction()
-	shots.append({"pos": origin, "previous": origin, "velocity": direction * _weapon().projectile_speed, "penetration": _weapon().penetration, "color": _weapon().color, "style": _weapon().projectile_style})
-	run_total_shots += 1
+	endless_fire_count += 1
+	var third_shot := endless_mode and endless_fire_count % 3 == 0
+	var extra := int(_meta_effect("multishot"))
+	if third_shot: extra += int(_meta_effect("third_fan"))
+	var penetration: int = int(_weapon().penetration)
+	var color: Color = _weapon().color
+	if third_shot and _meta_effect("third_ap") > 0:
+		penetration = maxi(3,penetration)
+		color = CYAN
+	# Keep the aimed center round; extra rounds form symmetric pairs.
+	_emit_player_round(origin,direction,penetration,color)
+	for pair in range(int(extra/2)):
+		var angle := deg_to_rad(5.0*float(pair+1))
+		_emit_player_round(origin,direction.rotated(angle),penetration,color)
+		_emit_player_round(origin,direction.rotated(-angle),penetration,color)
+	if third_shot and _meta_effect("third_energy") > 0:
+		guard_energy = minf(guard_capacity(),guard_energy+_meta_effect("third_energy"))
+		_emit(_player_center(),CYAN,6,90)
 	ammo[weapon_index] -= 1
 	_refresh_player_ui()
 	shot_left = float(lab_panel.values.rifle_cadence if weapon_index == 0 else lab_panel.values.piercer_cadence) * (1.0 + _meta_effect("cadence"))
 	_emit(origin, _weapon().color, 5, 145)
+
+func _emit_player_round(origin: Vector2, direction: Vector2, penetration: int, color: Color) -> void:
+	shots.append({"pos":origin,"previous":origin,"velocity":direction*_weapon().projectile_speed,
+		"penetration":penetration,"color":color,"style":_weapon().projectile_style})
+	run_total_shots += 1
 
 func _grenade() -> void:
 	if state != "playing" or not has_grenade: return
@@ -965,6 +991,8 @@ func _reset_campaign() -> void:
 	_close_endless_reward()
 	endless_talent_ranks.clear()
 	endless_talent_effects.clear()
+	endless_fire_count = 0
+	manual_piercer_lock = false
 	level_segments = CAMPAIGNS.segments(selected_level,not developer_mode)
 	endless_wave = 1
 	endless_intermission = 0
@@ -1063,6 +1091,8 @@ func return_to_start() -> void:
 	_close_endless_reward()
 	endless_talent_ranks.clear()
 	endless_talent_effects.clear()
+	endless_fire_count = 0
+	manual_piercer_lock = false
 	_reset_death_camera()
 	grenade_count = 0
 	ui_paused = false
@@ -1417,6 +1447,8 @@ func guard_regen() -> float:
 func _register_kill(kind: String, origin: Vector2) -> void:
 	run_total_kills += 1
 	if not _meta_enabled(): return
+	if _meta_effect("kill_grenade") > 0 and run_total_kills % 8 == 0:
+		grenade_count += 1
 	guard_energy = minf(guard_capacity(), guard_energy + _meta_effect("kill_energy"))
 	var value: int = preload("res://build_data.gd").COIN_VALUES.get(kind, 3)
 	var count := mini(value, 5)
@@ -1468,7 +1500,7 @@ func _settle_run(completed: bool) -> void:
 	settlement = {"bonus": bonus, "paid": bonus == 0 or progression.credit(bonus)}
 
 func _auto_select_weapon() -> void:
-	if not _upgrade("auto_weapon") or selected_slot == 2 or reload_left > 0: return
+	if not _upgrade("auto_weapon") or manual_piercer_lock or selected_slot == 2 or reload_left > 0: return
 	var armor := 0
 	var nearest := INF
 	var origin := player_visual.muzzle_world_position()
@@ -1504,7 +1536,7 @@ func _auto_select_weapon() -> void:
 				nearest = distance_to_target
 				armor = 0
 	var desired := _best_weapon_for_armor(armor)
-	if desired != weapon_index: _select_slot(desired)
+	if desired != weapon_index: _select_slot(desired,true)
 
 func _best_weapon_for_armor(required: int) -> int:
 	var best := 0
@@ -1580,7 +1612,7 @@ func enter_named_session(player_name: String) -> bool:
 	return true
 
 func _guard_hit_cost() -> float:
-	return 7.0 if developer_mode else BALANCE.GUARD_HIT_COST
+	return 7.0 if developer_mode else maxf(6.0,BALANCE.GUARD_HIT_COST-_meta_effect("hit_saving"))
 
 func _guard_drain() -> float:
 	return float(lab_panel.values.guard_drain) * (1.0 + _meta_effect("drain")) * (1.0 if developer_mode else BALANCE.GUARD_DRAIN_MULTIPLIER)
