@@ -89,7 +89,7 @@ static func endless_wave(wave: int, difficulty := "normal") -> Dictionary:
 	var patterns: Array = LEVEL_TWO + LEVEL_THREE
 	var data: Dictionary = patterns[(wave - 1) % patterns.size()].duplicate(true)
 	_add_drone(data)
-	_increase_pressure(data,1 if difficulty == "easy" else (3 if difficulty == "hard" else 2))
+	_increase_pressure(data,1 if difficulty == "easy" else (6 if difficulty == "hard" else 2))
 	# Increase density gradually, capped at 30%; world and projectile speeds stay authored.
 	var spacing := maxf(0.7, 1.0 - float(wave - 1) * 0.025)
 	data.duration *= spacing

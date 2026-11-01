@@ -22,3 +22,5 @@ The UI gallery includes LevelSelect, Level2, Level3 and Endless pages. `tests/ca
 Latest pressure revision: Level01 keeps the original GD timelines without kamikaze injection. Level02/03 and Endless add kamikazes and double enemy/hazard spawns with0.9s enemy or1.35s hazard follow-ups (authored timeline time, before the existing pace/Endless spacing). Original duration, scroll and Boss values remain. This supersedes earlier unchanged-pressure descriptions for later missions only; no runtime tests performed.
 
 无尽难度：选关页增加简单/普通/困难选择，默认普通。当前加强版即普通（每组2份敌人/障碍）；简单1份，困难3份，即简单约普通一半、困难约普通1.5倍刷怪。沿用逐波间隔加压、每五波Boss和原Boss数值；手雷不翻倍。难度随本轮重试保留，成绩与最高波数分别记录，普通保留原记录键。无尽解锁后一起开放。只改文件，未运行测试。
+
+困难倍率更新：困难现在为普通刷怪量的3倍（原始事件6份，普通2份）；覆盖此前1.5倍说明。简单和普通不变。未运行测试。
