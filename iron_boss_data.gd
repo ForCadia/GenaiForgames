@@ -22,7 +22,7 @@ const FIRE_TIME := 0.40
 const DEATH_FPS := 10.0
 const CANNON_ANGLE := 35.0
 const SHELL_GRAVITY := 580.0
-const SHELL_RADIUS := 9.0
+const SHELL_RADIUS := 16.0
 const DEPLOY_INTERVAL := 0.55
 const DEPLOY_ROSTER := ["aerial","kamikaze"]
 const AIR_SUPPORT_CAP := 3
@@ -50,3 +50,7 @@ const REVERSE_FPS := 10.0
 
 const GROUND_OFFSET := 18.0
 const CHASSIS_BOUNCE := [Vector2(0,0),Vector2(0,-2),Vector2(0,1),Vector2(0,-1)]
+
+const SHELL_DRAW_SIZE := Vector2(56,42)
+const DEATH_BURST_TIME := 0.45
+const FORTRESS_DEATH_TIME := 1.1

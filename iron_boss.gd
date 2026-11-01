@@ -11,9 +11,7 @@ const VFX := preload("res://assets/vfx/neon_effects_source.png")
 const ART := {
  "hull":preload("res://assets/boss_iron/reverse_pixel_user_4.png"),
  "cannon":preload("res://assets/boss_iron/cannon_pixel_user_v2.png"),
- "cannon_dead":preload("res://assets/boss_iron/cannon_death.png"),
  "launcher":preload("res://assets/boss_iron/launcher_fire_clean.png"),
- "launcher_dead":preload("res://assets/boss_iron/launcher_death.png"),
  "plate":preload("res://assets/boss_iron/plate.png")}
 var hull: Sprite2D
 var cannon: Sprite2D
@@ -26,8 +24,6 @@ var elapsed := 0.0
 var cannon_hp := DATA.CANNON_HP
 var launcher_hp := DATA.LAUNCHER_HP
 var plate_hp := DATA.PLATE_HP
-var cannon_death := -1.0
-var launcher_death := -1.0
 var wait_multiplier := 1.0
 var attack := "cannon"
 var emitted := 0
@@ -42,6 +38,8 @@ var foreground_hitboxes: Array[Rect2] = []
 var rng := RandomNumberGenerator.new()
 var mount_motion := Vector2.ZERO
 var projectile_visual: Node2D
+var burst_visual: Node2D
+var death_bursts: Array[Dictionary] = []
 
 func _ready() -> void:
 	rng.randomize()
@@ -68,6 +66,12 @@ func _ready() -> void:
 	launcher.z_index = 1
 	plate.z_index = 2
 	add_child(projectile_visual)
+	burst_visual = Node2D.new()
+	burst_visual.z_index = 1
+	burst_visual.material = vfx_material
+	burst_visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	burst_visual.draw.connect(_draw_death_bursts)
+	add_child(burst_visual)
 	for sprite in [hull,cannon]:
 		var pixel_material := ShaderMaterial.new()
 		pixel_material.shader = preload("res://assets/boss_iron/pixel_sample.gdshader")
@@ -115,9 +119,6 @@ func _pose(sprite: Sprite2D, key: String, frame: int, mount: Vector2) -> void:
 		sprite.position = mount+mount_motion-Vector2(float(metadata.anchor_x),float(metadata.bottom))*sprite.scale
 		(sprite.material as ShaderMaterial).set_shader_parameter("pixel_step",4.0)
 		return
-	if key == "cannon_dead":
-		sprite.scale = Vector2.ONE*DATA.CANNON_SCALE*1.4
-		(sprite.material as ShaderMaterial).set_shader_parameter("pixel_step",4.0)
 	var columns: int = 4 if key == "plate" else 2
 	var width: int = 384 if columns == 4 else 768
 	var source_origin := Vector2((frame%columns)*width,int(frame/columns)*512)
@@ -133,7 +134,7 @@ func _pose(sprite: Sprite2D, key: String, frame: int, mount: Vector2) -> void:
 	if key.begins_with("launcher"): anchor = Vector2(480,467)
 	if key == "plate": anchor = Vector2(225,495)
 	if key == "cannon" and frame >= 2: anchor = Vector2(480 if frame == 2 else 450,495)
-	sprite.position = mount+(mount_motion if key == "cannon_dead" else Vector2.ZERO)-anchor*sprite.scale
+	sprite.position = mount-anchor*sprite.scale
 
 func set_difficulty(difficulty: String, growth_wait: float = 1.0) -> void:
 	wait_multiplier = float(DATA.ATTACK_WAIT.get(difficulty,1.0))*growth_wait
@@ -146,11 +147,12 @@ func reset_for_battle(enabled: bool) -> void:
 	cannon_hp = DATA.CANNON_HP
 	launcher_hp = 0
 	plate_hp = 0
-	cannon_death = -1.0
-	launcher_death = -1.0
 	attack = "cannon"
 	emitted = 0
 	hull.modulate = Color.WHITE
+	hull.show()
+	cannon.show()
+	death_bursts.clear()
 	track_time = 0.0
 	_animate_hull(0.0)
 	clear_projectiles()
@@ -185,7 +187,7 @@ func advance(delta: float, target: Vector2) -> void:
 	if not combat_enabled: return
 	elapsed += delta
 	_animate_hull(delta)
-	_update_wrecks(delta)
+	_advance_death_bursts(delta)
 	_advance_projectiles(delta)
 	match state:
 		"entry":
@@ -328,7 +330,9 @@ func receive_shot_segment(penetration: int, from: Vector2, to: Vector2) -> void:
 		"cannon":
 			cannon_hp -= 1
 			if cannon_hp == 0:
-				cannon_death = 0.0
+				cannon.hide()
+				for index in range(3):
+					_add_death_burst(DATA.CANNON_MOUNT+mount_motion+Vector2(-65+index*45,-65),index*0.09,100.0)
 				sound_requested.emit("enemy_explode")
 	if module == "cannon": feedback.emit(origin,Color("ffb347"),"")
 
@@ -336,13 +340,23 @@ func _update_plate() -> void:
 	var frame: int = clampi(int((1.0-float(plate_hp)/DATA.PLATE_HP)*7.0),0,7)
 	_pose(plate,"plate",frame,DATA.PLATE_MOUNT)
 
-func _update_wrecks(delta: float) -> void:
-	if cannon_death >= 0:
-		cannon_death += delta
-		_pose(cannon,"cannon_dead",mini(3,int(cannon_death*DATA.DEATH_FPS)),DATA.CANNON_MOUNT)
-	if launcher_death >= 0:
-		launcher_death += delta
-		_pose(launcher,"launcher_dead",mini(3,int(launcher_death*DATA.DEATH_FPS)),DATA.LAUNCHER_MOUNT)
+func _add_death_burst(origin: Vector2, delay: float, size: float) -> void:
+	death_bursts.append({"p":origin,"age":-delay,"size":size})
+	_redraw_projectiles()
+
+func _advance_death_bursts(delta: float) -> void:
+	for index in range(death_bursts.size()-1,-1,-1):
+		death_bursts[index].age = float(death_bursts[index].age)+delta
+		if float(death_bursts[index].age) >= DATA.DEATH_BURST_TIME: death_bursts.remove_at(index)
+	_redraw_projectiles()
+
+func _draw_death_bursts() -> void:
+	var frames := [Rect2(28,650,100,90),Rect2(133,650,72,90),Rect2(210,660,60,75),Rect2(276,670,48,60)]
+	for burst in death_bursts:
+		if float(burst.age) < 0.0: continue
+		var frame: int = clampi(int(float(burst.age)/DATA.DEATH_BURST_TIME*frames.size()),0,frames.size()-1)
+		var size := Vector2.ONE*float(burst.size)
+		burst_visual.draw_texture_rect_region(VFX,Rect2(Vector2(burst.p)-size*0.5,size),frames[frame])
 
 func intro_focus_position() -> Vector2:
 	return to_global(DATA.INTRO_FOCUS)
@@ -362,19 +376,24 @@ func start_death() -> void:
 	cannon_hp = 0
 	launcher_hp = 0
 	plate_hp = 0
-	cannon_death = maxf(0.0,cannon_death)
-	launcher_death = maxf(0.0,launcher_death)
+	cannon.hide()
+	var points := [Vector2(-180,-280),Vector2(-80,-330),Vector2(20,-270),Vector2(130,-220),Vector2(-130,-140),Vector2(0,-100),Vector2(160,-90)]
+	for index in range(points.size()):
+		_add_death_burst(points[index],index*0.085,120.0+float(index%3)*16.0)
 	elapsed = 0.0
 	set_process(true)
 
 func _process(delta: float) -> void:
 	if state != "dead": return
 	elapsed += delta
-	_update_wrecks(delta)
-	hull.modulate = Color(0.45,0.45,0.45)
+	_advance_death_bursts(delta)
+	if elapsed >= DATA.FORTRESS_DEATH_TIME:
+		hull.hide()
+		if death_bursts.is_empty(): set_process(false)
 
 func _redraw_projectiles() -> void:
 	if is_instance_valid(projectile_visual): projectile_visual.queue_redraw()
+	if is_instance_valid(burst_visual): burst_visual.queue_redraw()
 
 func _draw_projectiles() -> void:
 	for round in projectiles:
@@ -387,7 +406,7 @@ func _draw_projectiles() -> void:
 			continue
 		var direction: Vector2 = Vector2(round.v).normalized()
 		projectile_visual.draw_set_transform(p,direction.angle()-PI)
-		projectile_visual.draw_texture_rect_region(VFX,Rect2(-16,-12,32,24),Rect2(28,40,95,68))
+		projectile_visual.draw_texture_rect_region(VFX,Rect2(-DATA.SHELL_DRAW_SIZE*0.5,DATA.SHELL_DRAW_SIZE),Rect2(28,40,95,68))
 		projectile_visual.draw_set_transform(Vector2.ZERO,0.0)
 		var landing := Vector2(float(round.target)-global_position.x,GD.GROUND_Y-global_position.y)
 		projectile_visual.draw_line(landing-Vector2(25,0),landing+Vector2(25,0),Color(1,0.15,0.07,0.8),3)
