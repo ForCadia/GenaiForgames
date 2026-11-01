@@ -39,9 +39,13 @@ func _ready() -> void:
 		if image.is_compressed(): image.decompress()
 		images[key] = image
 	hull = _sprite(ART.hull,DATA.HULL_ORIGIN,Vector2.ONE*DATA.HULL_SCALE)
-	cannon = _sprite(ART.cannon,DATA.CANNON_MOUNT,Vector2.ONE*0.23)
-	launcher = _sprite(ART.launcher,DATA.LAUNCHER_MOUNT,Vector2.ONE*0.20)
-	plate = _sprite(ART.plate,DATA.PLATE_MOUNT,Vector2(0.20,0.30))
+	cannon = _sprite(ART.cannon,DATA.CANNON_MOUNT,Vector2.ONE*DATA.CANNON_SCALE)
+	launcher = _sprite(ART.launcher,DATA.LAUNCHER_MOUNT,Vector2.ONE*DATA.LAUNCHER_SCALE)
+	plate = _sprite(ART.plate,DATA.PLATE_MOUNT,Vector2.ONE*DATA.PLATE_SCALE)
+	cannon.z_index = -1 # Behind the hull, with its mounting foot seated on the roof.
+	hull.z_index = 0
+	launcher.z_index = 1
+	plate.z_index = 2
 	reset_for_battle(false)
 
 func _sprite(texture: Texture2D, origin: Vector2, sizing: Vector2) -> Sprite2D:
@@ -275,6 +279,9 @@ func _update_wrecks(delta: float) -> void:
 	if launcher_death >= 0:
 		launcher_death += delta
 		_pose(launcher,"launcher_dead",mini(3,int(launcher_death*DATA.DEATH_FPS)),DATA.LAUNCHER_MOUNT)
+
+func intro_focus_position() -> Vector2:
+	return to_global(DATA.INTRO_FOCUS)
 
 func core_position() -> Vector2:
 	return to_global(DATA.CORE_RECT.get_center())

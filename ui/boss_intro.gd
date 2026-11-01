@@ -54,7 +54,8 @@ func advance_intro(delta: float, game: Node2D) -> bool:
 			game.boss_actor.position = game.boss_actor.position.move_toward(Vector2(785.0,265.0),400.0*entrance_delta)
 	if elapsed >= ENTRANCE_END and before < ENTRANCE_END:
 		var focus: Vector2 = game._mechanical_actor().core_position() if game.is_mechanical_boss() else game.boss_actor.position
-		var zoom := 1.5
+		if game.is_iron_boss(): focus = game.iron_actor.intro_focus_position()
+		var zoom: float = 1.05 if game.is_iron_boss() else 1.5
 		camera_target = Transform2D(Vector2(zoom,0),Vector2(0,zoom),GD.VIEW_SIZE*Vector2(0.58,0.46)-focus*zoom)
 	if bool(game.settings.options.death_camera):
 		if elapsed >= ENTRANCE_END and elapsed < FOCUS_END:
