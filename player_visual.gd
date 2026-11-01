@@ -74,7 +74,6 @@ const HEAD_AIM_LIMIT := 0.28
 @onready var muzzle: Marker2D = $Muzzle
 
 var cape: Node2D
-var cloth_ribbons: Array[Node2D] = []
 var body_state := "idle"
 var run_palette := ShaderMaterial.new()
 var body_time := 0.0
@@ -93,13 +92,7 @@ func _ready() -> void:
 	cape = preload("res://player_cape.gd").new()
 	cape.actor = self
 	visual_root.add_child(cape)
-	for rear in [true,false]:
-		var ribbon: Node2D = preload("res://player_cape.gd").new()
-		ribbon.actor = self
-		ribbon.small_ribbon = true
-		ribbon.back_ribbon = rear
-		visual_root.add_child(ribbon)
-		cloth_ribbons.append(ribbon)
+
 	# Explicit layers: body(0), cape(1), original arm/head order(2), guard(3).
 	back_pivot.z_index = 2
 	helmet.z_index = 2

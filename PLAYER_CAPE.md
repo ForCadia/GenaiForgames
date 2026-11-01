@@ -30,3 +30,6 @@ Running-only calming: run pose angular-wave amplitude22%, flutter force20%, velo
 ## Underarm ribbons — 2026-10-31
 
 User restores the two narrow red ribbons from the supplied design, without the neck scarf or ivory backing. image_gen extracted/pixelized the reference pair with real alpha into assets/player/red_ribbons_pair.png. player_visual.gd creates two more instances of the same player_cape.gd simulator, configured as small_ribbon. Vertical UV mapping uses separate atlas halves; twelve links span42/front and36/rear world pixels, half-width3–5.5px, down-back rest angle0.65rad. Attachment follows the animated underarm socket at local offsets(18,22) front and(2,22) rear, never weapon rotation. Different wave phases prevent synchronized overlap. Rear strip z=-1 behind body0, front strip/main cape z1 ahead of body; both arms/helmet remain z2 and guard3. Both inherit jump lag, falling lift, run damping, true track floor, shoulder avoidance and death settling from the main cape. No gameplay/collider changes. Source assets unchanged; no game/import/tests/captures run.
+
+
+User rollback: remove the two newly added underarm ribbon instances. Main red cape and its existing motion/layers remain. Optional ribbon code/asset retained unused; no runtime tests.
