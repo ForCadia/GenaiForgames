@@ -37,3 +37,8 @@ This supersedes the older duplicate-event pressure implementation and old stage 
 - Stage durations and scroll values remain as previously authored. Mission descriptions now reflect the distinct encounter mixes.
 
 Only files were edited. No game, imports, captures or tests were run; manual acceptance is left to the user.
+
+
+## Independent randomized Endless — 2026-10-31
+
+Supersedes the campaign-phase mapping above. Endless now uses endless_data.gd exclusively for its normal waves. It never reads Level01/02/03 encounter data. Each wave randomly selects a dedicated mixed/air-raid/armor/fireline profile, varies its type weights by 0.7–1.3, derives type quotas and shuffles spawn order with jittered times. The pool includes unarmored/light/heavy enemies, kamikazes, laser gates and spikes. Normal begins with22 combat events, rising by2 per five waves to32. Easy approximately halves type quotas; Hard triples them. Waves start at28 seconds with the existing30% interval reduction cap. One grenade supply remains per wave; Boss still appears every fifth wave with unchanged stats. New runs roll new waves; campaign encounters are unchanged. No runtime tests/imports/captures performed.

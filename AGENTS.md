@@ -139,3 +139,6 @@ Latest Hard multiplier (2026-10-31): Endless Hard now uses6 combat-event copies 
 
 
 Latest encounter authoring revision (2026-10-31): Level02/03 now use independently authored phase rosters, replacing generic duplicated-event pressure. Level02 emphasizes light turrets/kamikazes/laser gates; Level03 emphasizes heavy armor and combined arms. Level01 and historical LAB remain original. Endless retains campaign phases: one phase per wave, Level02 phases on waves1–4, Boss5, Level03 phases6–9, Boss10, then repeat with existing spacing progression. Easy approximately halves each event type, Normal uses authored roster, Hard triples Normal combat events; grenades/Boss stats unchanged. Supersedes earlier copy-count descriptions. User tests; do not run game/import/tests/captures.
+
+
+Latest independent Endless revision (2026-10-31): user rejects all campaign-derived Endless templates. endless_data.gd now generates independent random wave rosters from dedicated weighted profiles (mixed/air/armor/fireline), randomized ratios/order/timing and22–32 Normal combat-event budgets. Easy approximately half, Hard3x; one grenade, every-fifth-wave Boss and capped wave pacing retained. campaign_data.gd delegates Endless generation without referencing any campaign stage. Supersedes phase-to-wave mapping only; all campaigns unchanged. No game/import/tests/captures per user.

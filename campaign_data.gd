@@ -79,39 +79,5 @@ static func segments(level: int, include_drones := true) -> Array:
 	for spec in (LEVEL_TWO if level == 1 else LEVEL_THREE): result.append(_make_stage(spec,include_drones))
 	return result
 
-static func _apply_wave_difficulty(data: Dictionary, difficulty: String) -> void:
-	var events: Array = []
-	var seen: Dictionary = {}
-	for event in data.events:
-		if event.kind == "grenade":
-			events.append(event)
-			continue
-		if difficulty == "easy":
-			# Keep alternating members of each type so the mix stays recognizable.
-			var type_key: String = str(event.get("type",event.kind))
-			var count := int(seen.get(type_key,0))
-			seen[type_key] = count+1
-			if count % 2 == 0: events.append(event)
-		else:
-			events.append(event)
-			if difficulty == "hard":
-				for followup in range(1,3):
-					var extra: Dictionary = event.duplicate(true)
-					var gap := 0.6 if event.kind == "enemy" else 0.3
-					extra.at = minf(float(event.at)+gap*followup,float(data.duration)-0.2)
-					events.append(extra)
-	data.events = events
-	data.events.sort_custom(func(a: Dictionary,b: Dictionary): return float(a.at)<float(b.at))
-
 static func endless_wave(wave: int, difficulty := "normal") -> Dictionary:
-	# A campaign phase is one wave; each group of four is followed by a Boss.
-	# Waves1-4 = Level02 phases,6-9 = Level03 phases,11-14 loop onward.
-	var phases: Array = LEVEL_TWO+LEVEL_THREE
-	var phase_index := maxi(0,(wave-1)-int(wave/5)) % phases.size()
-	var data := _make_stage(phases[phase_index])
-	_apply_wave_difficulty(data,difficulty)
-	var spacing := maxf(0.7,1.0-float(wave-1)*0.025)
-	data.duration *= spacing
-	for event in data.events: event.at *= spacing
-	data.title = "WAVE %02d // %s" % [wave,str(data.title).get_slice("//",1).strip_edges()]
-	return data
+	return preload("res://endless_data.gd").generate_wave(wave,difficulty)
