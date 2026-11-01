@@ -6,11 +6,13 @@ const SHEET := preload("res://assets/enemies/kamikaze_drone_8x6.png")
 const SCORE := 150
 const ANIMATIONS := ["idle","fly","detect","charge","hurt","explode"]
 const COUNTS := [6,8,6,8,4,8]
-const FPS := [10.0,12.0,14.0,18.0,20.0,20.0]
+const FPS := [12.0,16.0,14.0,20.0,20.0,20.0]
 const CHARGE_SPEED := 500.0
 const WARNING_TIME := 0.42
-const ORBIT_TIME := 1.4
-const ORBIT_RADIUS := Vector2(48,28)
+const ORBIT_TIME := 2.6
+const ORBIT_RADIUS := Vector2(104,64)
+const VISUAL_SIZE := 112.0
+const STEERING := 7.0
 const BLAST_RADIUS := 48.0
 var sprite := AnimatedSprite2D.new()
 var state := "idle"
@@ -21,7 +23,9 @@ var hurt_left := 0.0
 var target := Vector2.ZERO
 var charge_direction := Vector2.LEFT
 var damage_done := false
-var base_y := 320.0
+var velocity := Vector2.ZERO
+var pose_offset := Vector2.ZERO
+var base_y := 235.0
 var orbit_center := Vector2.ZERO
 
 func _ready() -> void:
@@ -40,16 +44,18 @@ func _ready() -> void:
 			atlas.region = Rect2(Vector2(column,row)*cell,cell)
 			frames.add_frame(animation,atlas)
 	sprite.sprite_frames = frames
-	sprite.scale = Vector2(84.0/cell.x,84.0/cell.y)
+	sprite.scale = Vector2(VISUAL_SIZE/cell.x,VISUAL_SIZE/cell.y)
 	add_child(sprite)
 	play_pose("idle")
 
 func play_pose(animation: String) -> void:
 	sprite.flip_h = animation in ["fly","charge"]
-	sprite.rotation = charge_direction.angle()-PI if animation == "charge" else 0.0
 	# Charge art places the robot ahead of its flame trail; keep the body
 	# attached to the gameplay hitbox after horizontal mirroring.
-	sprite.position = Vector2(18 if animation == "charge" else (4 if animation == "fly" else 0),0)
+	pose_offset = Vector2(24 if animation == "charge" else (5.33 if animation == "fly" else 0.0),0)
+	if animation == "explode":
+		sprite.rotation = 0
+		sprite.position = Vector2.ZERO
 	if sprite.animation != animation or not sprite.is_playing(): sprite.play(animation)
 
 func advance(delta: float, scroll: float, player_center: Vector2) -> void:
@@ -57,36 +63,48 @@ func advance(delta: float, scroll: float, player_center: Vector2) -> void:
 	state_left -= delta
 	hurt_left = maxf(0,hurt_left-delta)
 	if state == "explode": return
+	var wanted_velocity := velocity
 	match state:
 		"idle":
-			position.x -= scroll*delta
+			wanted_velocity = Vector2(-scroll,0)
 			if state_left <= 0: state = "fly"
 		"fly":
-			position.x -= (scroll+100.0)*delta
-			position.y = base_y+sin(age*3.2)*12
-			if position.x < 760:
+			var altitude := base_y+sin(age*2.6)*8
+			wanted_velocity = Vector2(-scroll-60.0,(altitude-position.y)*5.0)
+			if position.x < 800:
 				state = "orbit"
 				state_left = ORBIT_TIME
-				orbit_center = position-Vector2(ORBIT_RADIUS.x,0)
+				# Enter at the ellipse's bottom, tangent to incoming leftward flight.
+				orbit_center = position-Vector2(0,ORBIT_RADIUS.y)
 		"orbit":
-			var phase := clampf(1.0-state_left/ORBIT_TIME,0.0,1.0)*TAU
-			position = orbit_center+Vector2(cos(phase)*ORBIT_RADIUS.x,sin(phase)*ORBIT_RADIUS.y)
+			var phase := PI*0.5+clampf(1.0-state_left/ORBIT_TIME,0.0,1.0)*TAU
+			var path_position := orbit_center+Vector2(cos(phase)*ORBIT_RADIUS.x,sin(phase)*ORBIT_RADIUS.y)
+			var tangent := Vector2(-sin(phase)*ORBIT_RADIUS.x,cos(phase)*ORBIT_RADIUS.y)*(TAU/ORBIT_TIME)
+			wanted_velocity = tangent+(path_position-position)*4.0
 			if state_left <= 0:
 				state = "detect"
 				state_left = WARNING_TIME
 		"detect":
-			position.x -= scroll*0.25*delta
+			wanted_velocity = Vector2(-20.0,sin(age*3.0)*8)
 			if state_left <= 0:
 				target = Vector2(player_center.x,maxf(player_center.y,position.y+100.0))
 				charge_direction = (target-position).normalized()
 				state = "charge"
-		"charge":
-			position += charge_direction*CHARGE_SPEED*delta
-			if position.distance_to(target)<24 or position.x < target.x-65: explode(false,false)
-	if state != "explode" and hurt_left <= 0: play_pose("fly" if state == "orbit" else state)
+				wanted_velocity = charge_direction*CHARGE_SPEED
+		"charge": wanted_velocity = charge_direction*CHARGE_SPEED
+	velocity = velocity.lerp(wanted_velocity,1.0-exp(-STEERING*delta))
+	var previous := position
+	position += velocity*delta
+	if state == "charge" and (Geometry2D.get_closest_point_to_segment(target,previous,position).distance_to(target)<24 or position.x<target.x-65):
+		explode(false,false)
+	if state != "explode":
+		if hurt_left <= 0: play_pose("fly" if state == "orbit" else state)
+		var desired_angle := velocity.angle()-PI if state == "charge" else clampf(velocity.y/500.0,-0.12,0.12)
+		sprite.rotation = lerp_angle(sprite.rotation,desired_angle,1.0-exp(-10.0*delta))
+		sprite.position = sprite.position.lerp(pose_offset.rotated(sprite.rotation),1.0-exp(-14.0*delta))
 
 func body_rect() -> Rect2:
-	return Rect2(global_position-Vector2(21,17),Vector2(42,34))
+	return Rect2(global_position-Vector2(27,22),Vector2(54,44))
 
 func shot_hits(from: Vector2, to: Vector2) -> bool:
 	if state == "explode": return false

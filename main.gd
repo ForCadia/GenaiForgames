@@ -450,7 +450,7 @@ func _spawn_enemy(kind: String, _y: float, _returns: bool) -> void:
 	if kind == "kamikaze":
 		var drone: Node2D = KAMIKAZE.new()
 		turret_root.add_child(drone)
-		drone.position = Vector2(1010,300 if segment % 2 == 0 else 340)
+		drone.position = Vector2(1010,220 if segment % 2 == 0 else 250)
 		drone.base_y = drone.position.y
 		drone.killed.connect(func(actor: Node2D): _award_enemy_kill("kamikaze",actor.global_position))
 		drone.exploded.connect(func(_actor: Node2D): world_audio.play_cue("enemy_explode"))
