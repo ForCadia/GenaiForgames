@@ -69,3 +69,6 @@ const BACKPACK_OUTLETS := {
  "lift":[Vector2(290,219),Vector2(735,213),Vector2(1174,209),Vector2(1619,207),Vector2(288,650),Vector2(735,635),Vector2(1174,662),Vector2(1616,666)]
 }
 const THRUSTER_WIDTH := 18.0
+
+# Chest weak-point box in unrotated world-size units relative to the red core.
+const CORE_HIT_RECT := Rect2(-30.0,-23.0,66.0,48.0)

@@ -235,3 +235,6 @@ Mecha presentation update: normalize alive action-sheet scale using helmet-to-co
 
 
 Backpack/scale follow-up: replace chest-relative exhaust offset with eight per-frame, full-sheet backpack outlet landmarks for lift, aerial fire and thrust. Convert through each frame region and actual sprite transform; exhaust points outwards right/down and only emits for sheets with known backpack anchors. No exhaust is guessed for ground slash poses. Narrow nozzle to18px, retain85px flame length. Per-sheet fixed helmet-width calibration (46 world pixels) now supersedes helmet-to-core normalization, avoiding torso/leg pose-dependent scale changes. Death uses matching helmet calibration too. Values/landmarks are centralized in mecha_boss_data.gd. Source/image inspection only; no game or tests.
+
+
+Mecha core collision correction: replace the tiny core circle with a66x48 chest box, offset(-30,-23) from the red core in unrotated world-size units and transformed with the current sprite. Core is checked first; overlapping front arm/gun body pixels at that chest-height approach lane no longer consume incoming bullets on an earlier physics tick. Body armor remains outside the chest lane. Both smart targeting and shot damage use the same core predicate; shared HP, penetration thresholds and one hit per projectile remain unchanged. Source-only inspection, no game/tests.

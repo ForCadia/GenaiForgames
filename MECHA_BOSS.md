@@ -73,3 +73,6 @@ Slash flipbook v2: imagegen edit changes expanding/contracting frames to left-wi
 
 
 Ground retreat follow-up: use separate GROUND_RETREAT_SPEED700px/s (formerly shared280px/s), returning450px in about0.64s. Aerial return remains280px/s; preparation/recovery/damage unchanged. No runtime tests.
+
+
+Mecha core collision correction: replace the tiny core circle with a66x48 chest box, offset(-30,-23) from the red core in unrotated world-size units and transformed with the current sprite. Core is checked first; overlapping front arm/gun body pixels at that chest-height approach lane no longer consume incoming bullets on an earlier physics tick. Body armor remains outside the chest lane. Both smart targeting and shot damage use the same core predicate; shared HP, penetration thresholds and one hit per projectile remain unchanged. Source-only inspection, no game/tests.

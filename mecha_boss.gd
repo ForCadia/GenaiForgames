@@ -257,14 +257,23 @@ func core_position() -> Vector2:
 	if pose_meta.is_empty(): return global_position+Vector2(-10,-90)
 	return visual.to_global(Vector2(pose_meta.cx,pose_meta.cy))
 
+func _core_local(point: Vector2) -> Vector2:
+	return (visual.to_local(point)-Vector2(float(pose_meta.cx),float(pose_meta.cy)))*scale_factor
+
 func _core_hit(from: Vector2, to: Vector2) -> bool:
-	var radius := maxf(7.0,13.0*source_unit*scale_factor)
-	return Geometry2D.get_closest_point_to_segment(core_position(),from,to).distance_to(core_position()) <= radius
+	# A chest-sized box, checked before opaque body pixels, following pose rotation.
+	if pose_meta.is_empty(): return false
+	return _segment_rect(_core_local(from),_core_local(to),DATA.CORE_HIT_RECT)
 
 func _body_pixel(local: Vector2) -> bool:
 	var x := int(local.x)
 	var y := int(local.y)
 	if x < int(DATA.ATLAS_INSET) or y < int(DATA.ATLAS_INSET) or x >= int(pose_meta.w-DATA.ATLAS_INSET) or y >= int(pose_meta.h-DATA.ATLAS_INSET): return false
+	# Leave an approach lane through overlapping front arm/gun pixels at chest height.
+	# Otherwise an earlier physics tick consumes a rifle shot before it reaches the core.
+	var chest_point := (local-Vector2(float(pose_meta.cx),float(pose_meta.cy)))*scale_factor
+	if chest_point.y >= DATA.CORE_HIT_RECT.position.y and chest_point.y <= DATA.CORE_HIT_RECT.end.y and chest_point.x <= DATA.CORE_HIT_RECT.end.x:
+		return false
 	# Exclude the gun/sword beyond the actual torso/limbs envelope.
 	if x < float(pose_meta.cx)-65.0*source_unit and y < float(pose_meta.cy)+48.0*source_unit: return false
 	if x > float(pose_meta.cx)+175.0*source_unit or y < float(pose_meta.top): return false
