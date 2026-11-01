@@ -225,6 +225,14 @@ func force_kill() -> void:
 
 func is_finished() -> bool:
 	if state == "dead":
-		var visual_bounds: Rect2 = sprite.get_global_transform()*sprite.get_rect()
+		# AnimatedSprite2D has no get_rect(); derive bounds from its current frame.
+		var frame_texture: Texture2D = sprite.sprite_frames.get_frame_texture(sprite.animation,sprite.frame)
+		if frame_texture == null: return false
+		var frame_size: Vector2 = frame_texture.get_size()
+		var local_origin: Vector2 = sprite.offset-frame_size*0.5 if sprite.centered else sprite.offset
+		var local_bounds := Rect2(local_origin,frame_size)
+		if sprite.flip_h: local_bounds.position.x = -local_bounds.end.x
+		if sprite.flip_v: local_bounds.position.y = -local_bounds.end.y
+		var visual_bounds: Rect2 = sprite.get_global_transform()*local_bounds
 		return visual_bounds.end.x < 0.0
 	return position.x < -120 or position.y > 820 or age > 18.0

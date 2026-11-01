@@ -21,3 +21,6 @@ Latest aim revision: remove fixed45-degree direction. Each burst samples filtere
 
 
 Latest corpse persistence: after ground contact, play landing frames4–7 and hold the final prone body (frame8 is an explosion-only image). Continue moving left at the actual track scroll speed indefinitely until the full transformed sprite rectangle is left of x0; remove death timeout. Corpse uses absolute z=-9, directly above track z=-10 and below live actors. Remains harmless/unshootable/no threat points; standard administrative cleanup still clears it on retry/title. No runtime tests.
+
+
+Runtime-log correction: existing EverFront/logs/godot.log reports AnimatedSprite2D.get_rect missing in is_finished. Replace it with bounds derived from current SpriteFrames frame texture size, offset/centering/flips and global transform; retain complete-offscreen cleanup. Other retained runtime logs inspected did not contain additional script errors at inspection time. Read-only logs/source inspection only; no game/tests launched.
