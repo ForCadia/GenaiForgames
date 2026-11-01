@@ -9,6 +9,8 @@ const COUNTS := [6,8,6,8,4,8]
 const FPS := [10.0,12.0,14.0,18.0,20.0,20.0]
 const CHARGE_SPEED := 500.0
 const WARNING_TIME := 0.42
+const ORBIT_TIME := 1.4
+const ORBIT_RADIUS := Vector2(48,28)
 const BLAST_RADIUS := 48.0
 var sprite := AnimatedSprite2D.new()
 var state := "idle"
@@ -19,7 +21,8 @@ var hurt_left := 0.0
 var target := Vector2.ZERO
 var charge_direction := Vector2.LEFT
 var damage_done := false
-var base_y := 460.0
+var base_y := 320.0
+var orbit_center := Vector2.ZERO
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -43,6 +46,7 @@ func _ready() -> void:
 
 func play_pose(animation: String) -> void:
 	sprite.flip_h = animation in ["fly","charge"]
+	sprite.rotation = charge_direction.angle()-PI if animation == "charge" else 0.0
 	# Charge art places the robot ahead of its flame trail; keep the body
 	# attached to the gameplay hitbox after horizontal mirroring.
 	sprite.position = Vector2(18 if animation == "charge" else (4 if animation == "fly" else 0),0)
@@ -61,18 +65,25 @@ func advance(delta: float, scroll: float, player_center: Vector2) -> void:
 			position.x -= (scroll+100.0)*delta
 			position.y = base_y+sin(age*3.2)*12
 			if position.x < 760:
+				state = "orbit"
+				state_left = ORBIT_TIME
+				orbit_center = position-Vector2(ORBIT_RADIUS.x,0)
+		"orbit":
+			var phase := clampf(1.0-state_left/ORBIT_TIME,0.0,1.0)*TAU
+			position = orbit_center+Vector2(cos(phase)*ORBIT_RADIUS.x,sin(phase)*ORBIT_RADIUS.y)
+			if state_left <= 0:
 				state = "detect"
 				state_left = WARNING_TIME
 		"detect":
 			position.x -= scroll*0.25*delta
 			if state_left <= 0:
-				target = player_center
+				target = Vector2(player_center.x,maxf(player_center.y,position.y+100.0))
 				charge_direction = (target-position).normalized()
 				state = "charge"
 		"charge":
 			position += charge_direction*CHARGE_SPEED*delta
 			if position.distance_to(target)<24 or position.x < target.x-65: explode(false,false)
-	if state != "explode" and hurt_left <= 0: play_pose(state)
+	if state != "explode" and hurt_left <= 0: play_pose("fly" if state == "orbit" else state)
 
 func body_rect() -> Rect2:
 	return Rect2(global_position-Vector2(21,17),Vector2(42,34))
