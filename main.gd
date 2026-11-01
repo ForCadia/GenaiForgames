@@ -1,6 +1,7 @@
 extends Node2D
 
 const BALANCE := preload("res://combat_balance.gd")
+const KAMIKAZE := preload("res://kamikaze_drone.gd")
 const GD := preload("res://game_data.gd")
 const CAMPAIGNS := preload("res://campaign_data.gd")
 const LASER_GATE_SCENE := preload("res://LaserGateEnemy.tscn")
@@ -107,6 +108,7 @@ var enemies: Array[Dictionary] = []
 var laser_gates: Array[LaserGateEnemy] = []
 var ground_spikes: Array[GroundSpikes] = []
 var turrets: Array[TurretBase] = []
+var kamikaze_drones: Array[Node2D] = []
 var obstacles: Array[Dictionary] = []
 var pickups: Array[Dictionary] = []
 var shots: Array[Dictionary] = []
@@ -389,6 +391,8 @@ func _grenade() -> void:
 	for turret in turrets:
 		if is_instance_valid(turret) and screen.intersects(turret.body_rect()):
 			turret.force_kill()
+	for drone in kamikaze_drones:
+		if is_instance_valid(drone) and screen.intersects(drone.body_rect()): drone.force_kill()
 	for gate in laser_gates:
 		if is_instance_valid(gate) and screen.intersects(gate.hazard_rect()): gate.take_damage()
 	for i in range(ground_spikes.size() - 1, -1, -1):
@@ -429,7 +433,7 @@ func _update_segment() -> void:
 			segment_transition_pending = true
 	# Let the outgoing enemies, obstacles, pickups and hostile rounds leave
 	# the screen instead of making them vanish mid-frame at the time limit.
-	if segment_transition_pending and enemies.is_empty() and turrets.is_empty() and laser_gates.is_empty() and ground_spikes.is_empty() and obstacles.is_empty() and pickups.is_empty() and coin_drops.is_empty() and threats.is_empty():
+	if segment_transition_pending and enemies.is_empty() and turrets.is_empty() and kamikaze_drones.is_empty() and laser_gates.is_empty() and ground_spikes.is_empty() and obstacles.is_empty() and pickups.is_empty() and coin_drops.is_empty() and threats.is_empty():
 		if endless_mode: _advance_endless()
 		elif segment == GD.CAMPAIGN_SEGMENT_COUNT - 1: _start_boss(true)
 		else: _start_segment(segment + 1, true)
@@ -443,6 +447,15 @@ func _spawn_event(event: Dictionary) -> void:
 		_: pass
 
 func _spawn_enemy(kind: String, _y: float, _returns: bool) -> void:
+	if kind == "kamikaze":
+		var drone: Node2D = KAMIKAZE.new()
+		turret_root.add_child(drone)
+		drone.position = Vector2(1010,460 if segment % 2 == 0 else 490)
+		drone.base_y = drone.position.y
+		drone.killed.connect(func(actor: Node2D): _award_enemy_kill("kamikaze",actor.global_position))
+		drone.exploded.connect(func(_actor: Node2D): world_audio.play_cue("enemy_explode"))
+		kamikaze_drones.append(drone)
+		return
 	if kind in ["unarmored", "light"]:
 		_spawn_turret(LIGHT_TURRET_SCENE)
 		return
@@ -492,6 +505,8 @@ func _on_laser_gate_destroyed(gate: LaserGateEnemy) -> void:
 
 func _update_world(delta: float) -> void:
 	_update_coins(delta)
+	_update_kamikaze_drones(delta)
+	if state != "playing": return
 	var scroll := _scroll()
 	distance += scroll * delta
 	for enemy in enemies:
@@ -608,7 +623,7 @@ func _update_world(delta: float) -> void:
 	obstacles = obstacles.filter(func(o): return o.x > -100)
 	pickups = pickups.filter(func(p): return not p.collected and p.pos.x > -80)
 	world_audio.set_drone_active(laser_gates.any(func(gate):
-		return is_instance_valid(gate) and not gate.is_queued_for_deletion() and gate.state == "Hover" and gate.position.x >= 0 and gate.position.x <= GD.VIEW_SIZE.x))
+		return is_instance_valid(gate) and not gate.is_queued_for_deletion() and gate.state == "Hover" and gate.position.x >= 0 and gate.position.x <= GD.VIEW_SIZE.x) or kamikaze_drones.any(func(drone): return is_instance_valid(drone) and drone.state != "explode" and drone.position.x >= 0 and drone.position.x <= GD.VIEW_SIZE.x))
 
 func _enemy_contact(enemy: Dictionary) -> void:
 	if enemy.dead or enemy.touch_lock > 0: return
@@ -638,6 +653,10 @@ func _update_shots(delta: float) -> void:
 				turret.take_damage(bullet.penetration, bullet.pos)
 				hit = true
 				break
+		for drone in kamikaze_drones:
+			if not hit and is_instance_valid(drone) and drone.shot_hits(bullet.previous,bullet.pos):
+				drone.take_damage(int(bullet.penetration))
+				hit = true
 		for enemy in enemies:
 			if not hit and not enemy.dead and _line_circle(bullet.previous, bullet.pos, enemy.pos, enemy.radius): _hit_enemy(enemy, bullet); hit = true; break
 		if not hit and boss_mode and boss_actor.shot_hits(bullet.previous, bullet.pos):
@@ -661,8 +680,8 @@ func _kill_enemy(enemy: Dictionary) -> void:
 	_award_enemy_kill(enemy.type, enemy.pos)
 
 func _award_enemy_kill(enemy_type: String, origin: Vector2) -> void:
-	var points: int = GD.SCORE[enemy_type]
-	stats[enemy_type] += 1
+	var points: int = GD.SCORE.get(enemy_type,KAMIKAZE.SCORE)
+	stats[enemy_type] = int(stats.get(enemy_type,0))+1
 	_register_kill(enemy_type, origin)
 	score += points
 	floaters.append({"pos": origin, "text": "+%d" % points, "color": YELLOW, "life": 0.85})
@@ -902,7 +921,7 @@ func _retry() -> void:
 	_start_lab_run()
 
 func _reset_campaign() -> void:
-	level_segments = CAMPAIGNS.segments(selected_level)
+	level_segments = CAMPAIGNS.segments(selected_level,not developer_mode)
 	endless_wave = 1
 	endless_intermission = 0
 	if endless_mode: endless_wave_data = CAMPAIGNS.endless_wave(endless_wave)
@@ -1045,6 +1064,9 @@ func _reset_player(preserve_motion := false) -> void:
 	player_hud.follow_hitbox(_player_hitbox())
 
 func _clear_world() -> void:
+	for drone in kamikaze_drones:
+		if is_instance_valid(drone): drone.queue_free()
+	kamikaze_drones.clear()
 	world_audio.stop_all()
 	boss_entering = false
 	coin_drops.clear(); enemies.clear(); obstacles.clear(); pickups.clear(); shots.clear(); threats.clear()
@@ -1380,6 +1402,12 @@ func _auto_select_weapon() -> void:
 			if distance_to_target < nearest:
 				nearest = distance_to_target
 				armor = 0
+	for drone in kamikaze_drones:
+		if is_instance_valid(drone) and drone.shot_hits(origin,ray_end):
+			var distance_to_target: float = origin.distance_squared_to(drone.global_position)
+			if distance_to_target < nearest:
+				nearest = distance_to_target
+				armor = 0
 	var desired := _best_weapon_for_armor(armor)
 	if desired != weapon_index: _select_slot(desired)
 
@@ -1476,3 +1504,20 @@ func _consume_guard_hit() -> void:
 func _auto_reload_empty() -> void:
 	if state == "playing" and selected_slot != 2 and _upgrade("auto_weapon") and ammo[weapon_index] <= 0 and reload_left <= 0 and shot_left <= 0:
 		_reload()
+
+func _update_kamikaze_drones(delta: float) -> void:
+	for index in range(kamikaze_drones.size()-1,-1,-1):
+		var drone = kamikaze_drones[index]
+		if not is_instance_valid(drone):
+			kamikaze_drones.remove_at(index)
+			continue
+		drone.advance(delta,_scroll(),_player_center())
+		if guarding and guard_energy > 0 and drone.state != "explode" and drone.body_rect().intersects(_guard_hitbox()):
+			drone.force_kill()
+			_consume_guard_hit()
+		elif drone.try_damage(_player_hitbox()):
+			_receive(false,"KAMIKAZE DRONE")
+			if state != "playing": return
+		if drone.is_finished():
+			drone.queue_free()
+			kamikaze_drones.remove_at(index)

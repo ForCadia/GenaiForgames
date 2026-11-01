@@ -93,6 +93,14 @@ func choose_controls() -> Dictionary:
 			target = center
 			has_target = true
 			required = 0
+	for drone in session.kamikaze_drones:
+		if not is_instance_valid(drone) or drone.state == "explode": continue
+		var dx: float = drone.position.x-session.player.x
+		if dx > 0 and dx < distance_to_target:
+			distance_to_target = dx
+			target = drone.global_position
+			has_target = true
+			required = 0
 	if session.boss_mode and session.boss_actor.combat_enabled:
 		target = session.boss_actor.position
 		required = 3 if session.boss_actor.armor_layers()>0 else 0
@@ -124,6 +132,8 @@ func choose_controls() -> Dictionary:
 		if is_instance_valid(bullet) and bullet.global_position.distance_to(session._player_center()) < 220: danger = true
 	for bomb in session.boss_bombs:
 		if is_instance_valid(bomb) and bomb.global_position.distance_to(session._player_center()) < 220: danger = true
+	for drone in session.kamikaze_drones:
+		if is_instance_valid(drone) and drone.position.distance_to(session._player_center()) < 155: danger = true
 	if danger and session.guard_energy >= 12: actions.guard = true
 	if danger and session.has_grenade and (session.boss_particles.size()>8 or session.threats.size()>7): actions.use_grenade = true
 	return actions

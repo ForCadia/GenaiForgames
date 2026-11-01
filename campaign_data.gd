@@ -55,15 +55,24 @@ const LEVEL_THREE := [
 		{"at": 25.0, "kind": "enemy", "type": "heavy"}]},
 ]
 
-static func segments(level: int) -> Array:
+static func segments(level: int, include_drones := true) -> Array:
+	var result: Array
 	match level:
-		1: return LEVEL_TWO
-		2: return LEVEL_THREE
-	return GD.SEGMENTS.slice(0, GD.CAMPAIGN_SEGMENT_COUNT)
+		1: result = LEVEL_TWO.duplicate(true)
+		2: result = LEVEL_THREE.duplicate(true)
+		_: result = GD.SEGMENTS.slice(0,GD.CAMPAIGN_SEGMENT_COUNT).duplicate(true)
+	if include_drones:
+		for stage in result: _add_drone(stage)
+	return result
+
+static func _add_drone(stage: Dictionary) -> void:
+	stage.events.append({"at":minf(8.5,float(stage.duration)*0.55),"kind":"enemy","type":"kamikaze"})
+	stage.events.sort_custom(func(a: Dictionary,b: Dictionary): return float(a.at)<float(b.at))
 
 static func endless_wave(wave: int) -> Dictionary:
 	var patterns: Array = LEVEL_TWO + LEVEL_THREE
 	var data: Dictionary = patterns[(wave - 1) % patterns.size()].duplicate(true)
+	_add_drone(data)
 	# Increase density gradually, capped at 30%; world and projectile speeds stay authored.
 	var spacing := maxf(0.7, 1.0 - float(wave - 1) * 0.025)
 	data.duration *= spacing
