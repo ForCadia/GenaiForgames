@@ -49,20 +49,17 @@ func _ready() -> void:
 		mission_buttons.append(button)
 		if index == 0: first_button = button
 	add_child(HSeparator.new())
-	mission_buttons.append(mission_row("∞","ENDLESS / 无尽模式",DESCRIPTIONS[3],func(): game.start_endless()))
+	F.label(self,"ENDLESS / 无尽挑战","SmallLabel")
 	var difficulty_row := F.box(self,true)
 	difficulty_row.add_theme_constant_override("separation",12)
-	F.label(difficulty_row,"无尽难度","MutedLabel").size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var group := ButtonGroup.new()
-	for spec in [["easy","简单 / EASY"],["normal","普通 / NORMAL"],["hard","困难 / HARD"]]:
+	for spec in [["easy","简单无尽"],["normal","普通无尽"],["hard","困难无尽"]]:
 		var id: String = spec[0]
-		var button := F.button(difficulty_row,spec[1],func(): game.endless_difficulty = id; refresh(),true)
-		button.theme_type_variation = "MenuCompact"
-		button.custom_minimum_size = Vector2(148,32)
+		var limit: int = preload("res://threat_budget.gd").endless_limit(id)
+		var button := F.button(difficulty_row,"%s\n威胁上限 %d" % [spec[1],limit],func(): game.start_endless(id))
+		button.custom_minimum_size = Vector2(192,76)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.toggle_mode = true
-		button.button_group = group
 		difficulty_buttons[id] = button
+	F.label(self,"每波三选一强化 · 每五波 Boss · 死亡从首波重开","MutedLabel")
 
 	var center := CenterContainer.new()
 	add_child(center)
@@ -94,8 +91,8 @@ func refresh() -> void:
 	for id in difficulty_buttons:
 		var button: Button = difficulty_buttons[id]
 		button.disabled = not game.mission_unlocked(3)
-		button.set_pressed_no_signal(id == game.endless_difficulty)
-		button.modulate = STYLE.AMBER if id == game.endless_difficulty else Color.WHITE
+		button.modulate = Color(0.5,0.56,0.64) if button.disabled else Color.WHITE
+		button.tooltip_text = "通关第三关后解锁" if button.disabled else "点击直接开始对应难度"
 	wallet_label.text = "%d G" % game.progression.coins
 	var available := 0
 	for id in preload("res://build_data.gd").NODES:
@@ -108,6 +105,3 @@ func refresh() -> void:
 		button.modulate = Color(0.5,0.56,0.64) if button.disabled else Color.WHITE
 		var label: Label = button.get_meta("description_label")
 		label.text = ("未解锁 / 通关第 %d 关后开放" % index) if button.disabled else DESCRIPTIONS[index]
-		if index == 3 and not button.disabled:
-			var names := {"easy":"简单","normal":"普通","hard":"困难"}
-			label.text = "%s / 威胁上限 %d · 每波三选一强化" % [names[game.endless_difficulty],preload("res://threat_budget.gd").endless_limit(game.endless_difficulty)]

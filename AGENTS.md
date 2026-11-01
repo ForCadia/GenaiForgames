@@ -148,3 +148,6 @@ Latest pressure-budget revision (2026-10-31): user adds active threat cap to Lev
 
 
 Latest Endless roguelite revision (2026-10-31): every Endless wave clear (Boss included) opens run-only three-choice talents via endless_talents.gd and ui/endless_reward.gd, freezes gameplay until selected, then advances with input-release gate. Bonuses combine with meta stats with bounded reload/cadence/drain reductions; ranks5 except repeatable supplies/projectile. No persistence; retry/new run/title clears talents. Endless difficulties now share22–32 total combat-event budgets; Easy/Normal/Hard cap50/100/150 with spawn gaps0.9/0.6/0.4 and duration factors1.25/1/0.75. Supersedes previous half/triple total counts and universal100 Endless cap. Level02/03 remain100 and Boss cadence/stats unchanged. Only edit files, no tests/import/game/captures.
+
+
+Latest Endless entry UI (2026-10-31): mission page replaces Endless-plus-difficulty-toggle flow with three direct-start buttons: 简单无尽 / 普通无尽 / 困难无尽, showing50/100/150 caps. Common Endless unlock requirement preserved; campaigns and gameplay unchanged. File-only, user tests.
