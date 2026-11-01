@@ -16,6 +16,7 @@ var accumulator := 0.0
 var initialized := false
 var previous_state := ""
 var last_anchor := Vector2.ZERO
+var last_actor_position := Vector2.ZERO
 var anchor_velocity := Vector2.ZERO
 var movement_acceleration := Vector2.ZERO
 
@@ -58,6 +59,7 @@ func _reset_strip(anchor: Vector2) -> void:
 		points.append(point)
 		previous.append(point)
 	last_anchor = anchor
+	last_actor_position = actor.global_position
 	anchor_velocity = Vector2.ZERO
 	movement_acceleration = Vector2.ZERO
 	initialized = true
@@ -73,15 +75,20 @@ func _process(delta: float) -> void:
 	if not initialized or anchor.distance_to(points[0]) > 180.0 or (previous_state == "death" and actor.body_state != "death"):
 		_reset_strip(anchor)
 	else:
-		# Carry the entire strip with root motion before solving relative flutter.
-		# Fast jumps/frame socket changes must not stretch or crush its mesh.
+		# Carry animation socket changes fully, but let the tail lag behind actual
+		# player motion, especially vertically. The shoulder remains attached.
 		var shift := anchor-last_anchor
+		var body_shift: Vector2 = actor.global_position-last_actor_position
 		for index in range(points.size()):
-			points[index] += shift
-			previous[index] += shift
-		var velocity := (shift/maxf(delta,0.001)).limit_length(500.0)
-		movement_acceleration = ((velocity-anchor_velocity)/maxf(delta,0.001)).limit_length(1200.0)
-		anchor_velocity = velocity
+			var t := float(index)/float(LINKS)
+			var carry := shift-Vector2(body_shift.x*0.2*t,body_shift.y*0.85*t)
+			points[index] += carry
+			previous[index] += carry
+		var velocity := (body_shift/maxf(delta,0.001)).limit_length(950.0)
+		var filtered_velocity := anchor_velocity.lerp(velocity,1.0-exp(-delta*16.0))
+		movement_acceleration = ((filtered_velocity-anchor_velocity)/maxf(delta,0.001)).limit_length(1800.0)
+		anchor_velocity = filtered_velocity
+		last_actor_position = actor.global_position
 		last_anchor = anchor
 	previous_state = actor.body_state
 	clock += minf(delta,0.066)
@@ -104,12 +111,19 @@ func _simulate(anchor: Vector2) -> void:
 		var t := float(index)/float(LINKS)
 		var flutter := (sin(clock*8.5-float(index)*0.6)*180.0+sin(clock*14.0-float(index)*0.8)*55.0)*t*t if not dead else 0.0
 		var acceleration := Vector2(wind,(250.0 if dead else 85.0)+flutter)
-		if not dead: acceleration -= movement_acceleration*0.18*t
+		if not dead:
+			acceleration -= movement_acceleration*0.25*t
+			acceleration.y -= anchor_velocity.y*1.4*t
 		if not dead:
 			# Traveling bends retain link lengths instead of pulling into a flat line.
 			# The root stays braced; amplitude grows toward the trailing edge.
 			var envelope := pow(t,1.25)*(1.0 if running else 0.45)
-			var bend := (sin(clock*8.5-float(index)*0.52)*0.85+sin(clock*3.7-float(index)*0.3)*0.18)*envelope
+			var airborne: bool = actor.body_state == "jump"
+			var wave_strength := 0.35 if airborne else 1.0
+			var flutter_bend := (sin(clock*8.5-float(index)*0.52)*0.85+sin(clock*3.7-float(index)*0.3)*0.18)*wave_strength
+			# Upward player velocity trails downward; falling lifts the trailing end.
+			var vertical_drag := -clampf(anchor_velocity.y/620.0,-1.0,1.0)*1.05
+			var bend := (flutter_bend+vertical_drag)*envelope
 			rest_target += Vector2(-cos(bend),sin(bend))*LINK_LENGTH
 			acceleration += (rest_target-points[index])*lerpf(85.0,65.0,t)
 		points[index] += inertia+acceleration*STEP*STEP

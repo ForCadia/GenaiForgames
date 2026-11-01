@@ -181,3 +181,6 @@ Latest cape jump correction (2026-10-31): fix airborne-foot floor clipping by us
 
 
 Latest cape flutter tuning (2026-10-31): reduce constant backward wind, add prominent traveling angular waves/tail flutter, reduce damping and soften tail bending while keeping root braced. Preserve shoulder avoidance, triangle topology/world-floor fix, layers and red-only presentation. File-only, user tests.
+
+
+Latest cape vertical inertia (2026-10-31): replace full-body translation with progressively lagging carry, distinguish actor body movement from animated shoulder socket. Filter body velocity; rise pulls tail down and fall lifts it via rest-angle/relative airflow, airborne decorative waves35%. Keep fixed root, dimensions, shoulder avoidance/world-floor/triangles. File edits only, user tests.

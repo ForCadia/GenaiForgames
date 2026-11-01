@@ -19,3 +19,6 @@ Jump/render correction: the previous floor constraint incorrectly followed actor
 
 
 Latest flutter revision: reduce constant rearward wind110→35, reduce live damping0.92→0.962 velocity retention, replace nearly flat rest target with a traveling angular wave growing toward the tail (8.5rad/s primary plus3.7rad/s secondary). Stronger tail-only flutter and shape-following make motion visible; root stays fixed. Tail chord stiffness eases1.85→1.65 link lengths and minimum rearward spacing0.7→0.5, retaining stable triangulation, shoulder exclusion and true world floor. Death behavior unchanged. No runtime tests.
+
+
+Latest jump inertia: animation socket motion is still carried fully, but each successive strip point follows less actual player motion (tail retains85% of vertical displacement as lag). Filter actual body velocity separately from sprite socket bob. Rising applies downward tail drag; falling applies upward drag via velocity-dependent rest bend and relative-air acceleration. Airborne decorative wave amplitude is reduced to35% so jump direction dominates. Preserve length, shoulder exclusion and true world-floor fixes. No runtime tests.
