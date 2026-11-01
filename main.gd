@@ -549,7 +549,7 @@ func _spawn_enemy(kind: String, _y: float, _returns: bool) -> void:
 		turret_root.add_child(soldier)
 		soldier.position = Vector2(1040,280 if segment % 2 == 0 else 340)
 		soldier.base_y = soldier.position.y
-		soldier.projectile_requested.connect(_on_turret_projectile)
+		soldier.projectile_requested.connect(_on_aerial_projectile)
 		soldier.killed.connect(func(actor: Node2D): _award_enemy_kill("aerial",actor.global_position))
 		soldier.sound_requested.connect(func(cue: String): world_audio.play_cue(cue))
 		aerial_riflemen.append(soldier)
@@ -579,6 +579,10 @@ func _spawn_turret(scene: PackedScene) -> void:
 	turret.feedback.connect(_on_turret_feedback)
 	turret.sound_requested.connect(func(cue: String, duration: float): world_audio.play_cue(cue, duration, turret))
 	turrets.append(turret)
+
+func _on_aerial_projectile(origin: Vector2, direction: Vector2, speed: float, color: Color) -> void:
+	threats.append({"pos":origin,"velocity":direction*speed,"unblockable":false,
+		"radius":4.0,"glow":4.0,"color":color})
 
 func _on_turret_projectile(origin: Vector2, direction: Vector2, speed: float, color: Color) -> void:
 	threats.append({"pos": origin, "velocity": direction * speed, "unblockable": false, "radius": 7.0, "color": color})
@@ -1360,7 +1364,7 @@ func _draw() -> void:
 	for object in obstacles: _draw_obstacle(object)
 	for bullet in threats:
 		var threat_color: Color = bullet.get("color", RED)
-		draw_circle(bullet.pos, bullet.radius + 8, Color(threat_color, 0.12))
+		draw_circle(bullet.pos, bullet.radius + float(bullet.get("glow",8.0)), Color(threat_color, 0.12))
 		draw_circle(bullet.pos, bullet.radius, threat_color)
 	for bullet in shots: _draw_player_shot(bullet)
 	for particle in particles: draw_circle(particle.pos, 3, Color(particle.color, clampf(particle.life * 2, 0, 1)))

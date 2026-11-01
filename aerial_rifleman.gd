@@ -27,6 +27,7 @@ var orbit_phase := 0.0
 var landed := false
 var fall_time := 0.0
 var landing_time := 0.0
+var muzzle_offsets: Array[Vector2] = []
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -48,6 +49,7 @@ func _ready() -> void:
 	add_child(sprite)
 	sprite.play("fly")
 	hover_x = 790.0
+	_calibrate_muzzles(cell)
 
 func advance(delta: float, scroll: float, _player_center: Vector2) -> void:
 	age += delta
@@ -59,6 +61,7 @@ func advance(delta: float, scroll: float, _player_center: Vector2) -> void:
 		_advance_fall(delta,scroll)
 		return
 	var wanted := Vector2.ZERO
+	var fire_round := false
 	if state == "enter":
 		wanted = Vector2(-230,(base_y-position.y)*4.0)
 		if position.x <= hover_x:
@@ -88,24 +91,61 @@ func advance(delta: float, scroll: float, _player_center: Vector2) -> void:
 					rounds_left = 3
 			"shoot":
 				if state_left <= 0:
-					projectile_requested.emit(_muzzle_position(),burst_direction,BULLET_SPEED,Color("ff9638"))
-					sound_requested.emit("light_turret_fire")
-					rounds_left -= 1
-					state_left = 0.18
-					if rounds_left <= 0:
+					if rounds_left > 0:
+						fire_round = true
+						rounds_left -= 1
+						state_left = 0.18
+					else:
 						volleys += 1
 						state = "retreat" if volleys >= 2 else "orbit"
 						state_left = 2.6
 	velocity = velocity.lerp(wanted,1.0-exp(-7.0*delta))
 	position += velocity*delta
 	var attacking: bool = state in ["aim","shoot"]
-	var desired_rotation := deg_to_rad(-30.0) if attacking else clampf(velocity.y/700.0,-0.15,0.15)
-	sprite.rotation = lerp_angle(sprite.rotation,desired_rotation,1.0-exp(-14.0*delta))
+	var desired_rotation := deg_to_rad(-26.0) if attacking else clampf(velocity.y/2200.0,-0.035,0.035)
+	sprite.rotation = lerp_angle(sprite.rotation,desired_rotation,1.0-exp(-8.0*delta))
+	sprite.position = Vector2(0,sin(age*4.0)*1.5)
 	var pose: String = state if attacking else "fly"
 	if sprite.animation != StringName(pose): sprite.play(pose)
+	if fire_round:
+		# Emit after movement/pose transforms, from the frame rendered this tick.
+		projectile_requested.emit(_muzzle_position(),burst_direction,BULLET_SPEED,Color("ff9638"))
+		sound_requested.emit("light_turret_fire")
+
+func _calibrate_muzzles(cell: Vector2) -> void:
+	var image := SHEET.get_image()
+	if image.is_compressed(): image.decompress()
+	for column in range(8):
+		var start := Vector2i(int(float(column)*cell.x),int(3.0*cell.y))
+		var width := int(cell.x)
+		var height := int(cell.y)
+		var first_x := width
+		# The forward orange flash belongs to the rifle; rear jet flame is excluded.
+		for x in range(int(cell.x*0.57),width):
+			for y in range(int(cell.y*0.24),int(cell.y*0.72)):
+				var pixel := image.get_pixel(start.x+x,start.y+y)
+				if pixel.a > 0.6 and pixel.r > 0.85 and pixel.g > 0.4 and pixel.b < 0.45:
+					first_x = x
+					break
+			if first_x < width: break
+		var source := Vector2(cell.x*0.75,cell.y*0.5)
+		if first_x < width:
+			var sum_y := 0.0
+			var samples := 0
+			for x in range(first_x,mini(width,first_x+4)):
+				for y in range(int(cell.y*0.24),int(cell.y*0.72)):
+					var pixel := image.get_pixel(start.x+x,start.y+y)
+					if pixel.a > 0.6 and pixel.r > 0.85 and pixel.g > 0.4 and pixel.b < 0.45:
+						sum_y += float(y)
+						samples += 1
+			if samples > 0: source = Vector2(first_x,sum_y/float(samples))
+		muzzle_offsets.append(source-cell*0.5)
 
 func _muzzle_position() -> Vector2:
-	return global_position+Vector2(-36,10).rotated(sprite.rotation)
+	var offset: Vector2 = muzzle_offsets[clampi(sprite.frame,0,7)]
+	if sprite.flip_h: offset.x = -offset.x
+	if sprite.flip_v: offset.y = -offset.y
+	return sprite.to_global(offset)
 
 func _advance_fall(delta: float, scroll: float) -> void:
 	var floor_y: float = get_parent().to_global(Vector2(0,GD.GROUND_Y)).y-38.0

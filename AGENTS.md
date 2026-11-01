@@ -199,3 +199,6 @@ Latest aerial ranged enemy (2026-10-31): user authorizes aerial_rifleman.gd from
 
 
 Latest aerial rifleman motion/death/fire revision (2026-10-31): smooth kamikaze-style104x64 orbit, no self-destruction; visual128/hitbox48x80. Fixed left-down45° bullets480px/s, muzzle/visual aim lean aligned. Death first3 frames during fall, fourth onward and explosion sound only after world-ground contact, cleanup after final landing frame. Two bursts then exit, HP/threat/rewards/scope unchanged. No tests/import/game/captures.
+
+
+Latest aerial shot polish (2026-10-31): only aerial bullets radius4/glow4; speed480/left-down45 unchanged. Flight tilt±2 degrees, eased26-degree attack lean, subtle bob. Calibrate each shoot frame muzzle from forward flash pixels, mirror and sprite.to_global transform; emit after movement/pose update. Others projectile sizes unchanged. No tests.
