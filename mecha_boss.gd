@@ -206,7 +206,7 @@ func _body_pixel(local: Vector2) -> bool:
 	if pixel.r > 0.4 and pixel.r > pixel.g*1.7 and pixel.r > pixel.b*1.7: return false
 	if pixel.r > 0.8 and pixel.g > 0.8 and pixel.b > 0.8:
 		for offset in [-4,-2,2,4]:
-			var sample_y := int(pose_meta.y)+y+offset
+			var sample_y: int = int(pose_meta.y)+y+int(offset)
 			if sample_y < 0 or sample_y >= images[pose_sheet].get_height(): continue
 			var neighbor: Color = images[pose_sheet].get_pixel(int(pose_meta.x)+x,sample_y)
 			if neighbor.a > 0.5 and neighbor.r > 0.6 and neighbor.g < 0.3 and neighbor.b < 0.3: return false
