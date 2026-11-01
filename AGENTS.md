@@ -205,3 +205,6 @@ Latest aerial shot polish (2026-10-31): only aerial bullets radius4/glow4; speed
 
 
 Latest aerial predictive aiming (2026-10-31): replace fixed45° with burst-locked player aim using filtered motion, travel-time prediction capped0.65s ×random0.45–0.8 plus±32x/±22y target error. All3 rounds retain direction; restrained target-directed visual bank and calibrated muzzle retained, speed480/radius4 unchanged. No tests.
+
+
+Latest aerial corpse revision (2026-10-31): dead rifleman falls, then landing frames4–7 hold prone body, scroll left with track and disappear only once complete transformed sprite bounds exit left. Remove death timer despawn. Absolute z=-9 above track-10 below live actors; no collisions/rewards repeated. No tests.

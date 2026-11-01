@@ -18,3 +18,6 @@ Latest firing presentation: aerial rounds use a dedicated main callback with rad
 
 
 Latest aim revision: remove fixed45-degree direction. Each burst samples filtered player velocity, estimates travel time capped0.65s, applies45–80% randomized lead and adds±32px horizontal/±22px vertical aim error, with on-playfield target limits. Lock that direction for all3 rounds; no per-round retargeting or homing. Attack artwork banks toward target within the existing restrained tilt range; muzzle transform,480 speed, radius4/glow4 retained. No runtime tests.
+
+
+Latest corpse persistence: after ground contact, play landing frames4–7 and hold the final prone body (frame8 is an explosion-only image). Continue moving left at the actual track scroll speed indefinitely until the full transformed sprite rectangle is left of x0; remove death timeout. Corpse uses absolute z=-9, directly above track z=-10 and below live actors. Remains harmless/unshootable/no threat points; standard administrative cleanup still clears it on retry/title. No runtime tests.

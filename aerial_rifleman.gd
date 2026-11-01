@@ -186,7 +186,9 @@ func _advance_fall(delta: float, scroll: float) -> void:
 	else:
 		landing_time += delta
 		position.x -= scroll*delta
-		sprite.frame = mini(7,3+int(landing_time*14.0))
+		# Frame7 is the final prone body; frame8 is only an explosion cloud.
+		# Hold the corpse instead of replacing it with smoke and despawning.
+		sprite.frame = mini(6,3+int(landing_time*14.0))
 
 func body_rect() -> Rect2:
 	return Rect2(global_position-Vector2(24,40),Vector2(48,80))
@@ -209,6 +211,9 @@ func take_damage(penetration: int) -> void:
 func force_kill() -> void:
 	if state == "dead": return
 	state = "dead"
+	# Absolute canvas depth: track(-10) < corpse(-9) < live world actors.
+	z_as_relative = false
+	z_index = -9
 	landed = false
 	fall_time = 0.0
 	landing_time = 0.0
@@ -219,5 +224,7 @@ func force_kill() -> void:
 	killed.emit(self)
 
 func is_finished() -> bool:
-	if state == "dead": return (landed and landing_time >= 5.0/14.0) or position.x < -150
+	if state == "dead":
+		var visual_bounds: Rect2 = sprite.get_global_transform()*sprite.get_rect()
+		return visual_bounds.end.x < 0.0
 	return position.x < -120 or position.y > 820 or age > 18.0
