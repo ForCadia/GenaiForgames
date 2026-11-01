@@ -61,3 +61,6 @@ Mecha presentation update: normalize alive action-sheet scale using helmet-to-co
 
 
 Screen-wide slash art: built-in imagegen generated assets/vfx/mecha_screen_slash.png with actual alpha. Ground slash now draws this strip across the logical viewport plus 120px overscan on each side, retaining thin/wide/thin animation. Original PNG and generation prompt are retained. This updates cosmetic reach only; melee damage and warning geometry remain unchanged. No runtime tests.
+
+
+Pixel flipbook supersedes the single-strip slash: generated 4x2 eight-frame transparent atlas, played with AnimatedSprite2D at fixed scale/nearest filtering, synchronized to melee execution (25fps). The source frames provide the thin/wide/thin shape changes; previous vertical scale animation is removed. Full-screen cosmetic coverage remains. No runtime tests.

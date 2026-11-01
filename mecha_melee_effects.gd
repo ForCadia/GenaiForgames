@@ -1,7 +1,7 @@
 extends Node2D
 # Telegraph geometry shares the actual blade sweep; the oversized sprite is cosmetic.
 const DATA := preload("res://mecha_boss_data.gd")
-const SCREEN_SLASH := preload("res://assets/vfx/mecha_screen_slash.png")
+const SCREEN_SLASH := preload("res://assets/vfx/mecha_screen_slash_flipbook.png")
 const GD := preload("res://game_data.gd")
 const SHEET := preload("res://assets/vfx/neon_effects_source.png")
 var band := PackedVector2Array()
@@ -11,6 +11,7 @@ var trail_left := 0.0
 var last_state := ""
 var effect_kind := ""
 var effect_direction := Vector2.LEFT
+var screen_slash: AnimatedSprite2D
 var slash: Sprite2D
 var cross_visible := false
 var cross_position := Vector2.ZERO
@@ -21,6 +22,21 @@ const HAND_OFFSETS := [Vector2(56,20),Vector2(83,-4),Vector2(80,-4),Vector2(67,0
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	screen_slash = AnimatedSprite2D.new()
+	var flipbook := SpriteFrames.new()
+	flipbook.set_animation_loop("default",false)
+	flipbook.set_animation_speed("default",8.0/DATA.SLASH_TIME)
+	for index in range(8):
+		var frame := AtlasTexture.new()
+		frame.atlas = SCREEN_SLASH
+		# Individually aligned row centers, with empty gutters around the pixel blade.
+		frame.region = Rect2((index%4)*384,212 if index < 4 else 694,384,100)
+		frame.filter_clip = true
+		flipbook.add_frame("default",frame)
+	screen_slash.sprite_frames = flipbook
+	screen_slash.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	screen_slash.visible = false
+	add_child(screen_slash)
 	slash = Sprite2D.new()
 	slash.texture = SHEET
 	slash.region_enabled = true
@@ -39,6 +55,7 @@ func clear_effects() -> void:
 	trail_left = 0.0
 	last_state = ""
 	if is_instance_valid(slash): slash.visible = false
+	if is_instance_valid(screen_slash): screen_slash.visible = false
 	queue_redraw()
 
 func advance_effects(delta: float, boss: Node2D) -> void:
@@ -87,6 +104,12 @@ func advance_effects(delta: float, boss: Node2D) -> void:
 		slash.rotation = effect_direction.angle()-PI
 		slash.scale = Vector2(0.85,1.1)
 		slash.modulate.a = minf(1.0,trail_left/0.07)
+	screen_slash.visible = effect_kind == "slash" and trail_left > 0.0
+	if screen_slash.visible:
+		var progress: float = clampf(1.0-trail_left/DATA.SLASH_TIME,0.0,1.0)
+		screen_slash.frame = clampi(int(progress*8.0),0,7)
+		screen_slash.position = to_local((line_start+line_end)*0.5)
+		screen_slash.scale = Vector2((GD.VIEW_SIZE.x+240.0)/384.0,1.4)
 	last_state = state
 	queue_redraw()
 
@@ -101,14 +124,3 @@ func _draw() -> void:
 		draw_line(p-Vector2(0,radius),p+Vector2(0,radius),Color(1.0,0.04,0.08,0.75),5.0)
 		draw_line(p-Vector2(radius*0.8,0),p+Vector2(radius*0.8,0),Color("ffe8dd"),2.0)
 		draw_line(p-Vector2(0,radius*0.8),p+Vector2(0,radius*0.8),Color("ffe8dd"),2.0)
-	if effect_kind == "slash" and trail_left > 0.0:
-		var progress: float = clampf(1.0-trail_left/DATA.SLASH_TIME,0.0,1.0)
-		# A narrow red cut opens rapidly, then contracts into a line again.
-		var opening: float = clampf((progress-0.12)/0.8,0.0,1.0)
-		var envelope: float = sin(PI*pow(opening,0.65))
-		var width: float = 2.0+72.0*maxf(0.0,envelope)
-		var a: Vector2 = to_local(line_start)
-		var b: Vector2 = to_local(line_end)
-		# Transparent imagegen strip; tips extend outside both viewport edges.
-		var target := Rect2(Vector2(minf(a.x,b.x),a.y-width*0.5),Vector2(absf(b.x-a.x),width))
-		draw_texture_rect_region(SCREEN_SLASH,target,Rect2(0,280,2172,166),Color.WHITE,false,true)
