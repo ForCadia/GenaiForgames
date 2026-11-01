@@ -87,6 +87,11 @@ func reset_for_battle(enabled: bool) -> void:
 	if enabled: _set_pose("lift",3)
 	else: _set_pose("slash",0)
 
+func finish_intro() -> void:
+	combat_enabled = true
+	_set_pose("slash",0)
+	_enter("ground_prepare")
+
 func set_combat_enabled(enabled: bool) -> void:
 	combat_enabled = enabled
 	if not enabled:

@@ -47,6 +47,8 @@ var developer_mode := false
 var boss_test_mode := false
 var boss_test_kind := "eyeball"
 var active_boss_kind := "eyeball"
+const BOSS_INTRO := preload("res://ui/boss_intro.gd")
+var boss_intro: BOSS_INTRO
 var mecha_actor: Node2D
 var selected_level := 0
 var endless_mode := false
@@ -184,6 +186,8 @@ func _ready() -> void:
 	lab_panel.game = self
 	lab_panel.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(lab_panel)
+	boss_intro = BOSS_INTRO.new()
+	add_child(boss_intro)
 	mecha_actor = MECHA_SCENE.instantiate()
 	add_child(mecha_actor)
 	mecha_actor.damage_requested.connect(_boss_damage)
@@ -226,6 +230,10 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if state == "start" or ui_paused or lab_panel.blocked: return
+	if state == "boss_intro":
+		_update_boss_intro(delta)
+		queue_redraw()
+		return
 	if state in ["talent","talent_exit"]:
 		# Empty moving track: retain player input and parallax, never advance spawns.
 		_update_fx(delta)
@@ -295,7 +303,7 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if attract_mode: return
 	if state != "start" and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
-		if state in ["playing", "intermission"] and not lab_panel.expanded: set_ui_paused(not ui_paused)
+		if state in ["playing", "intermission", "boss_intro"] and not lab_panel.expanded: set_ui_paused(not ui_paused)
 		else: return_to_start()
 		get_viewport().set_input_as_handled()
 		return
@@ -984,6 +992,7 @@ func _start_boss(preserve_motion := false) -> void:
 		mecha_actor.reset_for_battle(true)
 		boss_entering = false
 		banner = mode_caption()+" // GUNBLADE MECHA"; banner_time = 2.2
+		_begin_boss_intro()
 		return
 	var eye_maximum: int = int(ceil(GD.BOSS.health*float(growth.health_multiplier)))
 	boss = {"armor": GD.BOSS.armor_per_cycle, "hp":eye_maximum,"maximum":eye_maximum,"phase":1}
@@ -994,6 +1003,39 @@ func _start_boss(preserve_motion := false) -> void:
 	boss_actor.set_combat_enabled(false)
 	boss_entering = true
 	banner = mode_caption() + " // BOSS // BREAK ARMOR"; banner_time = 2.2
+	_begin_boss_intro()
+
+func _begin_boss_intro() -> void:
+	if developer_mode: return # Preserve historical LAB timing.
+	state = "boss_intro"
+	shots.clear()
+	threats.clear()
+	guarding = false
+	crouching = false
+	player_visual.set_collision_pose(false)
+	weapon_audio.stop_all()
+	world_audio.set_shield_active(false)
+	boss_intro.begin(self)
+
+func _update_boss_intro(delta: float) -> void:
+	# Continue empty-track running without consuming ammo, grenades or shield energy.
+	_update_fx(delta)
+	player.x = move_toward(player.x,GD.PLAYER_X,GD.PLAYER.horizontal_return_speed*delta)
+	if not _grounded(): velocity_y += float(lab_panel.values.gravity)*delta
+	player.y = minf(GD.GROUND_Y,player.y+velocity_y*delta)
+	if _grounded(): velocity_y = 0.0
+	player_visual.position = player
+	player_visual.set_motion(_grounded(),false,weapon_index,aim,false,true)
+	player_hud.follow_hitbox(_player_hitbox())
+	distance += _scroll()*delta
+	_update_parallax()
+	if boss_intro.advance_intro(delta,self):
+		state = "playing"
+		segment_time = 0.0
+		boss_entering = false
+		if is_mecha_boss(): mecha_actor.finish_intro()
+		else: boss_actor.set_combat_enabled(true)
+		_gate_gameplay_input()
 
 func _update_boss(delta: float) -> void:
 	if state != "playing": return
@@ -1317,6 +1359,7 @@ func _reset_player(preserve_motion := false) -> void:
 	player_hud.follow_hitbox(_player_hitbox())
 
 func _clear_world() -> void:
+	if is_instance_valid(boss_intro): boss_intro.cancel(self)
 	for soldier in aerial_riflemen:
 		if is_instance_valid(soldier): soldier.queue_free()
 	aerial_riflemen.clear()
@@ -1494,7 +1537,7 @@ func _notification(what: int) -> void:
 		lab.finish(score, "window_close", player, segment, boss_mode)
 
 func set_ui_paused(value: bool) -> void:
-	if state not in ["playing", "intermission"]: return
+	if state not in ["playing", "intermission", "boss_intro"]: return
 	ui_paused = value
 	queue_redraw()
 	if not attract_mode: get_tree().paused = value

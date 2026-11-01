@@ -1,0 +1,7 @@
+# Boss warning banner
+
+Generated with built-in imagegen, project-bound transparent pixel-art overlay. Source image retained unchanged at boss_warning_banner.png.
+
+Prompt: Use case stylized-concept. Asset type: game-ready pixel art Boss warning overlay strip for a sci-fi Contra-like side scrolling shooter, transparent PNG. One wide horizontal red hazard banner centered on a wide landscape canvas. Sharp blocky retro 16-bit pixel art, deliberately visible square pixels, hard stepped edges, limited red/crimson/black/ivory palette. Industrial crimson metal end caps, bright red parallel circuit rails top and bottom, diagonal black-red hazard chevrons along the rails, small red warning triangles at both ends. Wide dark translucent inset central plate with VERY CLEAR LARGE text exactly 'WARNING' in pale red/ivory block pixel lettering. Below in smaller readable pixel letters exactly 'BOSS APPROACHING'. Banner stretches from3% to97% canvas width and is centered vertically, occupies35% canvas height. True alpha transparent outside banner, no full scene, no characters, no guns, no perspective, no extra words, no watermarks. High readability on a detailed blue industrial game background. Crisp pixel-art effects, no photorealistic materials, no smooth glossy gradients. Single asset to animate by sliding and softly pulsing opacity in Godot.
+
+The warning slides in, pulses (disabled by reduced-flash option) and fades before the Boss entrance/focus. No engine or runtime tests performed.
