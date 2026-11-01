@@ -238,6 +238,16 @@ func _process(delta: float) -> void:
 		queue_redraw()
 		return
 	if state == "intermission":
+		# Boss death is a safe moving transition, not a frozen simulation second.
+		shots.clear()
+		threats.clear()
+		_update_player(delta)
+		player_visual.position = player
+		player_visual.set_motion(_grounded(),crouching,weapon_index,aim,guarding,true)
+		player_hud.follow_hitbox(_player_hitbox())
+		_update_coins(delta)
+		distance += _scroll()*delta
+		_update_parallax()
 		endless_intermission -= delta
 		if endless_intermission <= 0: _advance_endless()
 		queue_redraw()

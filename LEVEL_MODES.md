@@ -96,3 +96,6 @@ Latest homing balance: four ranks now guide one actual emitted projectile per5/4
 
 
 Latest enemy addition: aerial riflemen appear only in Level03 and Endless. Level03 swaps7 kamikaze events for riflemen; total roster length unchanged. Endless incorporates their own weights (mixed12%, air22%, armor10%, fire15%), keeping difficulty counts/pressure caps unchanged. Their40-point cost limits simultaneous pressure. See AERIAL_RIFLEMAN.md. No runtime testing.
+
+
+Latest Endless Boss-clear correction: the existing1s death showcase previously updated only a countdown, freezing track/player motion. Intermission now continues player motion/airborne physics, animation, parallax and coin movement while clearing player/hostile rounds; no combat or spawning resumes until talent choice. Existing death showcase/reward cadence retained. Inspected current runtime log: no related script errors recorded; no game/tests run.

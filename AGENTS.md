@@ -208,3 +208,6 @@ Latest aerial predictive aiming (2026-10-31): replace fixed45° with burst-locke
 
 
 Latest aerial corpse revision (2026-10-31): dead rifleman falls, then landing frames4–7 hold prone body, scroll left with track and disappear only once complete transformed sprite bounds exit left. Remove death timer despawn. Absolute z=-9 above track-10 below live actors; no collisions/rewards repeated. No tests.
+
+
+Latest Endless Boss-clear flow (2026-10-31): keep1s Boss death display but update player motion/animation, track parallax and coins during intermission, clearing residual bullets. Removes deliberate frozen-world second before reward selection; no combat/timeline advance. Read-only log inspection, no tests/game/import/captures.
