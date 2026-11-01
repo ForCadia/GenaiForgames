@@ -72,5 +72,5 @@ func apply_iron_state(hp: int, maximum: int, cannon_hp: int, launcher_hp: int, p
 	title.text = "IRON BASTION"
 	armor.show()
 	armor_bar.hide()
-	armor.text = "CANNON %d / MISSILES %d / COVER %d" % [cannon_hp,launcher_hp,plate_hp]
+	armor.text = "CANNON %d / HANGAR %d / COVER %d" % [cannon_hp,launcher_hp,plate_hp]
 	if plate_hp <= 0: armor.text += " / CORE EXPOSED"

@@ -2,9 +2,11 @@ class_name IronBastion
 extends Node2D
 signal damage_requested(origin: Vector2)
 signal sound_requested(cue: String)
+signal reinforcement_requested(kind: String, origin: Vector2)
 signal feedback(origin: Vector2, color: Color, message: String)
 const DATA := preload("res://iron_boss_data.gd")
 const GD := preload("res://game_data.gd")
+const VFX := preload("res://assets/vfx/neon_effects_source.png")
 const ART := {
  "hull":preload("res://assets/boss_iron/hull.png"),
  "cannon":preload("res://assets/boss_iron/cannon_fire.png"),
@@ -28,12 +30,16 @@ var launcher_death := -1.0
 var wait_multiplier := 1.0
 var attack := "cannon"
 var emitted := 0
+var cannon_frame := 0
 var target_x := 190.0
 var projectiles: Array[Dictionary] = []
 var rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	rng.randomize()
+	var vfx_material := ShaderMaterial.new()
+	vfx_material.shader = preload("res://assets/vfx/black_key.gdshader")
+	material = vfx_material
 	for key in ART:
 		var image: Image = ART[key].get_image()
 		if image.is_compressed(): image.decompress()
@@ -59,12 +65,23 @@ func _sprite(texture: Texture2D, origin: Vector2, sizing: Vector2) -> Sprite2D:
 	return sprite
 
 func _pose(sprite: Sprite2D, key: String, frame: int, mount: Vector2) -> void:
+	if key == "cannon":
+		cannon_frame = frame
+		var region: Rect2 = DATA.CANNON_REGIONS[frame]
+		var cannon_atlas := AtlasTexture.new()
+		cannon_atlas.atlas = ART.cannon
+		cannon_atlas.region = region
+		cannon_atlas.filter_clip = true
+		sprite.texture = cannon_atlas
+		var anchor: Vector2 = DATA.CANNON_ANCHORS[frame]-region.position
+		sprite.position = mount-anchor*sprite.scale
+		return
 	var columns: int = 4 if key == "plate" else 2
 	var width: int = 384 if columns == 4 else 768
 	var source_origin := Vector2((frame%columns)*width,int(frame/columns)*512)
 	var atlas := AtlasTexture.new()
 	atlas.atlas = ART[key]
-	# Detached missiles were removed from the firing artwork; code owns projectiles.
+	# Detached missiles were removed; this module now deploys air support.
 	var inset: float = 0.0
 	atlas.region = Rect2(source_origin+Vector2(inset,0),Vector2(width-inset,512))
 	atlas.margin = Rect2(Vector2(inset,0),Vector2(inset,0))
@@ -139,12 +156,12 @@ func advance(delta: float, target: Vector2) -> void:
 					_shell()
 					emitted = 1
 			elif attack == "launcher" and launcher_hp > 0:
-				var frame: int = 1 if elapsed < DATA.MISSILE_COUNT*DATA.MISSILE_INTERVAL else 2
+				var frame: int = 1 if elapsed < DATA.DEPLOY_ROSTER.size()*DATA.DEPLOY_INTERVAL else 2
 				_pose(launcher,"launcher",frame,DATA.LAUNCHER_MOUNT)
-				if emitted < DATA.MISSILE_COUNT and elapsed >= emitted*DATA.MISSILE_INTERVAL:
-					_missile(emitted)
+				if emitted < DATA.DEPLOY_ROSTER.size() and elapsed >= emitted*DATA.DEPLOY_INTERVAL:
+					_deploy(emitted)
 					emitted += 1
-			var duration: float = DATA.FIRE_TIME if attack == "cannon" else DATA.MISSILE_COUNT*DATA.MISSILE_INTERVAL+0.25
+			var duration: float = DATA.FIRE_TIME if attack == "cannon" else DATA.DEPLOY_ROSTER.size()*DATA.DEPLOY_INTERVAL+0.25
 			if elapsed >= duration:
 				if cannon_hp > 0: _pose(cannon,"cannon",0,DATA.CANNON_MOUNT)
 				if launcher_hp > 0: _pose(launcher,"launcher",0,DATA.LAUNCHER_MOUNT)
@@ -156,7 +173,9 @@ func advance(delta: float, target: Vector2) -> void:
 	queue_redraw()
 
 func _shell() -> void:
-	var origin: Vector2 = cannon.to_global(Vector2(185,165))
+	var cannon_region: Rect2 = DATA.CANNON_REGIONS[cannon_frame]
+	var source: Vector2 = DATA.CANNON_MUZZLES[cannon_frame]-cannon_region.position
+	var origin: Vector2 = cannon.to_global(source)
 	# Solve speed for the authored left/up barrel angle and the locked landing point.
 	var angle: float = deg_to_rad(DATA.CANNON_ANGLE)
 	var dx: float = maxf(100.0,origin.x-target_x)
@@ -166,13 +185,9 @@ func _shell() -> void:
 	projectiles.append({"kind":"shell","p":origin,"previous":origin,"v":velocity,"life":5.0,"target":target_x,"explode":0.0,"spent":false})
 	sound_requested.emit("iron_cannon_fire")
 
-func _missile(index: int) -> void:
+func _deploy(index: int) -> void:
 	var origin: Vector2 = launcher.to_global(DATA.LAUNCH_PORTS[index])
-	# Lock six dispersed lanes at launch; no mid-flight pursuit.
-	var destination := Vector2(target_x,GD.GROUND_Y-35.0-float(index%3)*50.0)
-	var velocity: Vector2 = (destination-origin).normalized()*DATA.MISSILE_SPEED
-	projectiles.append({"kind":"missile","p":origin,"previous":origin,"v":velocity,"life":4.0,"explode":0.0,"spent":false})
-	if index%2 == 0: sound_requested.emit("iron_missile_fire")
+	reinforcement_requested.emit(DATA.DEPLOY_ROSTER[index],origin)
 
 func _advance_projectiles(delta: float) -> void:
 	for index in range(projectiles.size()-1,-1,-1):
@@ -195,7 +210,7 @@ func try_melee(player_rect: Rect2, guard_rect: Rect2) -> bool:
 	if not combat_enabled: return false
 	for round in projectiles:
 		if bool(round.spent): continue
-		var radius: float = DATA.EXPLOSION_RADIUS if float(round.explode) > 0 else (DATA.SHELL_RADIUS if round.kind == "shell" else DATA.MISSILE_RADIUS)
+		var radius: float = DATA.EXPLOSION_RADIUS if float(round.explode) > 0 else DATA.SHELL_RADIUS
 		for candidate in [guard_rect,player_rect]:
 			var rect: Rect2 = candidate
 			if not rect.has_area(): continue
@@ -317,16 +332,14 @@ func _draw() -> void:
 	for round in projectiles:
 		var p: Vector2 = to_local(Vector2(round.p))
 		if float(round.explode) > 0:
-			var ratio: float = float(round.explode)/DATA.EXPLOSION_TIME
-			draw_circle(p,DATA.EXPLOSION_RADIUS*(1.2-ratio*0.4),Color(1,0.3,0.06,ratio))
+			var progress: float = 1.0-float(round.explode)/DATA.EXPLOSION_TIME
+			var frames := [Rect2(28,650,100,90),Rect2(133,650,72,90),Rect2(210,660,60,75),Rect2(276,670,48,60)]
+			var frame: int = clampi(int(progress*frames.size()),0,frames.size()-1)
+			draw_texture_rect_region(VFX,Rect2(p-Vector2(40,40),Vector2(80,80)),frames[frame])
 			continue
 		var direction: Vector2 = Vector2(round.v).normalized()
-		if round.kind == "shell":
-			draw_circle(p,DATA.SHELL_RADIUS,Color("ff9922"))
-			draw_circle(p,4.0,Color("fff0b4"))
-			var landing := Vector2(float(round.target)-global_position.x,GD.GROUND_Y-global_position.y)
-			draw_line(landing-Vector2(25,0),landing+Vector2(25,0),Color(1,0.15,0.07,0.8),3)
-		else:
-			var side: Vector2 = direction.orthogonal()
-			draw_colored_polygon(PackedVector2Array([p+direction*10.0,p-direction*9.0+side*5.0,p-direction*9.0-side*5.0]),Color("e5d4b4"))
-			draw_line(p-direction*9.0,p-direction*24.0,Color("ff6b20"),4)
+		draw_set_transform(p,direction.angle()-PI)
+		draw_texture_rect_region(VFX,Rect2(-16,-12,32,24),Rect2(28,40,95,68))
+		draw_set_transform(Vector2.ZERO,0.0)
+		var landing := Vector2(float(round.target)-global_position.x,GD.GROUND_Y-global_position.y)
+		draw_line(landing-Vector2(25,0),landing+Vector2(25,0),Color(1,0.15,0.07,0.8),3)

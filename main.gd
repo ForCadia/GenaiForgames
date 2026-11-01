@@ -200,6 +200,7 @@ func _ready() -> void:
 	iron_actor.damage_requested.connect(_boss_damage)
 	iron_actor.sound_requested.connect(func(cue: String): world_audio.play_cue(cue,-1.0,iron_actor))
 	iron_actor.feedback.connect(_on_turret_feedback)
+	iron_actor.reinforcement_requested.connect(_on_iron_reinforcement)
 	boss_actor.bomb_requested.connect(_on_boss_bomb_requested)
 	boss_actor.particle_requested.connect(_on_boss_particle_requested)
 	boss_actor.barrage_requested.connect(_on_boss_barrage_requested)
@@ -579,12 +580,17 @@ func _spawn_event(event: Dictionary) -> void:
 		"high_barrage": _spawn_laser_gate()
 		_: pass
 
-func _spawn_enemy(kind: String, _y: float, _returns: bool) -> void:
+func _spawn_enemy(kind: String, _y: float, _returns: bool, spawn_origin: Vector2 = Vector2.INF) -> void:
 	if kind == "aerial":
-		if developer_mode or (not endless_mode and selected_level != 2): return
+		if (developer_mode or (not endless_mode and selected_level != 2)) and not (boss_mode and is_iron_boss()): return
 		var soldier: Node2D = AERIAL.new()
 		turret_root.add_child(soldier)
 		soldier.position = Vector2(1040,280 if segment % 2 == 0 else 340)
+		if spawn_origin.is_finite():
+			soldier.position = turret_root.to_local(spawn_origin)
+			soldier.hover_x = soldier.position.x-60.0
+			soldier.orbit_anchor_x = clampf(soldier.position.x-150.0,360.0,520.0)
+			soldier.set_meta("iron_support",true)
 		soldier.base_y = soldier.position.y
 		soldier.projectile_requested.connect(_on_aerial_projectile)
 		soldier.killed.connect(func(actor: Node2D): _award_enemy_kill("aerial",actor.global_position))
@@ -595,6 +601,9 @@ func _spawn_enemy(kind: String, _y: float, _returns: bool) -> void:
 		var drone: Node2D = KAMIKAZE.new()
 		turret_root.add_child(drone)
 		drone.position = Vector2(1010,220 if segment % 2 == 0 else 250)
+		if spawn_origin.is_finite():
+			drone.position = turret_root.to_local(spawn_origin)
+			drone.set_meta("iron_support",true)
 		drone.base_y = drone.position.y
 		drone.killed.connect(func(actor: Node2D): _award_enemy_kill("kamikaze",actor.global_position))
 		drone.exploded.connect(func(_actor: Node2D): world_audio.play_cue("enemy_explode"))
@@ -606,6 +615,29 @@ func _spawn_enemy(kind: String, _y: float, _returns: bool) -> void:
 	if kind == "heavy":
 		_spawn_turret(HEAVY_TURRET_SCENE)
 		return
+
+func _on_iron_reinforcement(kind: String, origin: Vector2) -> void:
+	if state != "playing" or not boss_mode or not is_iron_boss(): return
+	var active := 0
+	for actor in aerial_riflemen:
+		if is_instance_valid(actor) and actor.state != "dead": active += 1
+	for actor in kamikaze_drones:
+		if is_instance_valid(actor) and actor.state != "explode": active += 1
+	if active >= preload("res://iron_boss_data.gd").AIR_SUPPORT_CAP: return
+	_spawn_enemy(kind,0.0,false,origin)
+
+func _clear_iron_support() -> void:
+	for index in range(aerial_riflemen.size()-1,-1,-1):
+		var actor: Node2D = aerial_riflemen[index]
+		if is_instance_valid(actor) and actor.get_meta("iron_support",false):
+			actor.queue_free()
+			aerial_riflemen.remove_at(index)
+	for index in range(kamikaze_drones.size()-1,-1,-1):
+		var actor: Node2D = kamikaze_drones[index]
+		if is_instance_valid(actor) and actor.get_meta("iron_support",false):
+			actor.queue_free()
+			kamikaze_drones.remove_at(index)
+	threats.clear()
 
 func _spawn_turret(scene: PackedScene) -> void:
 	var turret: TurretBase = scene.instantiate()
@@ -1158,6 +1190,7 @@ func _boss_damage(hit_origin: Vector2 = Vector2.INF) -> void:
 	if boss.hp <= 0:
 		score += GD.SCORE.boss
 		_register_kill("boss", _boss_pos())
+		if is_iron_boss(): _clear_iron_support()
 		if endless_mode:
 			state = "intermission"
 			endless_intermission = 1.0

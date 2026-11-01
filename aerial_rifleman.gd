@@ -17,6 +17,7 @@ var age := 0.0
 var state_left := 0.0
 var base_y := 300.0
 var hover_x := 750.0
+var orbit_anchor_x := 650.0
 var velocity := Vector2.ZERO
 var burst_direction := Vector2.LEFT
 var rounds_left := 0
@@ -74,7 +75,7 @@ func advance(delta: float, scroll: float, player_center: Vector2) -> void:
 	if state == "enter":
 		wanted = Vector2(-230,(base_y-position.y)*4.0)
 		if position.x <= hover_x:
-			orbit_center = Vector2(650,base_y)
+			orbit_center = Vector2(orbit_anchor_x,base_y)
 			orbit_phase = 0.0
 			state = "orbit"
 			state_left = 2.6
