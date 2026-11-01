@@ -208,7 +208,18 @@ func _ready() -> void:
 	return_to_start()
 
 func _process(delta: float) -> void:
-	if state in ["start","talent"] or ui_paused or lab_panel.blocked: return
+	if state == "start" or ui_paused or lab_panel.blocked: return
+	if state in ["talent","talent_exit"]:
+		# Empty moving track: retain player input and parallax, never advance spawns.
+		_update_fx(delta)
+		_update_player(delta)
+		player_visual.position = player
+		player_visual.set_motion(_grounded(),crouching,weapon_index,aim,guarding,true)
+		player_hud.follow_hitbox(_player_hitbox())
+		distance += _scroll()*delta
+		_update_parallax()
+		queue_redraw()
+		return
 	if lab.active: lab.duration += delta
 	if state != "victory": _update_fx(delta)
 	if state == "dead":
@@ -261,7 +272,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		else: return_to_start()
 		get_viewport().set_input_as_handled()
 		return
-	if state in ["start","talent"] or ui_paused or lab_panel.blocked: return
+	if state == "start" or ui_paused or lab_panel.blocked: return
 	if state == "dead":
 		for action in ["restart", "jump", "fire"]:
 			if event.is_action_pressed(action) and not event.is_echo():
@@ -1368,6 +1379,8 @@ func record_key() -> String:
 func _advance_endless() -> void:
 	if state == "talent": return
 	_bank_remaining_coins()
+	_clear_world()
+	boss_mode = false
 	state = "talent"
 	guarding = false
 	auto_guard_left = 0.0
@@ -1402,6 +1415,15 @@ func choose_endless_talent(id: String) -> void:
 			ammo = [weapon_data(0).magazine,weapon_data(1).magazine]
 			reload_left = 0.0
 			grenade_count += 1
+	state = "talent_exit"
+	endless_talent_choices.clear()
+	if is_instance_valid(endless_reward_ui):
+		endless_reward_ui.retract(_finish_endless_selection)
+	else:
+		_finish_endless_selection()
+
+func _finish_endless_selection() -> void:
+	if state != "talent_exit": return
 	_close_endless_reward()
 	_continue_endless()
 	_gate_gameplay_input()

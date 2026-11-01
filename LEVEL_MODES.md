@@ -79,3 +79,8 @@ Existing fire-rate, magazine and shield-stat talents remain. New run-only choice
 Trigger cadence is shared across guns and waves, independent of the number of spawned bullets; extra bullets cannot recursively trigger rewards. Split/volley ranks combine up to9 rounds on a third trigger at maximum ranks. All rounds use normal hit/armor checks. Shot statistics count actual emitted bullets. A new run or return to title clears trigger cadence and talents. Reward descriptions wrap within taller choice buttons. Campaigns gain none of these talents.
 
 Design reference: SYNTHETIK developer updates (https://www.synthetikgame.com/updates), for ammunition/weapon/shield item synergies; these particular numeric rules are authored for EverFront, not copied as game facts. No game/import/tests/captures were run.
+
+
+## Running-track talent selection — 2026-10-31
+
+Supersedes the frozen black-overlay reward UI. At each Endless clear, bank remaining coins and clear combat actors/rounds, then keep a safe empty track scrolling with player movement/jump and animation active. No timeline/spawn/combat time advances while choosing. Three square monitor cards use the existing ui_title_terminal.png artwork with preserved corner sizes; hanging supports descend from the top with staggered0.65s entrance. No full-screen shade or input-capturing background. Cards show the generated transparent upgrade-chip icon, name/rank and wrapped effect text. Selection applies one reward and retracts all screens over0.55s before spawning the next wave; duplicate selections are gated. The user can still Esc to title. Empty track persists until selection, no auto timeout. User tests; no runtime/import/capture checks.
