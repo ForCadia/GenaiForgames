@@ -105,3 +105,6 @@ Mecha mission integration (2026-10-31): campaign Level03 now ends with the gunbl
 
 
 Latest heavy pressure cost: heavy turret now reserves75 points (formerly50), independent of kill score. Applies wherever shared threat budget is enabled. An event costing more than the configured cap may spawn alone on an empty field, preventing easy Endless cap50 from permanently blocking its75-point heavy event; no additional combat event fits until that reservation releases. Other limits/costs/rewards unchanged. Source edits only, no runtime tests.
+
+
+Level03 roster rebalance: heavy turrets reduced to4/4/4/5 across four authored stages (17 total); removed heavy slots replaced with light turrets, aerial riflemen and occasional kamikazes at the same authored times. Remaining heavies are spaced through each stage; no adjacent heavy-heavy beats. Event counts, durations, scroll,75-point heavy cost and mecha Boss unchanged. Level01/02 and independent Endless rosters untouched. Source-only edit, no engine/tests.
