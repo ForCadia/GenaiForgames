@@ -342,16 +342,8 @@ func receive_shot_segment(penetration: int, from: Vector2, to: Vector2) -> void:
 		sound_requested.emit("armor_ricochet")
 		feedback.emit(origin,Color.WHITE,"RICOCHET")
 		return
-	match module:
-		"core": damage_requested.emit(origin)
-		"cannon":
-			cannon_hp -= 1
-			if cannon_hp == 0:
-				cannon.hide()
-				for index in range(3):
-					_add_death_burst(DATA.CANNON_MOUNT+mount_motion+Vector2(-65+index*45,-65),index*0.09,100.0)
-				sound_requested.emit("enemy_explode")
-	if module == "cannon": feedback.emit(origin,Color("ffb347"),"")
+	# Cannon and exposed core share the Boss HP; no separately destructible weapon.
+	if module in ["core","cannon"]: damage_requested.emit(origin)
 
 func _update_plate() -> void:
 	var frame: int = clampi(int((1.0-float(plate_hp)/DATA.PLATE_HP)*7.0),0,7)

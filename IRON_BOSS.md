@@ -59,3 +59,6 @@ Iron destruction simplification2026-11-01: stop using cannon/hangar destruction 
 
 
 Iron HP/fragmentation revision2026-11-01: user asks+1x health, interpreted as double: exposed core24->48, cannon8->16. Mortar shell detonation (ground or direct/shield contact) emits8 discrete shrapnel rounds into the upward hemisphere,300px/s, gravity180, radius5, lifetime1.6s. One fragment generation per parent shell, no chain fragmentation; pending fragments join on next update to avoid mutating collision iteration. Every fragment uses swept guard/player hit and consumes contact once; grenade/reset/death clear both live/pending rounds. Atlas red slugs represent fragments, separate from large mortar orb. Landing marker and blast radius unchanged; no engine/tests.
+
+
+Latest Iron shared HP rule2026-11-01: core and mortar hits both reduce the same48HP Boss pool. Cannon no longer takes separate module HP damage, hides or explodes independently; remains active until whole Boss defeat. Its internal availability sentinel remains positive until full death, and HUD removes the separate cannon count. Core threshold1 and cannon threshold3 remain; solid inert hull ricochet remains. Entire Boss still uses7 cosmetic death bursts; fragmentation shells retained. This supersedes earlier16HP destructible cannon. No engine/tests.
