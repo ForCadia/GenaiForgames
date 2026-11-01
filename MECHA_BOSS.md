@@ -52,3 +52,6 @@ Melee warning presentation follow-up: removed warning outlines; widened ground w
 
 
 Ground slash effect alignment: rotate the red crescent into a broad, low horizontal arc centered on the actual blade band (core offset -57,30.5), following Boss charge travel for its 0.32-second execution. Retain the last attack kind/direction during fading so recovery cannot switch its orientation. Aerial thrust artwork, damage and warning geometry remain unchanged. No runtime testing.
+
+
+Aerial thrust presentation correction: aerial attack now uses the straight red streak from the user neon atlas (27,422,340,64), aligned with locked stab direction, bright tip leading and tail behind. The crescent is restricted to ground slash; thrust movement, warning and collision remain unchanged. No runtime tests.

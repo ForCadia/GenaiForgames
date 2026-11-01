@@ -61,6 +61,7 @@ func advance_effects(delta: float, boss: Node2D) -> void:
 	slash.visible = trail_left > 0.0
 	if slash.visible:
 		if effect_kind == "slash":
+			slash.region_rect = Rect2(27,510,119,111)
 			# Turn the crescent into a low horizontal sweep around the actual blade band.
 			# The previous upright crescent covered the whole torso and floated too high.
 			slash.position = to_local(core+Vector2(-57.0,30.5))
@@ -68,10 +69,13 @@ func advance_effects(delta: float, boss: Node2D) -> void:
 			slash.rotation = PI*0.5
 			slash.scale = Vector2(0.85,3.4)
 		else:
-			slash.position = to_local(core+effect_direction*90.0)
-			slash.flip_h = true
+			# A straight red thrust streak, never the ground slash's crescent.
+			# The source points left: its bright tip leads and its tail trails the sword.
+			slash.region_rect = Rect2(27,422,340,64)
+			slash.position = to_local(core+effect_direction*20.0)
+			slash.flip_h = false
 			slash.rotation = effect_direction.angle()-PI
-			slash.scale = Vector2(3.6,3.0)
+			slash.scale = Vector2(0.85,1.1)
 		slash.modulate.a = minf(1.0,trail_left/0.07)
 	last_state = state
 	queue_redraw()
