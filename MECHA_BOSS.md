@@ -55,3 +55,6 @@ Ground slash effect alignment: rotate the red crescent into a broad, low horizon
 
 
 Aerial thrust presentation correction: aerial attack now uses the straight red streak from the user neon atlas (27,422,340,64), aligned with locked stab direction, bright tip leading and tail behind. The crescent is restricted to ground slash; thrust movement, warning and collision remain unchanged. No runtime tests.
+
+
+Mecha presentation update: normalize alive action-sheet scale using helmet-to-core span against ground idle, instead of total leg-dependent body height, correcting smaller aerial fire/thrust appearance. Ground melee cosmetic is now a thin red line across its swept path, expanding rapidly and contracting back to thin; the crescent is removed from ground melee. Slash preparation adds a red/white cross attached to per-pose sword-hand source anchors. Aerial straight thrust trail, HP/armor/damage and timings remain unchanged. Source changes only; no runtime verification per user instruction.
