@@ -93,21 +93,25 @@ func _process(delta: float) -> void:
 func _simulate(anchor: Vector2) -> void:
 	var dead: bool = actor.body_state == "death"
 	var running: bool = actor.body_state in ["run","slide","jump"]
-	var wind := -110.0 if running and not dead else -15.0
+	var wind := -35.0 if running and not dead else -8.0
 	var floor_y := _track_floor_y()-2.0
 	points[0] = anchor
 	previous[0] = anchor
+	var rest_target := anchor
 	for index in range(1,LINKS+1):
 		var old: Vector2 = points[index]
-		var inertia: Vector2 = (points[index]-previous[index])*(0.9 if dead else 0.92)
+		var inertia: Vector2 = (points[index]-previous[index])*(0.9 if dead else 0.962)
 		var t := float(index)/float(LINKS)
-		var flutter := sin(clock*7.0-float(index)*0.45)*22.0 if not dead else 0.0
+		var flutter := (sin(clock*8.5-float(index)*0.6)*180.0+sin(clock*14.0-float(index)*0.8)*55.0)*t*t if not dead else 0.0
 		var acceleration := Vector2(wind,(250.0 if dead else 85.0)+flutter)
 		if not dead: acceleration -= movement_acceleration*0.18*t
 		if not dead:
-			# A thick-cloth rest shape resists collapse without freezing the tail.
-			var rest := anchor+Vector2(-float(index)*LINK_LENGTH,t*(14.0 if running else 28.0)+sin(clock*4.0-t*3.0)*4.0*t)
-			acceleration += (rest-points[index])*lerpf(70.0,24.0,t)
+			# Traveling bends retain link lengths instead of pulling into a flat line.
+			# The root stays braced; amplitude grows toward the trailing edge.
+			var envelope := pow(t,1.25)*(1.0 if running else 0.45)
+			var bend := (sin(clock*8.5-float(index)*0.52)*0.85+sin(clock*3.7-float(index)*0.3)*0.18)*envelope
+			rest_target += Vector2(-cos(bend),sin(bend))*LINK_LENGTH
+			acceleration += (rest_target-points[index])*lerpf(85.0,65.0,t)
 		points[index] += inertia+acceleration*STEP*STEP
 		previous[index] = old
 	for iteration in range(10):
@@ -125,7 +129,7 @@ func _simulate(anchor: Vector2) -> void:
 			# Two-link chord constraints prevent sharp accordion folds.
 			for index in range(LINKS-1):
 				var chord: Vector2 = points[index+2]-points[index]
-				var minimum := LINK_LENGTH*1.85
+				var minimum := LINK_LENGTH*lerpf(1.85,1.65,float(index)/float(LINKS))
 				if chord.length() < minimum:
 					var direction := chord.normalized() if chord.length_squared() > 0.001 else Vector2.LEFT
 					var push := direction*(minimum-chord.length())
@@ -137,7 +141,7 @@ func _simulate(anchor: Vector2) -> void:
 		for index in range(1,LINKS+1):
 			# Keep the cloth behind the torso and above the track.
 			if not dead:
-				points[index].x = minf(points[index].x,points[index-1].x-LINK_LENGTH*0.7)
+				points[index].x = minf(points[index].x,points[index-1].x-LINK_LENGTH*0.5)
 				points[index] = _outside_shoulder(points[index])
 			points[index].y = minf(points[index].y,floor_y)
 

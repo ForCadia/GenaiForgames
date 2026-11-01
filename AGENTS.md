@@ -178,3 +178,6 @@ Latest cape stiffness/layer revision (2026-10-31): user removes scarf and ivory 
 
 
 Latest cape jump correction (2026-10-31): fix airborne-foot floor clipping by using true GD.GROUND_Y world floor for simulation/vertices. Carry all current/previous points with shoulder displacement and apply capped acceleration inertia, maintain rearward spacing/stable width normals, explicit triangles prevent invalid folded-quad triangulation. No changes to cloth size per jump or gameplay. User tests, no runtime checks.
+
+
+Latest cape flutter tuning (2026-10-31): reduce constant backward wind, add prominent traveling angular waves/tail flutter, reduce damping and soften tail bending while keeping root braced. Preserve shoulder avoidance, triangle topology/world-floor fix, layers and red-only presentation. File-only, user tests.

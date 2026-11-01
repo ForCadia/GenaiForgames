@@ -16,3 +16,6 @@ Latest user revision: scarf and ivory mesh are removed from rendering; only the 
 
 
 Jump/render correction: the previous floor constraint incorrectly followed actor.global_position.y (airborne feet). Both simulation and mesh now use the true game_data.GROUND_Y transformed by the world parent. Root displacement translates current AND previous strip points before solving relative flutter; capped root acceleration supplies movement inertia without collapsing link geometry. Enforce rearward centerline spacing, stabilize width-normal orientation and use explicit triangle faces instead of runtime quad triangulation to reduce folds/missing mesh. Fixed dimensions remain independent of body animation scale. Source-only inspection, no runtime verification.
+
+
+Latest flutter revision: reduce constant rearward wind110→35, reduce live damping0.92→0.962 velocity retention, replace nearly flat rest target with a traveling angular wave growing toward the tail (8.5rad/s primary plus3.7rad/s secondary). Stronger tail-only flutter and shape-following make motion visible; root stays fixed. Tail chord stiffness eases1.85→1.65 link lengths and minimum rearward spacing0.7→0.5, retaining stable triangulation, shoulder exclusion and true world floor. Death behavior unchanged. No runtime tests.
