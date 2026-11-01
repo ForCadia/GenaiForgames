@@ -1,0 +1,32 @@
+# Gunblade Mecha Boss — first implementation, 2026-10-31
+
+User-authorized independent Boss test,24 shared HP. Existing eye Boss, campaign endings, Endless bosses, historical LAB and telemetry files remain unchanged. DEV/BOSS now opens an eye/mecha selector; the selected Boss remains through retry/redeploy. No enemy waves or terrain hazards accompany the mecha. Boss tests remain isolated from currency, persistent upgrades and records.
+
+## Assets and frame contract
+
+Six supplied Downloads/boss PNGs were visually inspected and copied unchanged to assets/boss_mecha. Existing alpha is real (background RGB may still contain color but alpha0); no imagegen/redraw or jet flames added. Source filenames and one-based frame sequences:
+
+- ground_fire: 象牙机甲八帧开火使用1234.png — ONLY1,2,3,4; reused twice for an eight-tick firing cycle, never source5–8.
+- slash: 滑行劈砍，使用12345689-11-10-9-12-13-14-15-1.png —1,2,3,4,5 prepare;6,8,9,11,10,9 sweep;12,13,14,15,1 recover. Source7/16 excluded. Idle uses slash1.
+- stab: 空中向下攻击使用1345（攻击）671.png —1,3,4 prepare;5 active thrust;6,7,1 recovery. Despite filename, artwork is a horizontal left thrust, not a downward slash.
+- lift: 象牙机甲起降像素帧，不要使用18使用滑行劈砍的1.png — takeoff slash1→lift2,3,4; landing lift5,6,7→slash1. Source lift1/8 excluded. Hover uses lift4.
+- air_fire: 斜向下射击的无喷射机甲.png — all8 frames, no jet effects.
+- death: 像素机甲持枪剑倒地八帧动画.png — all8 frames.
+
+Frame regions use integer boundaries for1774x8874x2 and1536x10244x4 sheets. Offline source-pixel inspection provides chest anchors/opaque-body baselines, in assets/boss_mecha/frames.json and the exportable mecha_boss_frames.gd constant. Whole-body pose scale is calibrated by a common chest-to-helmet span; source sprites never flip, rotate or inherit movement mirroring. Feet align on the track; air foot root is displaced by code.
+
+## Damage contract
+
+Mecha has no consumable armor variable, armor bar, cracks, detachment or exposed phase. CORE_PENETRATION references GD.ENEMIES.light.armor=1; BODY_PENETRATION references GD.ENEMIES.heavy.armor=3, the existing AP-only threshold explicitly accepted by user for this Boss's medium body requirement. No new armor grade value invented. Core exists from first combat frame and shares the same24HP as body. Each valid bullet inflicts the current Boss weapon damage of1, with no core multiplier; insufficient penetration only plays ricochet. Grenade directly inflicts1 health damage and retains existing screen clear without armor changes.
+
+Segment tests check the separate red-core region first, before body alpha/solid-pixel checks. Body checks reject transparent pixels, forward gun extension, red/orange effects and bright white blade centerlines adjoining red energy. Existing per-projectile actor IDs deduplicate mecha core/body into one target, including multi-target-piercing bullets. Homing target data uses core position; smart targeting can ask the region's penetration requirement.
+
+## Loop, windows and configuration
+
+MechaBoss.tscn/mecha_boss.gd are independent of EyeballBoss. mecha_boss_data.gd centralizes health, dimensions, speeds/distances/heights, projectiles and stage timings. Order: ground prepare0.9s → two-shot ground firing0.8s → recover0.8s → slash prepare1.0s → left charge/sweep0.65s → recover0.8s → backslide → wait0.8s → takeoff0.75s → air prepare0.9s → two-shot diagonal fire0.8s → recover0.8s → thrust prepare0.9s → horizontal thrust0.65s → recover1.0s → return hover → land0.8s → recover1.0s.
+
+Ground bullets440px/s, air390px/s; shot emission snaps to the actual selected flash frames. Source-space barrel points are transformed by the current pose; airborne direction locks once per volley and follows the existing diagonal barrel orientation (no pursuit). Ground gun height intersects standing but clears crouched player. Ground sword checks only the forward sweep frames9/10/11/8 as configured (never preparation); jump clears its low band. Air stab only source5, at fixed altitude, grounded player passes below. No body-contact damage box seals a jump path. Sword swept rectangles account for fast horizontal travel and consume at most one contact/guard result per attack, via existing blockable _receive; shields remain recovery tools. Long return/recovery windows separate jump and aerial threats.
+
+## Validation status
+
+Only source/assets were inspected. NO Godot launch, import, automated tests or captures per standing user instruction. Manual acceptance remains: eye selector/regression; both retry paths; core AR/body ricochet/AP damage; grenade1HP and clear; shield one debit; crouch/jump/ground-under-stab evasion; source animation order, anchors/muzzles and death frames. Do not claim runtime verification. User's pre-existing HUD/layout/artwork changes were preserved; only the Boss HUD call is staged from that file.

@@ -15,6 +15,7 @@ var game: Node
 var start_button: Button
 var developer_button: Button
 var boss_test_button: Button
+var boss_select: VBoxContainer
 var menu: VBoxContainer
 var controls: VBoxContainer
 var settings_view: VBoxContainer
@@ -121,7 +122,7 @@ func _ready() -> void:
 	tests.offset_bottom = -12
 	var development_entry := F.button(tests,"开发模式",func(): game.enter_development_session(),true)
 	developer_button = F.button(tests, S.DEVELOPER, func(): game.start_game("checkpoint", 0, true), true)
-	boss_test_button = F.button(tests, S.BOSS_TEST, func(): game.start_game("checkpoint", 0, false, true), true)
+	boss_test_button = F.button(tests, S.BOSS_TEST, func(): show_bosses(true), true)
 	developer_button.text = "LAB / 调参"
 	boss_test_button.text = "DEV / BOSS"
 	for button in [development_entry,developer_button,boss_test_button]:
@@ -151,6 +152,13 @@ func _ready() -> void:
 	build_view.theme = preload("res://ui/ui_theme.tres")
 	panel.add_child(build_view)
 	build_view.hide()
+	boss_select = F.box(panel)
+	boss_select.add_theme_constant_override("separation",16)
+	F.label(boss_select,"BOSS TEST / 选择首领","LargeLabel")
+	preload("res://ui/menu_style.gd").primary(F.button(boss_select,"眼球 Boss",func(): game.start_game("checkpoint",0,false,true)))
+	preload("res://ui/menu_style.gd").primary(F.button(boss_select,"枪刀机甲 Boss",func(): game.start_game("checkpoint",0,false,true,0,false,"mecha")))
+	F.button(boss_select,"BACK",func(): show_bosses(false),true)
+	boss_select.hide()
 	visibility_changed.connect(func():
 		if visible:
 			show_controls(false)
@@ -191,6 +199,7 @@ static func build_controls(parent: Node, back: Callable) -> void:
 	preload("res://ui/menu_style.gd").primary(F.button(parent,S.BACK,back))
 
 func show_controls(value: bool) -> void:
+	if is_instance_valid(boss_select): boss_select.hide()
 	panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),20))
 	if is_instance_valid(build_view): build_view.hide()
 	if is_instance_valid(developer_button): developer_button.get_parent().show()
@@ -203,6 +212,7 @@ func show_controls(value: bool) -> void:
 	else: start_button.grab_focus()
 
 func show_settings(value: bool) -> void:
+	if is_instance_valid(boss_select): boss_select.hide()
 	build_view.hide()
 	level_select.hide()
 	menu.visible = not value
@@ -215,6 +225,7 @@ func show_settings(value: bool) -> void:
 	else: start_button.grab_focus()
 
 func show_levels(value: bool) -> void:
+	if is_instance_valid(boss_select): boss_select.hide()
 	panel.add_theme_stylebox_override("panel",preload("res://ui/menu_style.gd").frame(Color("0b121cf5"),Color("44586f"),20))
 	build_view.hide()
 	menu.visible = not value
@@ -228,8 +239,9 @@ func show_levels(value: bool) -> void:
 	else: start_button.grab_focus()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed("ui_cancel") and (controls.visible or settings_view.visible or level_select.visible or build_view.visible):
-		if build_view.visible: show_build(false)
+	if visible and event.is_action_pressed("ui_cancel") and (controls.visible or settings_view.visible or level_select.visible or build_view.visible or boss_select.visible):
+		if boss_select.visible: show_bosses(false)
+		elif build_view.visible: show_build(false)
 		elif level_select.visible: show_levels(false)
 		elif settings_view.visible: show_settings(false)
 		else: show_controls(false)
@@ -252,6 +264,7 @@ func _process(delta: float) -> void:
 			profile_label.text = "开发存档 / 保留当前状态，全部关卡开放"
 
 func show_build(value: bool) -> void:
+	if is_instance_valid(boss_select): boss_select.hide()
 	if not value:
 		show_levels(true)
 		developer_button.get_parent().show()
@@ -316,3 +329,15 @@ func _load_name() -> void:
 		get_node("/root/UIAudio").reject()
 		profile_notice.text = "请输入名字" if name_input.text.strip_edges().is_empty() else "存档无法读取，原有进度未更改"
 		profile_notice.show()
+
+func show_bosses(value: bool) -> void:
+	controls.hide()
+	settings_view.hide()
+	level_select.hide()
+	build_view.hide()
+	menu.visible = not value
+	boss_select.visible = value
+	developer_button.get_parent().visible = not value
+	_position_menu()
+	if value: (boss_select.get_child(1) as Button).grab_focus()
+	else: boss_test_button.grab_focus()

@@ -33,6 +33,8 @@ func _ready() -> void:
 	health.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 func apply_state(hp: int, maximum: int, plates: int, phase: int, armor_points := -1, armor_maximum := 36) -> void:
+	armor.show()
+	armor_bar.show()
 	var remaining := plates * 18 if armor_points < 0 else armor_points
 	armor_bar.max_value = armor_maximum
 	armor_bar.value = remaining
@@ -57,3 +59,10 @@ func apply_state(hp: int, maximum: int, plates: int, phase: int, armor_points :=
 			damage_tween.tween_interval(0.3)
 			damage_tween.tween_property(trail, "value", float(hp), 0.4)
 		last_hp = hp
+
+func apply_mecha_state(hp: int, maximum: int) -> void:
+	# Reuse shared health animation, then suppress all destructible-armor UI.
+	apply_state(hp,maximum,0,1,0,1)
+	title.text = "GUNBLADE / 枪刀机甲"
+	armor.hide()
+	armor_bar.hide()

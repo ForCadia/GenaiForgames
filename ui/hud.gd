@@ -242,7 +242,7 @@ func sync() -> void:
 	grenade_label.visible = game.has_grenade
 	grenade_label.text = "[F] GRENADE ×%d" % game.grenade_count
 	boss_hud.visible = game.boss_mode
-	if game.boss_mode and not game.boss.is_empty(): boss_hud.apply_state(game.boss.hp, game.GD.BOSS.health, game.boss.armor, game.boss.phase, game.boss_actor.armor_points(), game.boss_actor.armor_per_layer * 2)
+	if game.boss_mode and not game.boss.is_empty(): game.refresh_boss_hud(boss_hud)
 	for i in range(3):
 		slots[i].add_theme_stylebox_override("panel", selected_slot_style if game.selected_slot == i else inactive_slot_style)
 		slots[i].modulate = P.AMBER if game.selected_slot == i else P.TEXT_DIM
