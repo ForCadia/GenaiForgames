@@ -196,3 +196,6 @@ Latest user rollback (2026-10-31): remove both underarm ribbons from player_visu
 
 
 Latest aerial ranged enemy (2026-10-31): user authorizes aerial_rifleman.gd from Downloads/空中射击兵像素动画设定表.png, imagegen transparent assets/enemies/aerial_rifleman_8x6.png. Level03 and Endless only, enforced spawn API;3HP rifle1/AP2,40 threat,180score/4G,0.6s aim then3 orange320px/s shots at0.18s intervals, boost/reposition, exit after two bursts. Level03 replaces7 kamikaze events without increasing total; independent Endless profiles add10–22% nominal aerial share. Integrates shots/homing/piercing/grenade/shield/coins/cleanup/smart aim/demo AI. Level01/02/LAB/Boss unchanged. No tests/import/game/captures. See AERIAL_RIFLEMAN.md.
+
+
+Latest aerial rifleman motion/death/fire revision (2026-10-31): smooth kamikaze-style104x64 orbit, no self-destruction; visual128/hitbox48x80. Fixed left-down45° bullets480px/s, muzzle/visual aim lean aligned. Death first3 frames during fall, fourth onward and explosion sound only after world-ground contact, cleanup after final landing frame. Two bursts then exit, HP/threat/rewards/scope unchanged. No tests/import/game/captures.

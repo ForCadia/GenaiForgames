@@ -4,6 +4,10 @@ signal projectile_requested(origin: Vector2, direction: Vector2, speed: float, c
 signal sound_requested(cue: String)
 const SHEET := preload("res://assets/enemies/aerial_rifleman_8x6.png")
 const SCORE := 180
+const GD := preload("res://game_data.gd")
+const ORBIT_RADIUS := Vector2(104,64)
+const BULLET_SPEED := 480.0
+const FIRE_DIRECTION := Vector2(-0.70710678,0.70710678)
 const ANIMATIONS := ["idle","fly","aim","shoot","boost","die"]
 var sprite := AnimatedSprite2D.new()
 var state := "enter"
@@ -18,7 +22,11 @@ var rounds_left := 0
 var volleys := 0
 var hurt_left := 0.0
 var contact_left := 0.0
-var boost_target := Vector2.ZERO
+var orbit_center := Vector2.ZERO
+var orbit_phase := 0.0
+var landed := false
+var fall_time := 0.0
+var landing_time := 0.0
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -35,67 +43,91 @@ func _ready() -> void:
 			atlas.region = Rect2(Vector2(column,row)*cell,cell)
 			frames.add_frame(ANIMATIONS[row],atlas)
 	sprite.sprite_frames = frames
-	sprite.scale = Vector2.ONE*(96.0/maxf(cell.x,cell.y))
+	sprite.scale = Vector2.ONE*(128.0/maxf(cell.x,cell.y))
 	sprite.flip_h = true
 	add_child(sprite)
 	sprite.play("fly")
-	hover_x = 730.0+randf_range(-45,55)
+	hover_x = 790.0
 
-func advance(delta: float, scroll: float, player_center: Vector2) -> void:
+func advance(delta: float, scroll: float, _player_center: Vector2) -> void:
 	age += delta
 	state_left -= delta
 	contact_left = maxf(0.0,contact_left-delta)
 	hurt_left = maxf(0.0,hurt_left-delta)
 	sprite.modulate = Color(1.5,0.7,0.7) if hurt_left > 0 else Color.WHITE
 	if state == "dead":
-		velocity.y += 500.0*delta
-		position += velocity*delta
+		_advance_fall(delta,scroll)
 		return
 	var wanted := Vector2.ZERO
-	match state:
-		"enter":
-			wanted = Vector2(-170,(base_y-position.y)*4.0)
-			if position.x <= hover_x:
-				state = "hover"
-				state_left = 0.35
-		"hover":
-			wanted = Vector2((hover_x-position.x)*4.0,(base_y+sin(age*2.5)*12-position.y)*5.0)
-			if state_left <= 0:
-				state = "aim"
-				state_left = 0.6
-		"aim":
-			wanted = Vector2((hover_x-position.x)*3.0,(base_y-position.y)*4.0)
-			if state_left <= 0:
-				burst_direction = (player_center-(global_position+Vector2(-25,4))).normalized()
-				state = "shoot"
-				state_left = 0.0
-				rounds_left = 3
-		"shoot":
-			if state_left <= 0:
-				projectile_requested.emit(global_position+Vector2(-25,4),burst_direction,320.0,Color("ff9638"))
-				sound_requested.emit("light_turret_fire")
-				rounds_left -= 1
-				state_left = 0.18
-				if rounds_left <= 0:
-					volleys += 1
-					state = "boost"
-					state_left = 0.75
-					boost_target = Vector2(clampf(position.x+(45.0 if volleys % 2 == 1 else -60.0),620.0,860.0),clampf(base_y+(48.0 if volleys % 2 == 1 else -48.0),250.0,390.0))
-		"boost":
-			wanted = (boost_target-position)*4.5
-			if state_left <= 0:
-				base_y = boost_target.y
-				hover_x = boost_target.x
-				state = "retreat" if volleys >= 2 else "hover"
-				state_left = 0.45
-		"retreat": wanted = Vector2(-maxf(160.0,scroll*0.7),sin(age*3.0)*12)
+	if state == "enter":
+		wanted = Vector2(-230,(base_y-position.y)*4.0)
+		if position.x <= hover_x:
+			orbit_center = Vector2(650,base_y)
+			orbit_phase = 0.0
+			state = "orbit"
+			state_left = 2.6
+	elif state == "retreat":
+		wanted = Vector2(-maxf(160.0,scroll*0.7),sin(age*3.0)*12)
+	else:
+		# Same ellipse/tangent steering as the kamikaze, without any dive.
+		var phase_speed := TAU/2.6*(0.45 if state in ["aim","shoot"] else 1.0)
+		orbit_phase += phase_speed*delta
+		var path := orbit_center+Vector2(cos(orbit_phase)*ORBIT_RADIUS.x,sin(orbit_phase)*ORBIT_RADIUS.y)
+		var tangent := Vector2(-sin(orbit_phase)*ORBIT_RADIUS.x,cos(orbit_phase)*ORBIT_RADIUS.y)*phase_speed
+		wanted = tangent+(path-position)*4.0
+		match state:
+			"orbit":
+				if state_left <= 0:
+					state = "aim"
+					state_left = 0.6
+			"aim":
+				if state_left <= 0:
+					burst_direction = FIRE_DIRECTION
+					state = "shoot"
+					state_left = 0.0
+					rounds_left = 3
+			"shoot":
+				if state_left <= 0:
+					projectile_requested.emit(_muzzle_position(),burst_direction,BULLET_SPEED,Color("ff9638"))
+					sound_requested.emit("light_turret_fire")
+					rounds_left -= 1
+					state_left = 0.18
+					if rounds_left <= 0:
+						volleys += 1
+						state = "retreat" if volleys >= 2 else "orbit"
+						state_left = 2.6
 	velocity = velocity.lerp(wanted,1.0-exp(-7.0*delta))
 	position += velocity*delta
-	var pose: String = "fly" if state in ["enter","retreat"] else ("idle" if state == "hover" else state)
+	var attacking: bool = state in ["aim","shoot"]
+	var desired_rotation := deg_to_rad(-30.0) if attacking else clampf(velocity.y/700.0,-0.15,0.15)
+	sprite.rotation = lerp_angle(sprite.rotation,desired_rotation,1.0-exp(-14.0*delta))
+	var pose: String = state if attacking else "fly"
 	if sprite.animation != StringName(pose): sprite.play(pose)
 
+func _muzzle_position() -> Vector2:
+	return global_position+Vector2(-36,10).rotated(sprite.rotation)
+
+func _advance_fall(delta: float, scroll: float) -> void:
+	var floor_y: float = get_parent().to_global(Vector2(0,GD.GROUND_Y)).y-38.0
+	sprite.rotation = lerp_angle(sprite.rotation,0.0,1.0-exp(-10.0*delta))
+	if not landed:
+		fall_time += delta
+		velocity.y += 700.0*delta
+		position += Vector2(-35.0-scroll*0.35,velocity.y)*delta
+		sprite.frame = mini(2,int(fall_time*14.0))
+		if global_position.y >= floor_y:
+			global_position.y = floor_y
+			landed = true
+			landing_time = 0.0
+			sprite.frame = 3
+			sound_requested.emit("enemy_explode")
+	else:
+		landing_time += delta
+		position.x -= scroll*delta
+		sprite.frame = mini(7,3+int(landing_time*14.0))
+
 func body_rect() -> Rect2:
-	return Rect2(global_position-Vector2(18,30),Vector2(36,60))
+	return Rect2(global_position-Vector2(24,40),Vector2(48,80))
 
 func shot_hits(from: Vector2, to: Vector2) -> bool:
 	if state == "dead": return false
@@ -115,11 +147,15 @@ func take_damage(penetration: int) -> void:
 func force_kill() -> void:
 	if state == "dead": return
 	state = "dead"
-	state_left = 8.0/14.0
+	landed = false
+	fall_time = 0.0
+	landing_time = 0.0
 	velocity = Vector2(-35,50)
-	sprite.play("die")
+	sprite.animation = &"die"
+	sprite.stop()
+	sprite.frame = 0
 	killed.emit(self)
-	sound_requested.emit("enemy_explode")
 
 func is_finished() -> bool:
-	return (state == "dead" and state_left <= 0) or position.x < -120 or position.y > 820 or age > 16.0
+	if state == "dead": return (landed and landing_time >= 5.0/14.0) or position.x < -150
+	return position.x < -120 or position.y > 820 or age > 18.0
