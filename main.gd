@@ -1012,7 +1012,7 @@ func is_mecha_boss() -> bool:
 	return (boss_test_kind if boss_test_mode else active_boss_kind) == "mecha"
 
 func is_iron_boss() -> bool:
-	return boss_test_mode and boss_test_kind == "iron"
+	return (boss_test_kind if boss_test_mode else active_boss_kind) == "iron"
 
 func is_mechanical_boss() -> bool:
 	return is_mecha_boss() or is_iron_boss()
@@ -1021,11 +1021,13 @@ func _mechanical_actor() -> Node2D:
 	return iron_actor if is_iron_boss() else mecha_actor
 
 func _start_boss(preserve_motion := false) -> void:
-	# Keep campaign01/02 and historical LAB on the eye; alternate Endless bosses.
+	# Campaign bosses follow mission order; Endless rotates all three. LAB stays eye.
 	active_boss_kind = "eyeball"
 	if not boss_test_mode and not developer_mode:
 		if endless_mode:
-			active_boss_kind = "mecha" if int(endless_wave/5)%2 == 1 else "eyeball"
+			var roster := ["eyeball","iron","mecha"]
+			active_boss_kind = roster[maxi(0,int(endless_wave/5)-1)%roster.size()]
+		elif selected_level == 1: active_boss_kind = "iron"
 		elif selected_level == 2: active_boss_kind = "mecha"
 	checkpoint_grenades = grenade_count
 	boss_grenade_spawned = false
@@ -1227,7 +1229,7 @@ func _boss_damage(hit_origin: Vector2 = Vector2.INF) -> void:
 		_clear_boss_attacks()
 		player_visual.show_idle()
 	else:
-		_notify("BOSS HIT // HP %d / %d" % [boss.hp, GD.BOSS.health], WHITE, 1)
+		_notify("BOSS HIT // HP %d / %d" % [boss.hp, int(boss.get("maximum",GD.BOSS.health))], WHITE, 1)
 
 func _request_retry(action: String) -> void:
 	if state != "dead" or retry_requested: return

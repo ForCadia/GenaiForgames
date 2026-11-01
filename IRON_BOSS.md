@@ -62,3 +62,6 @@ Iron HP/fragmentation revision2026-11-01: user asks+1x health, interpreted as do
 
 
 Latest Iron shared HP rule2026-11-01: core and mortar hits both reduce the same48HP Boss pool. Cannon no longer takes separate module HP damage, hides or explodes independently; remains active until whole Boss defeat. Its internal availability sentinel remains positive until full death, and HUD removes the separate cannon count. Core threshold1 and cannon threshold3 remain; solid inert hull ricochet remains. Entire Boss still uses7 cosmetic death bursts; fragmentation shells retained. This supersedes earlier16HP destructible cannon. No engine/tests.
+
+
+Latest Boss roster2026-11-01: reduce mortar fragments8->4 (upward angles-155/-115/-65/-25deg). Campaign01 eye,02 IRON BASTION,03 gunblade; Endless rotates eye at5,Iron at10,gunblade at15 then repeats every15waves. Explicit Boss tests still override; historical LAB unchanged. Iron uses shared48HP baseline and existing Endless five-wave HP/aggression growth plus selected difficulty; campaign02 remains normal baseline. Active-kind dispatch now recognizes Iron beyond test mode, including foreground flyers, summons, HUD, intro, grenade/death/reset and targeting. Boss hit message denominator uses actual encounter maximum. No engine/tests.
