@@ -166,3 +166,6 @@ Latest Endless count/card tuning (2026-10-31): Easy/Normal/Hard total starts18/2
 
 
 Latest Endless homing/piercing revision (2026-10-31): user changes homing to single-rank complete tracking, no graded steering. main rounds snapshot homing/pierce rank, steer toward actual valid hurtbox/emitter center and switch when target gone/hit, preserve speed and avoid overshoot orbit. Piercing ranks1–4 allow that many extra unique actors, independent of armor penetration, deduplicate per-round hits and support same-frame multiple hits. All extra projectiles inherit effects. No permanent tree changes, no tests/import/game/captures.
+
+
+Latest homing nerf/copy (2026-10-31): homing now max4 ranks; every5/4/3/2 actual emitted rounds grants one fully guided round. Count multishot rounds individually, never entire volley at once; reset counter with run/title. Reward text directly states effects, removes explanation/cap/repeat prose; homing card shows next-rank interval. File-only, no tests.

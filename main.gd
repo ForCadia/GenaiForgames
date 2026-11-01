@@ -78,6 +78,7 @@ var weapon_index := 0
 var selected_slot := 0
 var manual_piercer_lock := false
 var endless_fire_count := 0
+var endless_homing_round_count := 0
 var legacy_shot_target_serial := 0
 var ammo := [GD.WEAPONS[0].magazine, GD.WEAPONS[1].magazine]
 var reload_left := 0.0
@@ -423,9 +424,16 @@ func _fire() -> void:
 	_emit(origin, _weapon().color, 5, 145)
 
 func _emit_player_round(origin: Vector2, direction: Vector2, penetration: int, color: Color) -> void:
+	var homing_rank := mini(4,int(_meta_effect("homing")))
+	var guided := false
+	if homing_rank > 0:
+		endless_homing_round_count += 1
+		if endless_homing_round_count >= 6-homing_rank:
+			guided = true
+			endless_homing_round_count = 0
 	shots.append({"pos":origin,"previous":origin,"velocity":direction*_weapon().projectile_speed,
 		"penetration":penetration,"color":color,"style":_weapon().projectile_style,
-		"pierce_left":int(_meta_effect("pierce_targets")),"homing":_meta_effect("homing")>0,
+		"pierce_left":int(_meta_effect("pierce_targets")),"homing":guided,
 		"hit_ids":[],"target_id":0,"age":0.0})
 	run_total_shots += 1
 
@@ -1071,6 +1079,7 @@ func _reset_campaign() -> void:
 	endless_talent_ranks.clear()
 	endless_talent_effects.clear()
 	endless_fire_count = 0
+	endless_homing_round_count = 0
 	manual_piercer_lock = false
 	level_segments = CAMPAIGNS.segments(selected_level,not developer_mode)
 	endless_wave = 1
@@ -1171,6 +1180,7 @@ func return_to_start() -> void:
 	endless_talent_ranks.clear()
 	endless_talent_effects.clear()
 	endless_fire_count = 0
+	endless_homing_round_count = 0
 	manual_piercer_lock = false
 	_reset_death_camera()
 	grenade_count = 0

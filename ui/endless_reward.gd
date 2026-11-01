@@ -78,10 +78,10 @@ func _ready() -> void:
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		title.add_theme_font_size_override("font_size",22)
 		var rank := int(game.endless_talent_ranks.get(id,0))
-		var rank_label := F.label(content,"可重复选择" if data.get("repeatable",false) and data.effects.is_empty() else "Lv.%d → %d" % [rank,rank+1],"MutedLabel")
+		var rank_label := F.label(content,"补给" if data.get("repeatable",false) and data.effects.is_empty() else "Lv.%d → %d" % [rank,rank+1],"MutedLabel")
 		rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		rank_label.add_theme_font_size_override("font_size",15)
-		var description := F.label(content,str(data.text),"SmallLabel")
+		var description := F.label(content,TALENTS.description(id,rank),"SmallLabel")
 		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		description.add_theme_font_size_override("font_size",18)
