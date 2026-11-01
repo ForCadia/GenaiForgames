@@ -1,0 +1,123 @@
+5dca52e 2026-11-01 Reduce fragments and assign Iron Bastion to mission two and endless rotation
+427bca3 2026-11-01 Share fortress and cannon health and remove independent mortar destruction
+a83833f 2026-11-01 Double fortress health and add mortar fragmentation bursts
+d00da00 2026-11-01 Replace fortress destruction flipbooks with bursts and enlarge mortar shells
+52aa7e2 2026-11-01 Lower fortress and synchronize cannon bounce with correct rear effect layering
+3178caf 2026-11-01 Use user four-frame pixel hull and mortar art with larger aligned cannon
+66f66ae 2026-11-01 Add isolated reversing hull animation and matching pixel cannon atlases
+0a85d1c 2026-11-01 Move fortress right, expose core and prioritize foreground flyer hits
+fd28cbd 2026-11-01 Fix mortar flash cropping and replace missiles with deployed air support and atlas shells
+17d822e 2026-11-01 Enlarge Iron fortress and align rooftop mortar, launcher and core cover
+46edeaf 2026-11-01 Add new sword melee and Iron Bastion ranged audio with calibrated gains
+0af35f6 2026-11-01 Add modular Iron Bastion boss test with covered core and ballistic cannon
+5bf26a9 2026-11-01 Add imagegen warning and safe Boss focus introduction before combat
+d3a7286 2026-10-31 Scale endless boss health and attack aggression after each five-wave block
+f0afa2d 2026-10-31 Reduce level three heavy turret density and diversify authored rosters
+d9ee3ef 2026-10-31 Increase heavy turret pressure cost to 75 and allow oversized solo spawns
+45ddba7 2026-10-31 Integrate mecha into level three and alternating endless bosses with aggression tiers
+0d92de7 2026-10-31 Place mecha impact sparks at first projectile contact
+52e2036 2026-10-31 Require armor piercing hits for all mecha damage regions
+62580c5 2026-10-31 Expose mecha chest core box through overlapping front armor pixels
+3e068c0 2026-10-31 Speed up mecha ground retreat independently of air return
+eeaf3a3 2026-10-31 Shape slash flipbook with wide left edge and rectangular peak frames
+12e9726 2026-10-31 Anchor mecha exhaust to frame backpack outlets and calibrate body scale
+683119f 2026-10-31 Replace single slash strip with eight-frame pixel flipbook
+534145c 2026-10-31 Use imagegen red slash texture across the full screen
+42b1cb4 2026-10-31 Normalize mecha aerial size and add expanding red slash with hand glint
+7b0f635 2026-10-31 Use straight directional thrust trail for aerial melee
+6254ebb 2026-10-31 Align ground melee effect as a low horizontal sword sweep
+b468d83 2026-10-31 Widen borderless mecha warnings and enlarge melee effects
+25e1bad 2026-10-31 Add mecha melee warnings and red slash effects with faster action poses
+ec20701 2026-10-31 Add mecha aerial entrance and cosmetic friction and thruster effects
+22138eb 2026-10-31 Repack all mecha action atlases with isolated blade frames
+5752421 2026-10-31 Correct mecha atlas gutters speed up actions and aim aerial thrust at player
+c407c79 2026-10-31 Specify integer type for mecha pixel sampling coordinate
+54f9830 2026-10-31 Use retro sheet coins and standard projectile sprites
+50233ab 2026-10-31 Add independently selectable gunblade mecha Boss with fixed armor thresholds
+4850a0e 2026-10-31 Keep the world moving during Endless Boss death intermission
+9c590a3 2026-10-31 Compute AnimatedSprite2D corpse bounds from the current frame texture
+b813fac 2026-10-31 Keep grounded aerial corpses scrolling above the track until offscreen
+0ee2186 2026-10-31 Aim aerial bursts at randomized predicted player positions
+8651dcd 2026-10-31 Reduce aerial projectile size and bank while calibrating animated muzzles
+f1a1f7f 2026-10-31 Revise aerial rifleman orbit size landing animation and diagonal fire
+809b371 2026-10-31 Add aerial rifleman encounters to Level03 and independent Endless profiles
+66d613c 2026-10-31 Remove underarm ribbons while retaining the main cape
+f390791 2026-10-31 Add front and rear underarm ribbons using shared cape simulation
+9aac716 2026-10-31 Calm running cape oscillation while preserving airborne inertia
+bb22f33 2026-10-31 Make cape lag upward jumps and lift during descent
+30d40f3 2026-10-31 Add stronger traveling cape waves with a stable shoulder root
+564199b 2026-10-31 Fix cape jump clipping and stabilize ribbon transport and mesh topology
+deea59c 2026-10-31 Stiffen red-only cape and add shoulder avoidance with foreground layering
+403072c 2026-10-31 Add procedural red ivory ribbon cape and layered red neck scarf
+bbd4065 2026-10-31 Limit homing to ranked projectile intervals and simplify talent copy
+eb51c22 2026-10-31 Specify boolean type for projectile bounds check
+686d6e7 2026-10-31 Add single-rank full homing and four-rank target piercing talents
+07feb7f 2026-10-31 Scale Endless counts by difficulty and refine reward monitors and extra rounds
+f7e999f 2026-10-31 Present Endless rewards on descending monitors over a running empty track
+00c7755 2026-10-31 Respect manual AP selection and expand Endless combat talent synergies
+d644884 2026-10-31 Simplify Endless entries and hide upper combat status messages
+25b9b40 2026-10-31 Show three direct Endless difficulty entries on mission selector
+7a3cac4 2026-10-31 Add run-only Endless talent choices and difficulty-based spawn pacing
+1f0734b 2026-10-31 Cap active threat points in later campaigns and Endless
+a1fd424 2026-10-31 Generate independent randomized Endless encounter rosters
+725a49c 2026-10-31 Redesign later mission encounters and map campaign phases to Endless waves
+7c12d07 2026-10-31 Increase Endless Hard spawns to three times Normal
+35ddd7d 2026-10-31 Add easy, normal and hard Endless difficulty selection
+58247db 2026-10-31 Keep first mission original and double later encounter pressure
+fa32d94 2026-10-31 Enlarge and raise kamikaze drone with wider smooth orbit
+9b4259b 2026-10-31 Raise kamikaze drone flight and orbit before downward dive
+70d2111 2026-10-31 Add transparent kamikaze drone animations and real enemy behavior
+180e112 2026-10-31 Remove title terminal stand and keep screen only
+641c105 2026-10-31 Regenerate long terminal pedestal and preserve its aspect ratio
+558792d 2026-10-31 Move actual title display further into upper-right corner
+8a5e6b4 2026-10-31 Extend title terminal pedestal to screen bottom
+9a9652f 2026-10-31 Use standing title terminal and restore submenu screen backgrounds
+9d877bd 2026-10-31 Use supplied sci-fi terminal artwork for title menu
+8624c00 2026-10-31 Replace click sound and trigger feedback immediately on button down
+1660315 2026-10-31 Play user-provided coin sound on collected currency
+beec5fa 2026-10-31 Add user-provided button click and rejection sounds
+478b94a 2026-10-31 Combine smart weapon selection with empty-magazine auto reload
+dc3abeb 2026-10-31 Drive Boss cracked and detached armor visuals from armor amount
+f3225cd 2026-10-31 Add cumulative Boss armor bar and reduce shield sustain
+1b305c9 2026-10-31 Group Development entry with bottom-right test controls
+d4ecfaf 2026-10-31 Move profile build entry to mission selection page
+5f764a2 2026-10-31 Add fresh guest visits, development access and named local profiles
+b2913b6 2026-10-31 Place title panel at upper-right with fixed margins
+5da40a1 2026-10-31 Make landed coins home automatically and shift title panel
+afd7494 2026-10-31 Run real gameplay with isolated bot controls behind title menu
+2c01c3c 2026-10-31 Add title battle demo and music, allow shield to block spikes
+d1d55ef 2026-10-31 Restore previous build tree presentation
+4d13a4a 2026-10-31 Unify noncombat menus, build tree states and result layouts
+8c560d9 2026-10-31 Polish coin drops, armor-aware DPS selection and Boss entrance
+072b540 2026-10-31 Add persistent gold economy and three-branch build tree
+5ce71f0 2026-10-31 Add three-mission selection and endless survival mode
+f6b5bad 2026-10-31 Add persistent pause settings and calibrate audio mix
+78afef1 2026-10-31 Align weapon barrel with reticle and rename failure heading
+529ee34 2026-10-31 Frame death text and statistics in a translucent panel
+c493fcc 2026-10-31 Hold death framing before overlay and widen start menu
+806af0e 2026-10-31 Slow death camera and frame character below center
+909bdb6 2026-10-31 Add post-death framing and unified five-stage HUD feedback
+a58c240 2026-10-31 Accumulate grenades center tutorial and finish death animation before overlay
+2c650ea 2026-10-31 Improve below-track hints weapon selection and pickup readability
+eca0a32 2026-10-31 Reduce run body size and speed up sixteen-frame loop
+d7e6f0a 2026-10-31 Match run proportions and palette and restore menu panels
+28ce60c 2026-10-31 Use new 16-frame olive run cycle without startup animation
+ee3296a 2026-10-31 Add F screen-clear grenade and refine frameless HUD
+1d2d5c1 2026-10-31 Move tutorial hints above playfield and compact weapon HUD on right
+c7226fb 2026-10-31 Exclude private and development files from Windows packages
+50c9abb 2026-10-31 Add UI gallery and regression coverage for redesigned interfaces
+bcbd5fd 2026-10-31 Replace game interfaces with layered pixel HUD and menus
+cc51983 2026-10-31 Add shared industrial pixel UI theme and visual assets
+beade2f 2026-10-31 Document UI surfaces and data sources before redesign
+aab3b2b 2026-10-30 Add held A-D movement with automatic return and faster Boss barrage
+9dfa9d0 2026-10-30 Fix lethal Boss hit iteration and reduce barrage to eight full-size rounds
+7f7cbda 2026-10-30 Expand Boss combat with roaming barrage and direct test entry
+536a701 2026-10-30 Replace shield sound and tie quieter playback to active guard
+67703c7 2026-10-30 Align Boss eye muzzle and fire a three-projectile spread
+0d9ac50 2026-10-30 Launch bombs from hovering Boss toward the landing point
+672b07d 2026-10-30 Improve combat audio and preserve airborne stage transitions
+c9e2619 2026-10-30 Add turret, laser wall, pickup and bomb sound effects
+5392f17 2026-10-30 Render piercer shots as blue lasers and rifle shots as orange bullets
+85513ef 2026-10-30 Wire weapon effects and scale reload audio to gameplay duration
+a41d57b 2026-10-30 Add regular and boss background music with mute control
+f5827b6 2026-10-30 Separate developer tools from default gameplay

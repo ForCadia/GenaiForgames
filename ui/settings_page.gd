@@ -27,7 +27,7 @@ func rebuild() -> void:
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	section("AUDIO")
 	for spec in [["master", "MASTER VOLUME"], ["music", "MUSIC VOLUME"], ["sfx", "SOUND EFFECTS"]]: add_volume(spec[0],spec[1])
-	add_toggle("muted", "MUTE ALL")
+	add_toggle("muted", "MUTE ALL / F10")
 	if game.settings.display_supported():
 		section("DISPLAY")
 		var fullscreen := add_toggle("fullscreen", "FULLSCREEN")
@@ -37,6 +37,7 @@ func rebuild() -> void:
 	section("ACCESSIBILITY / PRESENTATION")
 	add_toggle("tutorials", "SHOW TUTORIAL HINTS")
 	add_toggle("reduced_flash", "REDUCE SCREEN FLASH")
+	add_toggle("cosmetic_vfx", "HIT PICKUP AND FAILURE PARTICLES")
 	add_toggle("death_camera", "DEATH CAMERA MOTION")
 	F.label(self, "SCROLL FOR MORE  /  Changes apply and save automatically.", "MutedLabel")
 	var actions := F.box(self,true)

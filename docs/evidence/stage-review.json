@@ -1,0 +1,182 @@
+[
+  {
+    "pipeline": "2D",
+    "stage": "0",
+    "name": "Art direction",
+    "review_rating": 4,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "GDD.md; style/STYLE.md; d7e6f0a"
+  },
+  {
+    "pipeline": "2D",
+    "stage": "1",
+    "name": "Concept art",
+    "review_rating": 3,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "GDD.md source-status section; design_sources/LabA_Zhu_GDD.pdf"
+  },
+  {
+    "pipeline": "2D",
+    "stage": "2",
+    "name": "Final art",
+    "review_rating": 3,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "28ce60c; d7e6f0a; player_visual.gd; light_turret_frames.tres"
+  },
+  {
+    "pipeline": "2D",
+    "stage": "4",
+    "name": "Animation",
+    "review_rating": 2,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "player_visual.gd; turret_base.gd; iron_boss_frames.gd; 3178caf"
+  },
+  {
+    "pipeline": "Shared",
+    "stage": "E",
+    "name": "Environment",
+    "review_rating": 4,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "main.tscn; README.md backdrop section"
+  },
+  {
+    "pipeline": "Shared",
+    "stage": "UI",
+    "name": "UI art and text",
+    "review_rating": 4,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "NONCOMBAT_UI.md; TITLE_TERMINAL.md; d1d55ef; 180e112"
+  },
+  {
+    "pipeline": "Shared",
+    "stage": "VFX",
+    "name": "Effects",
+    "review_rating": 3,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "main.gd _emit; assets/vfx/*.source.md; 683119f; eeaf3a3"
+  },
+  {
+    "pipeline": "Shared",
+    "stage": "I",
+    "name": "Integration and review",
+    "review_rating": 4,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "0d92de7; 0af35f6; 427bca3; current export logs"
+  },
+  {
+    "pipeline": "SFX",
+    "stage": "1",
+    "name": "Spotting",
+    "review_rating": 4,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "SFX.md; world_audio.gd; docs/sound-list.md"
+  },
+  {
+    "pipeline": "SFX",
+    "stage": "2",
+    "name": "Sourcing",
+    "review_rating": 3,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "assets/sfx/boss_new_audio.source.json; docs/CREDITS.md"
+  },
+  {
+    "pipeline": "SFX",
+    "stage": "3",
+    "name": "Editing and design",
+    "review_rating": 4,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "85513ef; UI_SFX.md; assets/sfx/boss_new_audio.source.json"
+  },
+  {
+    "pipeline": "SFX",
+    "stage": "4",
+    "name": "Implementation",
+    "review_rating": 4,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "world_audio.gd; weapon_audio.gd; 46edeaf; game_settings.gd"
+  },
+  {
+    "pipeline": "SFX",
+    "stage": "5",
+    "name": "Mixing",
+    "review_rating": 4,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "audio_mix.gd; SOUND_SETTINGS.md; f6b5bad"
+  },
+  {
+    "pipeline": "Music",
+    "stage": "1",
+    "name": "Music direction",
+    "review_rating": 4,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "MUSIC.md; development conversation"
+  },
+  {
+    "pipeline": "Music",
+    "stage": "2",
+    "name": "Composition and production",
+    "review_rating": 3,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "assets/music/*.mp3; MUSIC.md"
+  },
+  {
+    "pipeline": "Music",
+    "stage": "3",
+    "name": "Mixing and mastering",
+    "review_rating": 3,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "docs/MUSIC_LOOP_EDIT.md; docs/evidence/music-loops.json"
+  },
+  {
+    "pipeline": "Music",
+    "stage": "4",
+    "name": "Implementation",
+    "review_rating": 4,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "music_player.gd; MENU_DEMO.md"
+  },
+  {
+    "pipeline": "Voice",
+    "stage": "ALT",
+    "name": "No voice alternative",
+    "review_rating": 4,
+    "actual_minutes": null,
+    "without_ai_minutes": null,
+    "plan_tier": null,
+    "evidence": "docs/voice-script.md"
+  }
+]

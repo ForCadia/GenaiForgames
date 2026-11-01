@@ -1,0 +1,7 @@
+# Voice pipeline decision
+
+Decision: no voice for this build. The assignment permits a150 word rationale instead of3 to10 captioned lines; this uses the stricter scope table rather than the shorter FAQ wording.
+
+EverFront does not use spoken dialogue because its attention budget is already committed to fast visual and sonic decisions. The player must read incoming fire, choose armor penetration, manage reload timing, and hear shield failure while the track continues moving. My priority order is lethal attack warnings, player state, enemy actions, rewards, music, and finally narration. A spoken warning could arrive too late, repeat during retries, or compete with the distinctive charge and ricochet sounds that already explain the encounter. The game instead uses concise on screen warnings and explicit menu instructions, so essential meaning does not depend on hearing speech. This also avoids adding a voice identity that the current character design and story have not established. For this build, no voice is a deliberate production choice. A later narrative mode could justify short captioned lines, but it should be tested against combat readability before any final voice recording begins.
+
+No spoken lines are implemented or claimed. Therefore there is no casting, scratch performance, recording or caption timing to misreport as complete. Visible attack warnings and UI labels remain.

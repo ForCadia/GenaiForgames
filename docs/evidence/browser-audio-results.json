@@ -1,0 +1,969 @@
+[
+  {
+    "browser": "Edge",
+    "errors": [],
+    "console": [
+      "Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org",
+      "OpenGL API OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)) - Compatibility - Using Device: WebKit - WebKit WebGL",
+      "Build configuration: Emscripten 4.0.20, single-threaded, no GDExtension support.",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "[.WebGL-0x39fc00ec6800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "[.WebGL-0x39fc00ec6800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "[.WebGL-0x39fc00ec6800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "[.WebGL-0x39fc00ec6800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: INVALID_OPERATION: bindBuffer: element array buffers can not be bound to a different target",
+      "WebGL: INVALID_OPERATION: bufferSubData: no buffer",
+      "WebGL: too many errors, no more errors will be reported to the console for this context."
+    ],
+    "version": "153.0.4234.48",
+    "before_interaction": [
+      {
+        "kind": "GainNode",
+        "time": 4.290666666666667,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "AudioWorkletNode",
+        "time": 4.290666666666667,
+        "state": "running",
+        "rms": 0.008700325995140422,
+        "peak": 0.0323944091796875,
+        "sampleRate": 48000
+      }
+    ],
+    "after_interaction": [
+      [
+        {
+          "kind": "GainNode",
+          "time": 7.810666666666667,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 7.810666666666667,
+          "state": "running",
+          "rms": 0.011200168200921753,
+          "peak": 0.04156494140625,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 7.850666666666666,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 7.850666666666666,
+          "state": "running",
+          "rms": 0.013557201095300755,
+          "peak": 0.047332763671875,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 7.890666666666666,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 7.890666666666666,
+          "state": "running",
+          "rms": 0.011812268662496083,
+          "peak": 0.03851318359375,
+          "sampleRate": 48000
+        }
+      ]
+    ],
+    "muted": [
+      {
+        "kind": "GainNode",
+        "time": 10.981333333333334,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "AudioWorkletNode",
+        "time": 10.981333333333334,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      }
+    ],
+    "unmuted": [
+      {
+        "kind": "GainNode",
+        "time": 13.592,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "AudioWorkletNode",
+        "time": 13.592,
+        "state": "running",
+        "rms": 0.015216774313869507,
+        "peak": 0.059661865234375,
+        "sampleRate": 48000
+      }
+    ],
+    "music_zero": [
+      {
+        "kind": "GainNode",
+        "time": 14.661333333333333,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "AudioWorkletNode",
+        "time": 14.661333333333333,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      }
+    ],
+    "sfx_preview": [
+      [
+        {
+          "kind": "GainNode",
+          "time": 15.192,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 15.192,
+          "state": "running",
+          "rms": 0.001394652868712684,
+          "peak": 0.0108642578125,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 15.272,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 15.272,
+          "state": "running",
+          "rms": 0.03398803509411371,
+          "peak": 0.264617919921875,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 15.36,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 15.36,
+          "state": "running",
+          "rms": 0.030799007048344453,
+          "peak": 0.25146484375,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 15.434666666666667,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 15.44,
+          "state": "running",
+          "rms": 0.04567106943614084,
+          "peak": 0.2788543701171875,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 15.52,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 15.52,
+          "state": "running",
+          "rms": 0.0623351128605071,
+          "peak": 0.32647705078125,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 15.592,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 15.592,
+          "state": "running",
+          "rms": 0.07892739102282496,
+          "peak": 0.3270263671875,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 15.661333333333333,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 15.672,
+          "state": "running",
+          "rms": 0.07580172196473597,
+          "peak": 0.3111572265625,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 15.752,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 15.752,
+          "state": "running",
+          "rms": 0.03200453048037659,
+          "peak": 0.1900634765625,
+          "sampleRate": 48000
+        }
+      ]
+    ],
+    "after_loop_boundary": [
+      {
+        "kind": "GainNode",
+        "time": 63.06133333333333,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "AudioWorkletNode",
+        "time": 63.06133333333333,
+        "state": "running",
+        "rms": 0.017159429898605975,
+        "peak": 0.06854248046875,
+        "sampleRate": 48000
+      }
+    ],
+    "sources": [],
+    "probe_selftest": [
+      {
+        "kind": "GainNode",
+        "time": 63.45066666666666,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "AudioWorkletNode",
+        "time": 63.45066666666666,
+        "state": "running",
+        "rms": 0.022124192635752233,
+        "peak": 0.0794219970703125,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "OscillatorNode",
+        "time": 63.45066666666666,
+        "state": "running",
+        "rms": 0.7083262749260603,
+        "peak": 1,
+        "sampleRate": 48000
+      }
+    ],
+    "status_text": [],
+    "loaded": true,
+    "signal_checks": {
+      "music": true,
+      "mute": true,
+      "unmute": true,
+      "sfx": true,
+      "loop": true
+    }
+  },
+  {
+    "browser": "Firefox",
+    "errors": [],
+    "console": [
+      "[JavaScript Warning: \"The WebAssembly exception handling 'try' instruction is deprecated and should no longer be used. Please recompile to use the 'try_table' instruction instead.\"]",
+      "Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org",
+      "OpenGL API OpenGL ES 3.0 (WebGL 2.0) - Compatibility - Using Device: Mozilla - ANGLE (NVIDIA, NVIDIA GeForce GTX 980 Direct3D11 vs_5_0 ps_5_0), or similar",
+      "Build configuration: Emscripten 4.0.20, single-threaded, no GDExtension support.",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"WebGL warning: bindBuffer: Buffer previously bound to ELEMENT_ARRAY_BUFFER cannot be now bound to non-ELEMENT_ARRAY_BUFFER.\"]",
+      "[JavaScript Warning: \"WebGL warning: bufferSubData: Buffer for `target` is null.\"]",
+      "[JavaScript Warning: \"After reporting 32, no further warnings will be reported for this WebGL context.\"]"
+    ],
+    "version": "157.0",
+    "before_interaction": [
+      {
+        "kind": "GainNode",
+        "time": 1.872,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "AudioWorkletNode",
+        "time": 1.872,
+        "state": "running",
+        "rms": 0.015331202758645126,
+        "peak": 0.05902099609375,
+        "sampleRate": 48000
+      }
+    ],
+    "after_interaction": [
+      [
+        {
+          "kind": "GainNode",
+          "time": 5.12,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 5.12,
+          "state": "running",
+          "rms": 0.017389038791292936,
+          "peak": 0.05902099609375,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 5.12,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 5.12,
+          "state": "running",
+          "rms": 0.01819769241794063,
+          "peak": 0.05902099609375,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 5.152,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 5.152,
+          "state": "running",
+          "rms": 0.017821825056134832,
+          "peak": 0.05389404296875,
+          "sampleRate": 48000
+        }
+      ]
+    ],
+    "muted": [
+      {
+        "kind": "GainNode",
+        "time": 7.832,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "AudioWorkletNode",
+        "time": 7.832,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      }
+    ],
+    "unmuted": [
+      {
+        "kind": "GainNode",
+        "time": 10.381333333333334,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "AudioWorkletNode",
+        "time": 10.381333333333334,
+        "state": "running",
+        "rms": 0.017190242740849068,
+        "peak": 0.0529327392578125,
+        "sampleRate": 48000
+      }
+    ],
+    "music_zero": [
+      {
+        "kind": "GainNode",
+        "time": 11.170666666666667,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "AudioWorkletNode",
+        "time": 11.170666666666667,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      }
+    ],
+    "sfx_preview": [
+      [
+        {
+          "kind": "GainNode",
+          "time": 11.450666666666667,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 11.450666666666667,
+          "state": "running",
+          "rms": 0.01732309336308057,
+          "peak": 0.256683349609375,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 11.52,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 11.52,
+          "state": "running",
+          "rms": 0.11680658022183386,
+          "peak": 0.4376373291015625,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 11.581333333333333,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 11.581333333333333,
+          "state": "running",
+          "rms": 0.08814189603623317,
+          "peak": 0.2801055908203125,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 11.650666666666666,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 11.650666666666666,
+          "state": "running",
+          "rms": 0.10390427708365506,
+          "peak": 0.33642578125,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 11.72,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 11.72,
+          "state": "running",
+          "rms": 0.10340162264559495,
+          "peak": 0.3634490966796875,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 11.8,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 11.8,
+          "state": "running",
+          "rms": 0.05601207299632859,
+          "peak": 0.1842498779296875,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 11.872,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 11.872,
+          "state": "running",
+          "rms": 0.02551228883151894,
+          "peak": 0.0978546142578125,
+          "sampleRate": 48000
+        }
+      ],
+      [
+        {
+          "kind": "GainNode",
+          "time": 11.92,
+          "state": "running",
+          "rms": 0,
+          "peak": 0,
+          "sampleRate": 48000
+        },
+        {
+          "kind": "AudioWorkletNode",
+          "time": 11.92,
+          "state": "running",
+          "rms": 0.006196933623206518,
+          "peak": 0.023712158203125,
+          "sampleRate": 48000
+        }
+      ]
+    ],
+    "after_loop_boundary": [
+      {
+        "kind": "GainNode",
+        "time": 63.050666666666665,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "AudioWorkletNode",
+        "time": 63.050666666666665,
+        "state": "running",
+        "rms": 0.01171215222518128,
+        "peak": 0.072235107421875,
+        "sampleRate": 48000
+      }
+    ],
+    "sources": [],
+    "probe_selftest": [
+      {
+        "kind": "GainNode",
+        "time": 63.4,
+        "state": "running",
+        "rms": 0,
+        "peak": 0,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "AudioWorkletNode",
+        "time": 63.4,
+        "state": "running",
+        "rms": 0.0124039799633661,
+        "peak": 0.035400390625,
+        "sampleRate": 48000
+      },
+      {
+        "kind": "OscillatorNode",
+        "time": 63.4,
+        "state": "running",
+        "rms": 0.7076149281967681,
+        "peak": 0.9999999403953552,
+        "sampleRate": 48000
+      }
+    ],
+    "status_text": [],
+    "loaded": true,
+    "signal_checks": {
+      "music": true,
+      "mute": true,
+      "unmute": true,
+      "sfx": true,
+      "loop": true
+    }
+  }
+]

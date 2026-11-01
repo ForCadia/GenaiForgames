@@ -1,0 +1,13 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 617.42 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 4050 Laptop GPU
+
+Movie Maker mode enabled, recording movie in 960×720 @ 30 FPS...
+RECORDING real simulation; existing AI controls; isolated --lab-test; no invulnerability or accelerated timeline
+RECORD 0.0s state=playing kills=0 shots=0
+RECORD 10.0s state=playing kills=3 shots=20
+RECORD 20.0s state=playing kills=5 shots=28
+RECORD 30.0s state=playing kills=6 shots=32
+RECORD 40.0s state=playing kills=9 shots=47
+RECORD 50.0s state=playing kills=12 shots=60
+RECORD 60.0s state=playing kills=14 shots=70
+RECORD 70.0s state=playing kills=17 shots=84

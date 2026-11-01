@@ -3,7 +3,7 @@ extends Node
 const DEFAULTS := {
 	"master": 80.0, "music": 100.0, "sfx": 90.0, "muted": false,
 	"fullscreen": false, "vsync": true, "tutorials": true,
-	"reduced_flash": false, "death_camera": true,
+	"reduced_flash": false, "death_camera": true, "cosmetic_vfx": true,
 }
 const SAVE_PATH := "user://settings.cfg"
 var options := DEFAULTS.duplicate()
@@ -42,6 +42,11 @@ func _ready() -> void:
 
 func _test_mode() -> bool:
 	return "--lab-test" in OS.get_cmdline_user_args()
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F10:
+		set_option("muted",not bool(options.muted))
+		get_viewport().set_input_as_handled()
 
 func display_supported() -> bool:
 	return DisplayServer.get_name() != "headless" and not OS.has_feature("web")

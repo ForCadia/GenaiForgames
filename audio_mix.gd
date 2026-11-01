@@ -2,6 +2,8 @@ extends RefCounted
 
 # Offline active-segment RMS calibration; preserve source files and timing.
 const GAINS_DB := {
+	"untitled_loop60.ogg": -12.73,
+	"chase_mode_loop60.ogg": -10.98,
 	"boss_melee_sword.wav": 2.95,
 	"iron_missile_fire.wav": -7.74,
 	"iron_cannon_fire.wav": 3.49,

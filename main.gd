@@ -1462,6 +1462,7 @@ func _update_fx(delta: float) -> void:
 		if floaters[i].life <= 0: floaters.remove_at(i)
 
 func _emit(origin: Vector2, color: Color, count: int, speed: float) -> void:
+	if not developer_mode and is_instance_valid(settings) and not bool(settings.options.cosmetic_vfx): return
 	if lab_panel and not lab_panel.values.particles_enabled: return
 	for i in range(count): particles.append({"pos": origin, "velocity": Vector2.from_angle(randf_range(0, TAU)) * randf_range(speed * 0.3, speed), "life": randf_range(0.18, 0.62), "color": color})
 
@@ -1538,7 +1539,8 @@ func _draw() -> void:
 		else:
 			_draw_retro_round(bullet.pos,bullet.velocity,Vector2(bullet.radius*5.0,bullet.radius*1.8),RETRO.energy_round(),false)
 	for bullet in shots: _draw_player_shot(bullet)
-	for particle in particles: draw_circle(particle.pos, 3, Color(particle.color, clampf(particle.life * 2, 0, 1)))
+	if developer_mode or bool(settings.options.cosmetic_vfx):
+		for particle in particles: draw_circle(particle.pos, 3, Color(particle.color, clampf(particle.life * 2, 0, 1)))
 	if state == "playing" and not ui_paused and not attract_mode: _draw_reticle()
 
 func _draw_player_shot(bullet: Dictionary) -> void:

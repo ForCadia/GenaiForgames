@@ -1,0 +1,16 @@
+[
+  {
+    "file": "assets/music/untitled_loop60.ogg",
+    "duration_seconds": 60.0,
+    "crossfade_seconds": 0.25,
+    "source_preserved": "assets/music/untitled.mp3",
+    "listening_and_browser_test": "not performed"
+  },
+  {
+    "file": "assets/music/chase_mode_loop60.ogg",
+    "duration_seconds": 60.0,
+    "crossfade_seconds": 0.25,
+    "source_preserved": "assets/music/chase_mode.mp3",
+    "listening_and_browser_test": "not performed"
+  }
+]
