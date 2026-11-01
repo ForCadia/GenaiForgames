@@ -157,6 +157,7 @@ func _ready() -> void:
 	F.label(boss_select,"BOSS TEST / 选择首领","LargeLabel")
 	preload("res://ui/menu_style.gd").primary(F.button(boss_select,"眼球 Boss",func(): game.start_game("checkpoint",0,false,true)))
 	preload("res://ui/menu_style.gd").primary(F.button(boss_select,"枪刀机甲 Boss",func(): game.start_game("checkpoint",0,false,true,0,false,"mecha")))
+	preload("res://ui/menu_style.gd").primary(F.button(boss_select,"IRON BASTION",func(): game.start_game("checkpoint",0,false,true,0,false,"iron")))
 	F.button(boss_select,"BACK",func(): show_bosses(false),true)
 	boss_select.hide()
 	visibility_changed.connect(func():

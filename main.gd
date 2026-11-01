@@ -50,6 +50,7 @@ var active_boss_kind := "eyeball"
 const BOSS_INTRO := preload("res://ui/boss_intro.gd")
 var boss_intro: BOSS_INTRO
 var mecha_actor: Node2D
+var iron_actor: Node2D
 var selected_level := 0
 var endless_mode := false
 var endless_difficulty := "normal"
@@ -194,6 +195,11 @@ func _ready() -> void:
 	mecha_actor.projectile_requested.connect(_on_turret_projectile)
 	mecha_actor.sound_requested.connect(func(cue: String): world_audio.play_cue(cue,-1.0,mecha_actor))
 	mecha_actor.feedback.connect(_on_turret_feedback)
+	iron_actor = preload("res://IronBoss.tscn").instantiate()
+	add_child(iron_actor)
+	iron_actor.damage_requested.connect(_boss_damage)
+	iron_actor.sound_requested.connect(func(cue: String): world_audio.play_cue(cue,-1.0,iron_actor))
+	iron_actor.feedback.connect(_on_turret_feedback)
 	boss_actor.bomb_requested.connect(_on_boss_bomb_requested)
 	boss_actor.particle_requested.connect(_on_boss_particle_requested)
 	boss_actor.barrage_requested.connect(_on_boss_barrage_requested)
@@ -804,9 +810,9 @@ func _round_targets() -> Array[Dictionary]:
 			legacy_shot_target_serial += 1
 			enemy.shot_target_id = -legacy_shot_target_serial
 		targets.append({"id":enemy.shot_target_id,"kind":"legacy","actor":enemy,"point":enemy.pos})
-	if boss_mode and is_mecha_boss() and mecha_actor.combat_enabled:
-		targets.append({"id":mecha_actor.get_instance_id(),"kind":"mecha","actor":mecha_actor,"point":mecha_actor.core_position()})
-	if boss_mode and not is_mecha_boss() and boss_actor.combat_enabled and boss_actor.attack_state not in [EyeballBoss.AttackState.ARMOR_BREAK,EyeballBoss.AttackState.DEAD]:
+	if boss_mode and is_mechanical_boss() and _mechanical_actor().combat_enabled:
+		targets.append({"id":_mechanical_actor().get_instance_id(),"kind":"mecha","actor":_mechanical_actor(),"point":_mechanical_actor().core_position()})
+	if boss_mode and not is_mechanical_boss() and boss_actor.combat_enabled and boss_actor.attack_state not in [EyeballBoss.AttackState.ARMOR_BREAK,EyeballBoss.AttackState.DEAD]:
 		targets.append({"id":boss_actor.get_instance_id(),"kind":"boss","actor":boss_actor,"point":boss_actor.global_position})
 	return targets
 
@@ -867,7 +873,7 @@ func _update_shots(delta: float) -> void:
 				"drone": target.actor.take_damage(int(bullet.penetration))
 				"legacy": _hit_enemy(target.actor,bullet)
 				"boss": _hit_boss(bullet)
-				"mecha": mecha_actor.receive_shot_segment(int(bullet.penetration),bullet.previous,bullet.pos)
+				"mecha": _mechanical_actor().receive_shot_segment(int(bullet.penetration),bullet.previous,bullet.pos)
 			if int(bullet.get("pierce_left",0)) > 0:
 				bullet.pierce_left -= 1
 			else:
@@ -940,7 +946,7 @@ func _die(cause: String) -> void:
 		_settle_run(false)
 		overlays.record_result()
 	if boss_mode:
-		if is_mecha_boss(): mecha_actor.set_combat_enabled(false)
+		if is_mechanical_boss(): _mechanical_actor().set_combat_enabled(false)
 		else: boss_actor.set_combat_enabled(false)
 		_clear_boss_attacks()
 	player_visual.play_death()
@@ -965,6 +971,15 @@ func _start_segment(index: int, preserve_motion := false) -> void:
 func is_mecha_boss() -> bool:
 	return (boss_test_kind if boss_test_mode else active_boss_kind) == "mecha"
 
+func is_iron_boss() -> bool:
+	return boss_test_mode and boss_test_kind == "iron"
+
+func is_mechanical_boss() -> bool:
+	return is_mecha_boss() or is_iron_boss()
+
+func _mechanical_actor() -> Node2D:
+	return iron_actor if is_iron_boss() else mecha_actor
+
 func _start_boss(preserve_motion := false) -> void:
 	# Keep campaign01/02 and historical LAB on the eye; alternate Endless bosses.
 	active_boss_kind = "eyeball"
@@ -984,14 +999,15 @@ func _start_boss(preserve_motion := false) -> void:
 	if lab.active: lab.record("checkpoint_reached", {"score": score})
 	var growth: Dictionary = preload("res://endless_data.gd").boss_growth(endless_wave) if endless_mode and not boss_test_mode and not developer_mode else {"health_multiplier":1.0,"wait_multiplier":1.0}
 	var difficulty_wait: float = float(MECHA_DATA.ATTACK_WAIT_MULTIPLIER.get(endless_difficulty,1.0)) if endless_mode and not boss_test_mode else 1.0
-	if is_mecha_boss():
-		var mecha_maximum: int = int(ceil(MECHA_DATA.HEALTH*float(growth.health_multiplier)))
+	if is_mechanical_boss():
+		var base_health: int = preload("res://iron_boss_data.gd").HEALTH if is_iron_boss() else MECHA_DATA.HEALTH
+		var mecha_maximum: int = int(ceil(base_health*float(growth.health_multiplier)))
 		boss = {"armor":0,"hp":mecha_maximum,"maximum":mecha_maximum,"phase":1}
-		mecha_actor.position = Vector2(GD.VIEW_SIZE.x+180.0,GD.GROUND_Y)
-		mecha_actor.set_difficulty(endless_difficulty if endless_mode else "normal",float(growth.wait_multiplier))
-		mecha_actor.reset_for_battle(true)
+		_mechanical_actor().position = Vector2(GD.VIEW_SIZE.x+180.0,GD.GROUND_Y)
+		_mechanical_actor().set_difficulty(endless_difficulty if endless_mode else "normal",float(growth.wait_multiplier))
+		_mechanical_actor().reset_for_battle(true)
 		boss_entering = false
-		banner = mode_caption()+" // GUNBLADE MECHA"; banner_time = 2.2
+		banner = mode_caption()+(" // IRON BASTION" if is_iron_boss() else " // GUNBLADE MECHA"); banner_time = 2.2
 		_begin_boss_intro()
 		return
 	var eye_maximum: int = int(ceil(GD.BOSS.health*float(growth.health_multiplier)))
@@ -1033,7 +1049,7 @@ func _update_boss_intro(delta: float) -> void:
 		state = "playing"
 		segment_time = 0.0
 		boss_entering = false
-		if is_mecha_boss(): mecha_actor.finish_intro()
+		if is_mechanical_boss(): _mechanical_actor().finish_intro()
 		else: boss_actor.set_combat_enabled(true)
 		_gate_gameplay_input()
 
@@ -1042,10 +1058,10 @@ func _update_boss(delta: float) -> void:
 	if not boss_grenade_spawned and segment_time >= 0.5:
 		boss_grenade_spawned = true
 		_spawn_grenade_pickup()
-	if is_mecha_boss():
-		mecha_actor.advance(delta,_player_center())
-		if mecha_actor.try_melee(_player_hitbox(),_guard_hitbox() if guarding else Rect2()):
-			_receive(false,"MECHA BLADE")
+	if is_mechanical_boss():
+		_mechanical_actor().advance(delta,_player_center())
+		if _mechanical_actor().try_melee(_player_hitbox(),_guard_hitbox() if guarding else Rect2()):
+			_receive(false,"IRON BASTION PROJECTILE" if is_iron_boss() else "MECHA BLADE")
 		return
 	if boss_entering:
 		boss_actor.position = boss_actor.position.move_toward(Vector2(785.0, BOSS_IDLE_Y), 250.0 * delta)
@@ -1136,8 +1152,8 @@ func _hit_boss(bullet: Dictionary) -> void:
 func _boss_damage(hit_origin: Vector2 = Vector2.INF) -> void:
 	if state != "playing" or boss.is_empty() or int(boss.hp) <= 0: return
 	boss.hp -= 1
-	boss.phase = 1 if is_mecha_boss() else int(boss_actor.form)+1
-	var effect_origin: Vector2 = hit_origin if hit_origin.is_finite() else (mecha_actor.core_position() if is_mecha_boss() else _boss_pos())
+	boss.phase = 1 if is_mechanical_boss() else int(boss_actor.form)+1
+	var effect_origin: Vector2 = hit_origin if hit_origin.is_finite() else (_mechanical_actor().core_position() if is_mechanical_boss() else _boss_pos())
 	_emit(effect_origin, WHITE, 45, 390)
 	if boss.hp <= 0:
 		score += GD.SCORE.boss
@@ -1148,7 +1164,7 @@ func _boss_damage(hit_origin: Vector2 = Vector2.INF) -> void:
 			world_audio.stop_all()
 			world_audio.play_cue("enemy_explode")
 			weapon_audio.stop_all()
-			if is_mecha_boss(): mecha_actor.start_death()
+			if is_mechanical_boss(): _mechanical_actor().start_death()
 			else: boss_actor.start_death()
 			_clear_boss_attacks()
 			_notify("BOSS DOWN // WAVE %02d CLEARED" % endless_wave, CYAN, 1.2)
@@ -1165,7 +1181,7 @@ func _boss_damage(hit_origin: Vector2 = Vector2.INF) -> void:
 		weapon_audio.stop_all()
 		music.play_track(false)
 		banner = "THE FRONT NEVER STOPS"
-		if is_mecha_boss(): mecha_actor.start_death()
+		if is_mechanical_boss(): _mechanical_actor().start_death()
 		else: boss_actor.start_death()
 		_clear_boss_attacks()
 		player_visual.show_idle()
@@ -1281,7 +1297,7 @@ func start_game(mode := "checkpoint", parameter_index := 0, development := false
 	if development or boss_only: _use_development_profile()
 	elif not mission_unlocked(3 if infinite else clampi(level_index,0,2)): return
 	boss_test_mode = boss_only
-	boss_test_kind = "mecha" if boss_only and test_boss == "mecha" else "eyeball"
+	boss_test_kind = test_boss if boss_only and test_boss in ["mecha","iron"] else "eyeball"
 	developer_mode = development
 	selected_level = 0 if development or boss_only else clampi(level_index, 0, CAMPAIGNS.LEVELS.size() - 1)
 	endless_mode = infinite and not development and not boss_only
@@ -1383,8 +1399,10 @@ func _clear_world() -> void:
 	boss.clear()
 	if is_instance_valid(boss_actor): boss_actor.reset_for_battle(false)
 	if is_instance_valid(mecha_actor): mecha_actor.reset_for_battle(false)
+	if is_instance_valid(iron_actor): iron_actor.reset_for_battle(false)
 
 func _clear_boss_attacks() -> void:
+	if is_instance_valid(iron_actor): iron_actor.clear_projectiles()
 	for bomb in boss_bombs:
 		if is_instance_valid(bomb): bomb.queue_free()
 	boss_bombs.clear()
@@ -1447,7 +1465,7 @@ func _guard_hitbox() -> Rect2: return player_visual.guard_rect()
 func _player_center() -> Vector2: return _player_hitbox().get_center()
 func _grounded() -> bool: return is_zero_approx(player.y - GD.GROUND_Y)
 func _boss_pos() -> Vector2:
-	if boss_mode and is_mecha_boss() and is_instance_valid(mecha_actor): return mecha_actor.position
+	if boss_mode and is_mechanical_boss() and is_instance_valid(_mechanical_actor()): return _mechanical_actor().position
 	if boss_mode and is_instance_valid(boss_actor) and boss_actor.visible:
 		return boss_actor.position
 	return Vector2(785.0, BOSS_IDLE_Y)
@@ -1594,7 +1612,7 @@ func current_stage_name() -> String:
 
 func mode_caption() -> String:
 	if endless_mode: return "ENDLESS / %s / WAVE %02d" % [endless_difficulty.to_upper(),endless_wave]
-	if boss_test_mode: return "MECHA BOSS TEST" if is_mecha_boss() else "EYEBALL BOSS TEST"
+	if boss_test_mode: return "IRON BASTION TEST" if is_iron_boss() else ("MECHA BOSS TEST" if is_mecha_boss() else "EYEBALL BOSS TEST")
 	return "LEVEL %02d" % (selected_level + 1)
 
 func record_key() -> String:
@@ -1759,12 +1777,12 @@ func _auto_select_weapon() -> void:
 			if distance_to_target < nearest:
 				nearest = distance_to_target
 				armor = 3 if turret.turret_kind == TurretBase.TurretKind.HEAVY and turret.state != TurretBase.TurretState.EXPOSED else 0
-	if boss_mode and is_mecha_boss() and mecha_actor.combat_enabled and mecha_actor.shot_hits(origin,ray_end):
-		var distance_to_target: float = origin.distance_squared_to(mecha_actor.core_position())
+	if boss_mode and is_mechanical_boss() and _mechanical_actor().combat_enabled and _mechanical_actor().shot_hits(origin,ray_end):
+		var distance_to_target: float = origin.distance_squared_to(_mechanical_actor().core_position())
 		if distance_to_target < nearest:
 			nearest = distance_to_target
-			armor = mecha_actor.required_penetration(origin,ray_end)
-	if boss_mode and not is_mecha_boss() and boss_actor.combat_enabled and boss_actor.shot_hits(origin, ray_end):
+			armor = _mechanical_actor().required_penetration(origin,ray_end)
+	if boss_mode and not is_mechanical_boss() and boss_actor.combat_enabled and boss_actor.shot_hits(origin, ray_end):
 		var distance_to_target := origin.distance_squared_to(_boss_pos())
 		if distance_to_target < nearest:
 			nearest = distance_to_target
@@ -1930,7 +1948,9 @@ func _update_aerial_riflemen(delta: float) -> void:
 			aerial_riflemen.remove_at(index)
 
 func refresh_boss_hud(hud: Node) -> void:
-	if is_mecha_boss():
+	if is_iron_boss():
+		hud.apply_iron_state(int(boss.hp),int(boss.get("maximum",24)),iron_actor.cannon_hp,iron_actor.launcher_hp,iron_actor.plate_hp)
+	elif is_mechanical_boss():
 		hud.apply_mecha_state(int(boss.hp),int(boss.get("maximum",MECHA_DATA.HEALTH)))
 	else:
 		hud.apply_state(boss.hp,int(boss.get("maximum",GD.BOSS.health)),boss.armor,boss.phase,boss_actor.armor_points(),boss_actor.armor_per_layer*2)

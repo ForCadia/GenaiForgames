@@ -1,0 +1,34 @@
+extends RefCounted
+const GD := preload("res://game_data.gd")
+const HEALTH := 24
+const CANNON_HP := 8
+const LAUNCHER_HP := 8
+const PLATE_HP := 6
+const ARMOR: int = GD.ENEMIES.heavy.armor
+const CORE_ARMOR: int = GD.ENEMIES.light.armor
+const HOME_X := 770.0
+const ENTRY_SPEED := 330.0
+const HULL_SCALE := 0.25
+const HULL_ORIGIN := Vector2(-166.0,-264.0)
+const CANNON_MOUNT := Vector2(-45,-215)
+const LAUNCHER_MOUNT := Vector2(87,-215)
+const PLATE_MOUNT := Vector2(-62,-54)
+const CORE_RECT := Rect2(-86,-163,40,83)
+const PLATE_RECT := Rect2(-88,-199,54,148)
+const BODY_RECT := Rect2(-142,-215,290,205)
+const PREPARE := 1.0
+const RECOVERY := 1.0
+const FIRE_TIME := 0.40
+const DEATH_FPS := 10.0
+const CANNON_ANGLE := 35.0
+const SHELL_GRAVITY := 580.0
+const SHELL_RADIUS := 9.0
+const MISSILE_SPEED := 330.0
+const MISSILE_INTERVAL := 0.16
+const MISSILE_COUNT := 6
+const MISSILE_RADIUS := 6.0
+const EXPLOSION_TIME := 0.28
+const EXPLOSION_RADIUS := 34.0
+const ATTACK_WAIT := {"easy":1.5,"normal":1.0,"hard":0.75}
+
+const LAUNCH_PORTS := [Vector2(212,180),Vector2(272,204),Vector2(212,249),Vector2(272,270),Vector2(212,314),Vector2(272,330)]

@@ -28,8 +28,9 @@ func begin(game: Node2D) -> void:
 	elapsed = 0.0
 	active = true
 	visible = true
-	title = "GUNBLADE" if game.is_mecha_boss() else "SENTINEL"
+	title = "IRON BASTION" if game.is_iron_boss() else ("GUNBLADE" if game.is_mecha_boss() else "SENTINEL")
 	game.mecha_actor.visible = false
+	game.iron_actor.visible = false
 	game.boss_actor.visible = false
 	game.get_viewport().canvas_transform = Transform2D.IDENTITY
 	surface.queue_redraw()
@@ -44,18 +45,15 @@ func advance_intro(delta: float, game: Node2D) -> bool:
 	elapsed += delta
 	if elapsed >= WARNING_TIME:
 		var entrance_delta: float = maxf(0.0,elapsed-maxf(before,WARNING_TIME))
-		if game.is_mecha_boss():
-			game.mecha_actor.visible = true
-			if game.mecha_actor.state == "entry":
-				game.mecha_actor.advance(entrance_delta,game._player_center())
-			else:
-				game.mecha_actor._set_pose("slash",0)
-				game.mecha_actor.effects.advance_effects(delta,true,"entry_recover",game.mecha_actor.visual,game.mecha_actor.pose_meta,game.mecha_actor.pose_sheet,game.mecha_actor.pose_frame)
+		if game.is_mechanical_boss():
+			var actor: Node2D = game._mechanical_actor()
+			actor.visible = true
+			actor.advance_intro(entrance_delta,game._player_center())
 		else:
 			game.boss_actor.visible = true
 			game.boss_actor.position = game.boss_actor.position.move_toward(Vector2(785.0,265.0),400.0*entrance_delta)
 	if elapsed >= ENTRANCE_END and before < ENTRANCE_END:
-		var focus: Vector2 = game.mecha_actor.core_position() if game.is_mecha_boss() else game.boss_actor.position
+		var focus: Vector2 = game._mechanical_actor().core_position() if game.is_mechanical_boss() else game.boss_actor.position
 		var zoom := 1.5
 		camera_target = Transform2D(Vector2(zoom,0),Vector2(0,zoom),GD.VIEW_SIZE*Vector2(0.58,0.46)-focus*zoom)
 	if bool(game.settings.options.death_camera):

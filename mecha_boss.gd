@@ -87,6 +87,12 @@ func reset_for_battle(enabled: bool) -> void:
 	if enabled: _set_pose("lift",3)
 	else: _set_pose("slash",0)
 
+func advance_intro(delta: float, target: Vector2) -> void:
+	if state == "entry": advance(delta,target)
+	else:
+		_set_pose("slash",0)
+		effects.advance_effects(delta,true,"entry_recover",visual,pose_meta,pose_sheet,pose_frame)
+
 func finish_intro() -> void:
 	combat_enabled = true
 	_set_pose("slash",0)
