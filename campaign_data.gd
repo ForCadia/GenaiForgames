@@ -61,18 +61,34 @@ static func segments(level: int, include_drones := true) -> Array:
 		1: result = LEVEL_TWO.duplicate(true)
 		2: result = LEVEL_THREE.duplicate(true)
 		_: result = GD.SEGMENTS.slice(0,GD.CAMPAIGN_SEGMENT_COUNT).duplicate(true)
-	if include_drones:
-		for stage in result: _add_drone(stage)
+	# Level 01 keeps the original authored events, including normal play.
+	if level > 0 and include_drones:
+		for stage in result:
+			_add_drone(stage)
+			_increase_pressure(stage)
 	return result
 
 static func _add_drone(stage: Dictionary) -> void:
 	stage.events.append({"at":minf(8.5,float(stage.duration)*0.55),"kind":"enemy","type":"kamikaze"})
 	stage.events.sort_custom(func(a: Dictionary,b: Dictionary): return float(a.at)<float(b.at))
 
+static func _increase_pressure(stage: Dictionary) -> void:
+	# Double combat/hazard spawns inside the existing stage duration.
+	# Space the follow-up hazards farther apart than enemy reinforcements.
+	var original: Array = stage.events.duplicate(true)
+	for event in original:
+		if event.kind not in ["enemy","high_barrage","low_obstacle"]: continue
+		var reinforcement: Dictionary = event.duplicate(true)
+		var delay := 0.9 if event.kind == "enemy" else 1.35
+		reinforcement.at = minf(float(event.at)+delay,float(stage.duration)-0.2)
+		stage.events.append(reinforcement)
+	stage.events.sort_custom(func(a: Dictionary,b: Dictionary): return float(a.at)<float(b.at))
+
 static func endless_wave(wave: int) -> Dictionary:
 	var patterns: Array = LEVEL_TWO + LEVEL_THREE
 	var data: Dictionary = patterns[(wave - 1) % patterns.size()].duplicate(true)
 	_add_drone(data)
+	_increase_pressure(data)
 	# Increase density gradually, capped at 30%; world and projectile speeds stay authored.
 	var spacing := maxf(0.7, 1.0 - float(wave - 1) * 0.025)
 	data.duration *= spacing
