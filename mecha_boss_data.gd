@@ -72,3 +72,6 @@ const THRUSTER_WIDTH := 18.0
 
 # Chest weak-point box in unrotated world-size units relative to the red core.
 const CORE_HIT_RECT := Rect2(-30.0,-23.0,66.0,48.0)
+
+# Attack desire changes downtime only, not damage, projectile speed or charge speed.
+const ATTACK_WAIT_MULTIPLIER := {"easy":1.5,"normal":1.0,"hard":0.75}

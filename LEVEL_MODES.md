@@ -99,3 +99,6 @@ Latest enemy addition: aerial riflemen appear only in Level03 and Endless. Level
 
 
 Latest Endless Boss-clear correction: the existing1s death showcase previously updated only a countdown, freezing track/player motion. Intermission now continues player motion/airborne physics, animation, parallax and coin movement while clearing player/hostile rounds; no combat or spawning resumes until talent choice. Existing death showcase/reward cadence retained. Inspected current runtime log: no related script errors recorded; no game/tests run.
+
+
+Mecha mission integration (2026-10-31): campaign Level03 now ends with the gunblade mecha; Levels01/02 retain the eye. Endless Boss encounters remain every fifth wave, alternating mecha at5/15/25 and eye at10/20/30. Explicit Boss-test selection still overrides mission selection; historical LAB remains on eye. Mecha current cadence is normal: Endless easy multiplies preparation/recovery waits by1.5, hard by0.75, normal1.0. Fixed combat animation/damage/HP/projectile and movement speeds stay unchanged. Campaign03 and Boss test always use normal, independent of last selected Endless difficulty. Telegraph cross progress follows the adjusted windup. Existing retry, shared kill/reward, grenade and Boss HUD paths dispatch to selected Boss. Source inspection only, no engine/tests per user.

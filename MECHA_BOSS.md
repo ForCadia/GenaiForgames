@@ -82,3 +82,6 @@ Latest user armor rule: mecha chest and body both require the existing heavy-arm
 
 
 Impact spark correction: sample the incoming shot segment in source-pixel order to obtain the first opaque body contact, with existing chest-box fallback. Both ricochet feedback and successful-hit damage signal now carry that contact position. Shared Boss damage uses the supplied point for sparks instead of the feet-origin; no-origin mecha grenade damage uses chest center. Eyeball HP/damage and historical data remain unchanged. No engine/tests.
+
+
+Mecha mission integration (2026-10-31): campaign Level03 now ends with the gunblade mecha; Levels01/02 retain the eye. Endless Boss encounters remain every fifth wave, alternating mecha at5/15/25 and eye at10/20/30. Explicit Boss-test selection still overrides mission selection; historical LAB remains on eye. Mecha current cadence is normal: Endless easy multiplies preparation/recovery waits by1.5, hard by0.75, normal1.0. Fixed combat animation/damage/HP/projectile and movement speeds stay unchanged. Campaign03 and Boss test always use normal, independent of last selected Endless difficulty. Telegraph cross progress follows the adjusted windup. Existing retry, shared kill/reward, grenade and Boss HUD paths dispatch to selected Boss. Source inspection only, no engine/tests per user.

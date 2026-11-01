@@ -69,7 +69,7 @@ func advance_effects(delta: float, boss: Node2D) -> void:
 	var core: Vector2 = boss.core_position()
 	cross_visible = state == "slash_prepare"
 	if cross_visible:
-		cross_progress = clampf(float(boss.elapsed)/DATA.SLASH_PREPARE,0.0,1.0)
+		cross_progress = clampf(float(boss.elapsed)/boss.wait_time(DATA.SLASH_PREPARE),0.0,1.0)
 		var hand_offset: Vector2 = HAND_OFFSETS[clampi(int(boss.pose_frame),0,4)]
 		var hand_source := Vector2(float(boss.pose_meta.cx),float(boss.pose_meta.cy))+hand_offset
 		cross_position = to_local(boss.visual.to_global(hand_source))

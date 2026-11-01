@@ -37,6 +37,7 @@ var death_time := 0.0
 var previous_position := Vector2.ZERO
 var player_target := Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 var stab_direction := Vector2.LEFT
+var attack_wait_multiplier := 1.0
 var effects: EFFECTS
 var melee_effects: MELEE_EFFECTS
 
@@ -64,6 +65,12 @@ func _ready() -> void:
 	add_child(melee_effects)
 	set_process(false)
 	reset_for_battle(false)
+
+func set_difficulty(difficulty: String) -> void:
+	attack_wait_multiplier = float(DATA.ATTACK_WAIT_MULTIPLIER.get(difficulty,1.0))
+
+func wait_time(duration: float) -> float:
+	return duration*attack_wait_multiplier
 
 func reset_for_battle(enabled: bool) -> void:
 	combat_enabled = enabled
@@ -167,31 +174,31 @@ func advance(delta: float, target: Vector2 = Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 			if elapsed >= DATA.ENTRY_RECOVERY: _enter("ground_prepare")
 		"ground_prepare":
 			_set_pose("slash",0)
-			if elapsed >= DATA.PREPARE: _enter("ground_fire")
+			if elapsed >= wait_time(DATA.PREPARE): _enter("ground_fire")
 		"ground_fire":
 			_set_pose("ground_fire",_frame(DATA.GROUND_FIRE_FRAMES,DATA.GROUND_FIRE_TIME))
 			_fire_burst(delta,false)
 			if elapsed >= DATA.GROUND_FIRE_TIME: _enter("ground_recover")
 		"ground_recover":
 			_set_pose("slash",0)
-			if elapsed >= DATA.RECOVERY: _enter("slash_prepare")
+			if elapsed >= wait_time(DATA.RECOVERY): _enter("slash_prepare")
 		"slash_prepare":
-			_set_pose("slash",_windup_frame(DATA.SLASH_READY,DATA.SLASH_PREPARE))
-			if elapsed >= DATA.SLASH_PREPARE: _enter("slash")
+			_set_pose("slash",_windup_frame(DATA.SLASH_READY,wait_time(DATA.SLASH_PREPARE)))
+			if elapsed >= wait_time(DATA.SLASH_PREPARE): _enter("slash")
 		"slash":
 			_set_pose("slash",DATA.SLASH_CHARGE_FRAME)
 			position = position.move_toward(phase_goal,DATA.CHARGE_SPEED*delta)
 			if elapsed >= DATA.SLASH_TIME: _enter("slash_recover")
 		"slash_recover":
-			_set_pose("slash",_frame(DATA.SLASH_RECOVER,DATA.RECOVERY))
-			if elapsed >= DATA.RECOVERY: _enter("retreat")
+			_set_pose("slash",_frame(DATA.SLASH_RECOVER,wait_time(DATA.RECOVERY)))
+			if elapsed >= wait_time(DATA.RECOVERY): _enter("retreat")
 		"retreat":
 			_set_pose("slash",0)
 			position = position.move_toward(phase_goal,DATA.GROUND_RETREAT_SPEED*delta)
 			if position.distance_to(phase_goal) < 1: _enter("takeoff_wait")
 		"takeoff_wait":
 			_set_pose("slash",0)
-			if elapsed >= DATA.RECOVERY: _enter("takeoff")
+			if elapsed >= wait_time(DATA.RECOVERY): _enter("takeoff")
 		"takeoff":
 			var index := mini(3,int(elapsed/DATA.TAKEOFF_TIME*4.0))
 			if index == 0: _set_pose("slash",0)
@@ -200,17 +207,17 @@ func advance(delta: float, target: Vector2 = Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 			if elapsed >= DATA.TAKEOFF_TIME: _enter("air_prepare")
 		"air_prepare":
 			_set_pose("lift",3)
-			if elapsed >= DATA.AIR_PREPARE: _enter("air_fire")
+			if elapsed >= wait_time(DATA.AIR_PREPARE): _enter("air_fire")
 		"air_fire":
 			_set_pose("air_fire",mini(7,int(elapsed/DATA.AIR_FIRE_TIME*8.0)))
 			_fire_burst(delta,true)
 			if elapsed >= DATA.AIR_FIRE_TIME: _enter("air_recover")
 		"air_recover":
 			_set_pose("lift",3)
-			if elapsed >= DATA.RECOVERY: _enter("stab_prepare")
+			if elapsed >= wait_time(DATA.RECOVERY): _enter("stab_prepare")
 		"stab_prepare":
-			_set_pose("stab",_windup_frame(DATA.STAB_READY,DATA.STAB_PREPARE))
-			if elapsed >= DATA.STAB_PREPARE: _enter("stab")
+			_set_pose("stab",_windup_frame(DATA.STAB_READY,wait_time(DATA.STAB_PREPARE)))
+			if elapsed >= wait_time(DATA.STAB_PREPARE): _enter("stab")
 		"stab":
 			_set_pose("stab",_frame(DATA.STAB_ACTIVE,DATA.STAB_TIME))
 			position = position.move_toward(phase_goal,DATA.STAB_SPEED*delta)
@@ -232,7 +239,7 @@ func advance(delta: float, target: Vector2 = Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 				_enter("land_recover")
 		"land_recover":
 			_set_pose("slash",0)
-			if elapsed >= DATA.LAND_RECOVERY: _enter("ground_prepare")
+			if elapsed >= wait_time(DATA.LAND_RECOVERY): _enter("ground_prepare")
 
 	effects.advance_effects(delta,combat_enabled,state,visual,pose_meta,pose_sheet,pose_frame)
 	melee_effects.advance_effects(delta,self)

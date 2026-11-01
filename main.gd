@@ -46,6 +46,7 @@ var restart_mode := "checkpoint"
 var developer_mode := false
 var boss_test_mode := false
 var boss_test_kind := "eyeball"
+var active_boss_kind := "eyeball"
 var mecha_actor: Node2D
 var selected_level := 0
 var endless_mode := false
@@ -954,9 +955,15 @@ func _start_segment(index: int, preserve_motion := false) -> void:
 	banner_time = 2
 
 func is_mecha_boss() -> bool:
-	return boss_test_mode and boss_test_kind == "mecha"
+	return (boss_test_kind if boss_test_mode else active_boss_kind) == "mecha"
 
 func _start_boss(preserve_motion := false) -> void:
+	# Keep campaign01/02 and historical LAB on the eye; alternate Endless bosses.
+	active_boss_kind = "eyeball"
+	if not boss_test_mode and not developer_mode:
+		if endless_mode:
+			active_boss_kind = "mecha" if int(endless_wave/5)%2 == 1 else "eyeball"
+		elif selected_level == 2: active_boss_kind = "mecha"
 	checkpoint_grenades = grenade_count
 	boss_grenade_spawned = false
 	music.play_track(true)
@@ -970,8 +977,10 @@ func _start_boss(preserve_motion := false) -> void:
 	if is_mecha_boss():
 		boss = {"armor":0,"hp":MECHA_DATA.HEALTH,"maximum":MECHA_DATA.HEALTH,"phase":1}
 		mecha_actor.position = Vector2(GD.VIEW_SIZE.x+180.0,GD.GROUND_Y)
+		mecha_actor.set_difficulty(endless_difficulty if endless_mode else "normal")
 		mecha_actor.reset_for_battle(true)
 		boss_entering = false
+		banner = mode_caption()+" // GUNBLADE MECHA"; banner_time = 2.2
 		return
 	boss = {"armor": GD.BOSS.armor_per_cycle, "hp": GD.BOSS.health, "phase": 1}
 	boss_actor.position = Vector2(GD.VIEW_SIZE.x + 220.0, BOSS_IDLE_Y)
