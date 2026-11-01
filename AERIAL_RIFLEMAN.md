@@ -15,3 +15,6 @@ Latest user revision: enlarged visual96→128px and hitbox36×60→48×80. Repla
 
 
 Latest firing presentation: aerial rounds use a dedicated main callback with radius4/glow4 (others retain7/glow8), unchanged480 speed and45-degree trajectory. Fly bank limited to±0.035rad, aim/shoot26-degree lean eased more slowly, tiny1.5px visual bob supports jet flight. Muzzle locations are calibrated per shoot-row frame by reading the forward orange muzzle-flash base (excluding rear jet), with source-space fallback; mirror offsets and Sprite2D.to_global apply current scale/rotation/bob. Emission happens after movement/pose transforms, retaining the final shoot pose through its last bullet. No game/import/tests/captures.
+
+
+Latest aim revision: remove fixed45-degree direction. Each burst samples filtered player velocity, estimates travel time capped0.65s, applies45–80% randomized lead and adds±32px horizontal/±22px vertical aim error, with on-playfield target limits. Lock that direction for all3 rounds; no per-round retargeting or homing. Attack artwork banks toward target within the existing restrained tilt range; muzzle transform,480 speed, radius4/glow4 retained. No runtime tests.

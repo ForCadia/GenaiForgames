@@ -202,3 +202,6 @@ Latest aerial rifleman motion/death/fire revision (2026-10-31): smooth kamikaze-
 
 
 Latest aerial shot polish (2026-10-31): only aerial bullets radius4/glow4; speed480/left-down45 unchanged. Flight tilt±2 degrees, eased26-degree attack lean, subtle bob. Calibrate each shoot frame muzzle from forward flash pixels, mirror and sprite.to_global transform; emit after movement/pose update. Others projectile sizes unchanged. No tests.
+
+
+Latest aerial predictive aiming (2026-10-31): replace fixed45° with burst-locked player aim using filtered motion, travel-time prediction capped0.65s ×random0.45–0.8 plus±32x/±22y target error. All3 rounds retain direction; restrained target-directed visual bank and calibrated muzzle retained, speed480/radius4 unchanged. No tests.
