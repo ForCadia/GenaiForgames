@@ -25,10 +25,6 @@ general/default_playback_type.web=0
 UIAudio="*res://ui/ui_audio.gd"
 SceneFader="*res://ui/scene_fader.gd"
 
-[gui]
-
-theme/custom="res://ui/ui_theme.tres"
-
 [display]
 
 window/size/viewport_width=960
@@ -36,17 +32,22 @@ window/size/viewport_height=720
 window/size/window_width_override=960
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
+
+[gui]
+
+theme/custom="res://ui/ui_theme.tres"
 
 [input]
 
 move_back={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"physical_keycode":65)]
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":65,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
 }
 move_forward={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"physical_keycode":68)]
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":68,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
 }
 jump={
 "deadzone": 0.5,
@@ -120,7 +121,5 @@ restart={
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
-
 rendering_device/driver.windows="d3d12"
-renderer/rendering_method.web="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"

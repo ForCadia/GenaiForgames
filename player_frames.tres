@@ -1,8 +1,7 @@
-[gd_resource type="SpriteFrames" format=3]
+[gd_resource type="SpriteFrames" format=3 uid="uid://coml525c5d14a"]
 
-[ext_resource type="Texture2D" path="res://body(2).png" id="1_sif3y"]
-
-[ext_resource type="Texture2D" path="res://assets/player/run_olive_4x4.png" id="2_run"]
+[ext_resource type="Texture2D" uid="uid://b0p8b2kqirj7" path="res://body(2).png" id="1_sif3y"]
+[ext_resource type="Texture2D" uid="uid://bsd4wvi5swq64" path="res://assets/player/run_olive_4x4.png" id="2_run"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_laber"]
 atlas = ExtResource("1_sif3y")
@@ -100,78 +99,6 @@ region = Rect2(1536, 512, 256, 256)
 atlas = ExtResource("1_sif3y")
 region = Rect2(1792, 512, 256, 256)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_pqu4l"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(0, 256, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_koieo"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(256, 256, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_c3cyc"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(512, 256, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ljgpi"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(1792, 256, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_lahe2"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(1280, 256, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1vy3e"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(1536, 256, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_14rg0"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(512, 256, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_jj3gr"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(256, 256, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_17jvf"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(0, 256, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_psour"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(768, 256, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_xgr2t"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(0, 768, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_2wgqn"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(256, 768, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_jcw1q"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(512, 768, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3hxay"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(768, 768, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_y840m"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(1024, 768, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_iroc1"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(1280, 768, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_wmewm"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(1536, 768, 256, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_y0wfr"]
-atlas = ExtResource("1_sif3y")
-region = Rect2(1792, 768, 256, 256)
-
 [sub_resource type="AtlasTexture" id="RunOlive_00"]
 atlas = ExtResource("2_run")
 region = Rect2(0, 0, 314, 314)
@@ -235,6 +162,38 @@ region = Rect2(627, 940, 313, 314)
 [sub_resource type="AtlasTexture" id="RunOlive_15"]
 atlas = ExtResource("2_run")
 region = Rect2(940, 940, 314, 314)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xgr2t"]
+atlas = ExtResource("1_sif3y")
+region = Rect2(0, 768, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2wgqn"]
+atlas = ExtResource("1_sif3y")
+region = Rect2(256, 768, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jcw1q"]
+atlas = ExtResource("1_sif3y")
+region = Rect2(512, 768, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3hxay"]
+atlas = ExtResource("1_sif3y")
+region = Rect2(768, 768, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y840m"]
+atlas = ExtResource("1_sif3y")
+region = Rect2(1024, 768, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iroc1"]
+atlas = ExtResource("1_sif3y")
+region = Rect2(1280, 768, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wmewm"]
+atlas = ExtResource("1_sif3y")
+region = Rect2(1536, 768, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y0wfr"]
+atlas = ExtResource("1_sif3y")
+region = Rect2(1792, 768, 256, 256)
 
 [resource]
 animations = [{
@@ -330,7 +289,55 @@ animations = [{
 "name": &"jump",
 "speed": 12.0
 }, {
-"frames": [{"duration": 1.0, "texture": SubResource("RunOlive_00")}, {"duration": 1.0, "texture": SubResource("RunOlive_01")}, {"duration": 1.0, "texture": SubResource("RunOlive_02")}, {"duration": 1.0, "texture": SubResource("RunOlive_03")}, {"duration": 1.0, "texture": SubResource("RunOlive_04")}, {"duration": 1.0, "texture": SubResource("RunOlive_05")}, {"duration": 1.0, "texture": SubResource("RunOlive_06")}, {"duration": 1.0, "texture": SubResource("RunOlive_07")}, {"duration": 1.0, "texture": SubResource("RunOlive_08")}, {"duration": 1.0, "texture": SubResource("RunOlive_09")}, {"duration": 1.0, "texture": SubResource("RunOlive_10")}, {"duration": 1.0, "texture": SubResource("RunOlive_11")}, {"duration": 1.0, "texture": SubResource("RunOlive_12")}, {"duration": 1.0, "texture": SubResource("RunOlive_13")}, {"duration": 1.0, "texture": SubResource("RunOlive_14")}, {"duration": 1.0, "texture": SubResource("RunOlive_15")}],
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("RunOlive_00")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_01")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_02")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_03")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_04")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_05")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_06")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_07")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_08")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_09")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_10")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_11")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_12")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_13")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_14")
+}, {
+"duration": 1.0,
+"texture": SubResource("RunOlive_15")
+}],
 "loop": 1,
 "name": &"run",
 "speed": 22.0

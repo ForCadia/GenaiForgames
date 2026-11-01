@@ -12,6 +12,7 @@ var stage_label: BoxContainer
 var stage_styles: Array[StyleBoxFlat] = []
 var shield: ProgressBar
 var shield_label: Label
+var coins_label: Label
 var grenade_label: Label
 var weapon_label: Label
 var ammo_label: Label
@@ -54,10 +55,11 @@ func _ready() -> void:
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var layout := F.box(margin)
 	var top := F.box(layout, true)
+	var backplate := StyleBoxFlat.new()
+	backplate.bg_color = Color(0.02, 0.035, 0.055, 0.55)
+	for side in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]: backplate.set_content_margin(side, 8)
 	var left_panel := PanelContainer.new()
-	var compact_panel := root.theme.get_stylebox("panel", "PanelContainer").duplicate()
-	for side in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]: compact_panel.set_content_margin(side, 8)
-	left_panel.add_theme_stylebox_override("panel", compact_panel)
+	left_panel.add_theme_stylebox_override("panel", backplate)
 	top.add_child(left_panel)
 	var left := F.box(left_panel)
 	left.add_theme_constant_override("separation", 3)
@@ -80,15 +82,26 @@ func _ready() -> void:
 	top.add_child(boss_hud)
 	F.spacer(top)
 	var right_panel := PanelContainer.new()
-	right_panel.add_theme_stylebox_override("panel", compact_panel)
+	right_panel.add_theme_stylebox_override("panel", backplate)
 	top.add_child(right_panel)
 	var right := F.box(right_panel)
+	right.add_theme_constant_override("separation", 3)
 	var shield_row := F.box(right, true)
 	F.icon(shield_row, "shield")
 	shield = F.bar(shield_row, 112)
 	shield.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	shield_label = F.label(right, "GUARD LOCK", "AmberLabel")
 	shield_label.hide()
+	var coins_row := F.box(right, true)
+	coins_row.add_theme_constant_override("separation", 5)
+	var coin_icon := TextureRect.new()
+	coin_icon.texture = load("res://assets/retro_shooter/coin_icon.tres")
+	coin_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	coin_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	coin_icon.custom_minimum_size = Vector2(14, 14)
+	coin_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	coins_row.add_child(coin_icon)
+	coins_label = F.label(coins_row, "0 G", "AmberLabel")
 	grenade_label = F.label(right, "[F] GRENADE ×1", "AmberLabel")
 	var messages := F.box(layout)
 	var banner_center := CenterContainer.new()
@@ -148,16 +161,16 @@ func _ready() -> void:
 	F.spacer(bottom)
 	var panel := PanelContainer.new()
 	panel.name = "WeaponHUD"
-	panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	panel.add_theme_stylebox_override("panel", backplate)
 	bottom.add_child(panel)
 	var weapon_layout := F.box(panel, true)
 	weapon_layout.add_theme_constant_override("separation", 10)
 	var row := F.box(weapon_layout, true)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 3)
+	row.add_theme_constant_override("separation", 4)
 	for i in range(3):
 		var slot := PanelContainer.new()
-		slot.custom_minimum_size = Vector2(64, 32)
+		slot.custom_minimum_size = Vector2(80, 36)
 		slot.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 		slot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(slot)
@@ -165,7 +178,7 @@ func _ready() -> void:
 		contents.add_theme_constant_override("separation", 3)
 		F.label(contents, str(i + 1), "MutedLabel")
 		var icon := F.icon(contents, ["rifle", "piercer", "grenade"][i])
-		icon.custom_minimum_size = Vector2(44, 20) if i < 2 else Vector2(24, 24)
+		icon.custom_minimum_size = Vector2(56, 22) if i < 2 else Vector2(24, 24)
 		if i < 2: icon.stretch_mode = TextureRect.STRETCH_SCALE
 		slots.append(slot)
 	var weapons := F.box(weapon_layout)
@@ -228,7 +241,9 @@ func sync() -> void:
 		score_tween.parallel().tween_property(score_label, "scale", Vector2(1.15, 1.15), 0.1)
 		score_tween.tween_property(score_label, "scale", Vector2.ONE, 0.12)
 	score_label.text = "%06d" % roundi(shown_score)
-	kills_label.text = "KILLS %02d   G %d" % [game.run_total_kills, game.progression.coins] if game._meta_enabled() else "KILLS %02d" % game.run_total_kills
+	kills_label.text = "KILLS %02d" % game.run_total_kills
+	coins_label.get_parent().visible = game._meta_enabled()
+	coins_label.text = "%d G" % game.progression.coins
 	mode_label.text = game.mode_caption()
 	var reached: int = 4 if game.boss_mode or game.state == "victory" else game.segment
 	for index in range(5):
