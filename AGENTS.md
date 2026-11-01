@@ -142,3 +142,6 @@ Latest encounter authoring revision (2026-10-31): Level02/03 now use independent
 
 
 Latest independent Endless revision (2026-10-31): user rejects all campaign-derived Endless templates. endless_data.gd now generates independent random wave rosters from dedicated weighted profiles (mixed/air/armor/fireline), randomized ratios/order/timing and22–32 Normal combat-event budgets. Easy approximately half, Hard3x; one grenade, every-fifth-wave Boss and capped wave pacing retained. campaign_data.gd delegates Endless generation without referencing any campaign stage. Supersedes phase-to-wave mapping only; all campaigns unchanged. No game/import/tests/captures per user.
+
+
+Latest pressure-budget revision (2026-10-31): user adds active threat cap to Level02/03 AND Endless. threat_budget.gd defines cap100, light/unarmored25, heavy50, kamikaze35, gate40, spikes25 and0.6s minimum release gap. main.gd reserves incoming actors, delays over-budget events without dropping them and waits for event dispatch before transition; harmless dead actors release points, damaging drone explosions retain reservation. Hard total3x retained; same cap. Level01/LAB/Boss unchanged. File edits only; user tests.

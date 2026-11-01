@@ -4,6 +4,7 @@ const BALANCE := preload("res://combat_balance.gd")
 const KAMIKAZE := preload("res://kamikaze_drone.gd")
 const GD := preload("res://game_data.gd")
 const CAMPAIGNS := preload("res://campaign_data.gd")
+const THREAT_BUDGET := preload("res://threat_budget.gd")
 const LASER_GATE_SCENE := preload("res://LaserGateEnemy.tscn")
 const GROUND_SPIKES_SCENE := preload("res://GroundSpikes.tscn")
 const LIGHT_TURRET_SCENE := preload("res://LightTurret.tscn")
@@ -90,6 +91,7 @@ var checkpoint_ammo := [24, 5]
 var segment := 0
 var segment_time := 0.0
 var next_event := 0
+var next_budget_spawn_at := 0.0
 var segment_transition_pending := false
 var distance := 0.0
 var boss_mode := false
@@ -429,8 +431,16 @@ func _update_segment() -> void:
 	var data: Dictionary = current_segment()
 	if not segment_transition_pending:
 		while next_event < data.events.size() and segment_time >= data.events[next_event].at * GD.SEGMENT_PACE:
-			_spawn_event(data.events[next_event]); next_event += 1
-		if segment_time >= data.duration * GD.SEGMENT_PACE:
+			var event: Dictionary = data.events[next_event]
+			var cost: int = THREAT_BUDGET.event_cost(event)
+			if _uses_threat_budget() and cost > 0:
+				if segment_time < next_budget_spawn_at or _active_threat_points()+cost > THREAT_BUDGET.LIMIT:
+					break
+				# Reserve offscreen arrivals too; never burst a delayed queue at once.
+				next_budget_spawn_at = segment_time+THREAT_BUDGET.SPAWN_GAP
+			_spawn_event(event)
+			next_event += 1
+		if segment_time >= data.duration * GD.SEGMENT_PACE and (not _uses_threat_budget() or next_event >= data.events.size()):
 			segment_transition_pending = true
 	# Let the outgoing enemies, obstacles, pickups and hostile rounds leave
 	# the screen instead of making them vanish mid-frame at the time limit.
@@ -438,6 +448,28 @@ func _update_segment() -> void:
 		if endless_mode: _advance_endless()
 		elif segment == GD.CAMPAIGN_SEGMENT_COUNT - 1: _start_boss(true)
 		else: _start_segment(segment + 1, true)
+
+func _uses_threat_budget() -> bool:
+	return not developer_mode and not boss_mode and (endless_mode or selected_level > 0)
+
+func _active_threat_points() -> int:
+	var total := 0
+	for turret in turrets:
+		if is_instance_valid(turret) and not turret.is_queued_for_deletion() and turret.state != TurretBase.TurretState.DEAD:
+			total += int(THREAT_BUDGET.COSTS.heavy if turret.turret_kind == TurretBase.TurretKind.HEAVY else THREAT_BUDGET.COSTS.light)
+	for drone in kamikaze_drones:
+		if is_instance_valid(drone) and not drone.is_queued_for_deletion() and not drone.is_finished():
+			total += int(THREAT_BUDGET.COSTS.kamikaze)
+	for gate in laser_gates:
+		if is_instance_valid(gate) and not gate.is_queued_for_deletion() and gate.state == "Hover":
+			total += THREAT_BUDGET.GATE_COST
+	for spikes in ground_spikes:
+		if is_instance_valid(spikes) and not spikes.is_queued_for_deletion():
+			total += THREAT_BUDGET.SPIKES_COST
+	for enemy in enemies:
+		if not enemy.dead:
+			total += int(THREAT_BUDGET.COSTS.get(enemy.type,25))
+	return total
 
 func _spawn_event(event: Dictionary) -> void:
 	match event.kind:
@@ -737,6 +769,7 @@ func _start_segment(index: int, preserve_motion := false) -> void:
 	checkpoint_grenades = grenade_count
 	music.play_track(false)
 	segment = index; segment_time = 0; next_event = 0; segment_transition_pending = false; boss_mode = false
+	next_budget_spawn_at = 0.0
 	checkpoint_score = score; checkpoint_stats = stats.duplicate(true); checkpoint_ammo = ammo.duplicate()
 	checkpoint_weapon_index = weapon_index; checkpoint_distance = distance
 	_clear_world(); _reset_player(preserve_motion)
