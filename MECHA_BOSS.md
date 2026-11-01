@@ -46,3 +46,6 @@ Mecha entrance/effects revision (2026-10-31): user now authorizes backpack propu
 
 
 Mecha melee readability revision (2026-10-31): larger backpack exhaust and leftward ground sparks. Ground slash and aerial thrust display red swept-area telegraphs before execution; thrust direction locks at preparation start so the warning gives a usable dodge window. Windup poses play in the final 0.20 seconds of the unchanged preparation window; charge holds slash source frame 9, and execution/recovery/fire/lift/landing animations are faster. Cosmetic oversized red crescent uses the user Downloads neon effects atlas, retained unchanged as assets/vfx/neon_effects_source.png; shader removes its black background at render time. Damage still uses existing swept blade shapes and one contact per attack. No game, import or tests were run.
+
+
+Melee warning presentation follow-up: removed warning outlines; widened ground warning from 37px to 73px and thrust warning from 36px to 80px. Enlarged cosmetic crescent artwork to 4.0x3.8 (slash) and 3.6x3.0 (thrust). Actual damage shapes and timing are unchanged. Source edits only, no runtime tests.

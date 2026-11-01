@@ -41,7 +41,7 @@ func advance_effects(delta: float, boss: Node2D) -> void:
 	if state == "slash_prepare":
 		var area: Rect2 = Rect2(core+Vector2(-128,18),Vector2(142,25))
 		var travel: float = minf(DATA.CHARGE_DISTANCE,maxf(0.0,boss.position.x-280.0))
-		area = area.merge(Rect2(area.position-Vector2(travel,0),area.size)).grow(6.0)
+		area = area.merge(Rect2(area.position-Vector2(travel,0),area.size)).grow(24.0)
 		band = PackedVector2Array([to_local(area.position),to_local(Vector2(area.end.x,area.position.y)),to_local(area.end),to_local(Vector2(area.position.x,area.end.y))])
 	elif state == "stab_prepare":
 		var direction: Vector2 = boss.stab_direction
@@ -49,7 +49,7 @@ func advance_effects(delta: float, boss: Node2D) -> void:
 		goal.x = maxf(130.0,goal.x)
 		goal.y = minf(preload("res://game_data.gd").GROUND_Y-4.0,goal.y)
 		var end: Vector2 = core+(goal-boss.position)+direction*DATA.STAB_HIT_LENGTH
-		var side: Vector2 = direction.orthogonal()*(DATA.STAB_HIT_RADIUS+8.0)
+		var side: Vector2 = direction.orthogonal()*(DATA.STAB_HIT_RADIUS+30.0)
 		band = PackedVector2Array([to_local(core-side),to_local(end-side),to_local(end+side),to_local(core+side)])
 	if state in ["slash","stab"] and state != last_state:
 		trail_left = DATA.MELEE_TRAIL_TIME
@@ -60,15 +60,12 @@ func advance_effects(delta: float, boss: Node2D) -> void:
 		slash.position = to_local(core+direction*90.0)
 		slash.flip_h = true
 		slash.rotation = direction.angle()-PI
-		slash.scale = Vector2(2.5,2.4) if state == "slash" else Vector2(2.2,1.65)
+		slash.scale = Vector2(4.0,3.8) if state == "slash" else Vector2(3.6,3.0)
 		slash.modulate.a = minf(1.0,trail_left/0.07)
 	last_state = state
 	queue_redraw()
 
 func _draw() -> void:
 	if not warning or band.size() < 4: return
-	var pulse: float = 0.2+0.08*sin(clock*16.0)
+	var pulse: float = 0.24+0.06*sin(clock*16.0)
 	draw_colored_polygon(band,Color(1.0,0.04,0.06,pulse))
-	var outline: PackedVector2Array = band.duplicate()
-	outline.append(band[0])
-	draw_polyline(outline,Color(1.0,0.18,0.16,0.85),2.0,false)
