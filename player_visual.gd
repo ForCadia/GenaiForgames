@@ -92,6 +92,11 @@ func _ready() -> void:
 	cape = preload("res://player_cape.gd").new()
 	cape.actor = self
 	visual_root.add_child(cape)
+	# Explicit layers: body(0), cape(1), original arm/head order(2), guard(3).
+	back_pivot.z_index = 2
+	helmet.z_index = 2
+	front_pivot.z_index = 2
+	guard_effect.z_index = 3
 	helmet.scale = Vector2(0.88, 0.88)
 	run_palette.shader = preload("res://assets/player/run_palette.gdshader")
 	set_collision_pose(false)

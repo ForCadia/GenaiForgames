@@ -10,3 +10,6 @@ First visual-only implementation requested by the user. Downloads/红白披风�
 - Local artwork sizes: link6.5 world pixels ×12, maximum cloth half-width17 world pixels; scarf68 VisualRoot pixels before the existing0.5 scale. Values are presentation-only.
 
 Assets: assets/player/cape_red_ivory_atlas.png and assets/player/scarf_red_pixel.png. Integration only adds a child from player_visual.gd; gameplay, collider shapes, weapons, HUD and historical telemetry are unchanged. No Godot game/import/tests/captures run per user; user will judge size, attachment and motion in play.
+
+
+Latest user revision: scarf and ivory mesh are removed from rendering; only the red cape remains (source/unused assets retained). Thick cloth uses stronger shape springs, lower gravity/flutter, higher damping and10 constraint passes plus two-link bending constraints; root direction is braced, tail still moves and death relaxes it. Draw layers now body0, cape1, back arm/helmet/front arm2 in their original sibling order, guard3. A visual-only8×10px elliptical shoulder exclusion follows the animated back-shoulder socket. Both centerline simulation points and rendered cloth edges are pushed to its rear boundary on contact; root attachment is exempt. No changes to gameplay collision/hitboxes. No runtime tests per user.

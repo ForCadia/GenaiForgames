@@ -172,3 +172,6 @@ Latest homing nerf/copy (2026-10-31): homing now max4 ranks; every5/4/3/2 actual
 
 
 Latest procedural cape revision (2026-10-31): user authorizes first visual-only broad ribbon cape. player_visual.gd instantiates player_cape.gd,12-link fixed-step global Verlet mesh using generated transparent pixel red/ivory atlas, bone-white edge, wind/gravity/motion inertia, behind-body/ground constraints and pixel-snapped vertices. Separate scarf_red_pixel.png is pure red, positioned below neck and inserted before Helmet sibling (body < scarf < helmet < front arm), never weapon rotation. Cape z=-3; death settles cloth and hides separate scarf to preserve baked death head. Source Downloads unchanged. No gameplay/collider changes, no tests/import/game/captures. See PLAYER_CAPE.md.
+
+
+Latest cape stiffness/layer revision (2026-10-31): user removes scarf and ivory backing; render red only. Cape z1 in front of body0, original back-arm/helmet/front-arm ordering at z2, guard3. Shape-rest springs, damping, reduced live gravity/flutter and two-link bend constraints make it thick/stiffer while leaving tail/death motion. Follow animated shoulder with visual ellipse exclusion for centerline and mesh edges; pin root attachment, no gameplay collider changes. Assets retained unused. No tests/import/game/captures.
