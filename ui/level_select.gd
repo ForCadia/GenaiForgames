@@ -45,7 +45,7 @@ func _ready() -> void:
 
 	for index in range(CAMPAIGNS.LEVELS.size()):
 		var data: Dictionary = CAMPAIGNS.LEVELS[index]
-		var button := mission_row("%02d" % (index+1),str(data.name),DESCRIPTIONS[index],func(): game.start_level(index))
+		var button := mission_row(tr("%02d") % (index+1),str(data.name),DESCRIPTIONS[index],func(): game.start_level(index))
 		mission_buttons.append(button)
 		if index == 0: first_button = button
 	add_child(HSeparator.new())
@@ -91,15 +91,15 @@ func refresh() -> void:
 		button.disabled = not game.mission_unlocked(3)
 		button.modulate = Color(0.5,0.56,0.64) if button.disabled else Color.WHITE
 		button.tooltip_text = "通关第三关后解锁" if button.disabled else "点击直接开始对应难度"
-	wallet_label.text = "%d G" % game.progression.coins
+	wallet_label.text = tr("%d G") % game.progression.coins
 	var available := 0
 	for id in preload("res://build_data.gd").NODES:
 		if game.progression.can_buy(id): available += 1
-	upgrade_hint.text = "%d 项升级可购买 / 强化后再出击" % available if available > 0 else "花费金币，强化护盾与武器"
-	mode_label.text = "开发模式 / 全部关卡开放" if game.play_profile == "development" else ("游客 / 每次重新进入从零开始" if game.play_profile == "guest" else "存档：" + game.progression.profile_name.left(20))
+	upgrade_hint.text = tr("%d 项升级可购买 / 强化后再出击") % available if available > 0 else "花费金币，强化护盾与武器"
+	mode_label.text = "开发模式 / 全部关卡开放" if game.play_profile == "development" else ("游客 / 每次重新进入从零开始" if game.play_profile == "guest" else tr("存档：") + game.progression.profile_name.left(20))
 	for index in range(mission_buttons.size()):
 		var button := mission_buttons[index]
 		button.disabled = not game.mission_unlocked(index)
 		button.modulate = Color(0.5,0.56,0.64) if button.disabled else Color.WHITE
 		var label: Label = button.get_meta("description_label")
-		label.text = ("未解锁 / 通关第 %d 关后开放" % index) if button.disabled else DESCRIPTIONS[index]
+		label.text = (tr("未解锁 / 通关第 %d 关后开放") % index) if button.disabled else DESCRIPTIONS[index]

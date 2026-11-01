@@ -70,7 +70,9 @@ func refresh() -> void:
 		buttons[id].size = node_size(id)
 		buttons[id].position = node.pos - buttons[id].size*0.5
 		buttons[id].modulate = Color.WHITE if state != "blocked" or id == selected else Color(0.62,0.66,0.72)
-		buttons[id].text = str(node.name)+"\n"+("已购买" if state == "owned" else str(node.cost)+" G")
+		buttons[id].add_theme_font_size_override("font_size",11 if TranslationServer.get_locale().begins_with("en") else 13)
+		buttons[id].autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		buttons[id].text = tr(str(node.name))+"\n"+(tr("已购买") if state == "owned" else str(node.cost)+" G")
 	queue_redraw()
 func edge_points(from_id: String, to_id: String) -> Array:
 	var origin: Vector2 = DATA.ROOT_POSITION if from_id == "core" else DATA.NODES[from_id].pos

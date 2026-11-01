@@ -1,9 +1,11 @@
 extends Node
+signal language_changed
 
 const DEFAULTS := {
 	"master": 80.0, "music": 100.0, "sfx": 90.0, "muted": false,
 	"fullscreen": false, "vsync": true, "tutorials": true,
 	"reduced_flash": false, "death_camera": true, "cosmetic_vfx": true,
+	"language": "zh_CN",
 }
 const SAVE_PATH := "user://settings.cfg"
 var options := DEFAULTS.duplicate()
@@ -11,6 +13,7 @@ var preview := AudioStreamPlayer.new()
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	preload("res://ui/translations.gd").install()
 	for bus_name in ["Music", "SFX"]:
 		if AudioServer.get_bus_index(bus_name) < 0:
 			AudioServer.add_bus()
@@ -30,9 +33,12 @@ func _ready() -> void:
 		if config.load(SAVE_PATH) == OK:
 			for key in DEFAULTS:
 				var value: Variant = config.get_value("settings", key, DEFAULTS[key])
-				if typeof(DEFAULTS[key]) == TYPE_BOOL:
+				if key == "language":
+					if value is String and value in ["zh_CN", "en"]: options[key] = value
+				elif typeof(DEFAULTS[key]) == TYPE_BOOL:
 					if value is bool: options[key] = value
 				elif value is float or value is int: options[key] = clampf(float(value), 0, 100)
+	TranslationServer.set_locale(options.language)
 	apply_audio()
 	if not _test_mode(): apply_display(not OS.get_cmdline_args().has("--fullscreen"))
 	preview.bus = "SFX"
@@ -56,6 +62,13 @@ func fullscreen_supported() -> bool:
 
 func set_option(key: String, value: Variant) -> void:
 	if not DEFAULTS.has(key): return
+	if key == "language":
+		if value not in ["zh_CN", "en"] or options.language == value: return
+		options.language = value
+		TranslationServer.set_locale(value)
+		save()
+		language_changed.emit()
+		return
 	options[key] = bool(value) if DEFAULTS[key] is bool else clampf(float(value), 0, 100)
 	apply_audio()
 	if key in ["fullscreen", "vsync"]: apply_display()
@@ -78,10 +91,13 @@ func apply_display(include_fullscreen := true) -> void:
 	elif not options.fullscreen and is_full: DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 
 func restore_defaults() -> void:
+	var previous_language: String = options.language
 	options = DEFAULTS.duplicate()
+	TranslationServer.set_locale(options.language)
 	apply_audio()
 	apply_display()
 	save()
+	if previous_language != options.language: language_changed.emit()
 
 func save() -> void:
 	if _test_mode(): return

@@ -234,6 +234,15 @@ func _ready() -> void:
 	overlays.game = self
 	add_child(overlays)
 	return_to_start()
+	settings.language_changed.connect(func(): call_deferred("_refresh_language"))
+
+func _refresh_language() -> void:
+	# Keep the selected profile, current page and paused run while refreshing copy.
+	start_screen.level_select.refresh()
+	start_screen.build_view.refresh()
+	start_screen.settings_view.rebuild()
+	if overlays.visible: overlays.rebuild()
+	player_hud.sync()
 
 func _process(delta: float) -> void:
 	if state == "start" or ui_paused or lab_panel.blocked: return
@@ -1653,12 +1662,12 @@ func current_segment() -> Dictionary:
 	return level_segments[segment]
 
 func current_stage_name() -> String:
-	return str(current_segment().title).get_slice("//", 1).strip_edges()
+	return tr(str(current_segment().title).get_slice("//", 1).strip_edges())
 
 func mode_caption() -> String:
-	if endless_mode: return "ENDLESS / %s / WAVE %02d" % [endless_difficulty.to_upper(),endless_wave]
+	if endless_mode: return tr("ENDLESS / %s / WAVE %02d") % [tr(endless_difficulty.to_upper()),endless_wave]
 	if boss_test_mode: return "IRON BASTION TEST" if is_iron_boss() else ("MECHA BOSS TEST" if is_mecha_boss() else "EYEBALL BOSS TEST")
-	return "LEVEL %02d" % (selected_level + 1)
+	return tr("LEVEL %02d") % (selected_level + 1)
 
 func record_key() -> String:
 	if endless_mode: return "endless_best_score" if endless_difficulty == "normal" else "endless_%s_best_score" % endless_difficulty

@@ -88,23 +88,23 @@ func build_death() -> void:
 	F.label(text,"// SIGNAL LOST","AmberLabel")
 	F.label(text,S.DEATH,"TitleLabel").modulate = STYLE.RED
 	F.label(text,S.death_cause(game.banner),"SmallLabel")
-	var destination := "WAVE 01 / NEW ENDLESS RUN" if game.endless_mode else ("BOSS ENCOUNTER" if game.boss_mode and game.restart_mode == "checkpoint" else ("CHECKPOINT %02d / %s" % [game.segment+1,game.current_stage_name()] if game.restart_mode == "checkpoint" else "CAMPAIGN ENTRY"))
-	var restart := F.label(text,"RESTART / " + destination,"EnergyLabel")
+	var destination := "WAVE 01 / NEW ENDLESS RUN" if game.endless_mode else ("BOSS ENCOUNTER" if game.boss_mode and game.restart_mode == "checkpoint" else (tr("CHECKPOINT %02d / %s") % [game.segment+1,game.current_stage_name()] if game.restart_mode == "checkpoint" else "CAMPAIGN ENTRY"))
+	var restart := F.label(text,tr("RESTART / ") + tr(destination),"EnergyLabel")
 	restart.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	if game.boss_mode: F.label(text,"SENTINEL / PHASE %d" % int(game.boss.get("phase",1)),"AmberLabel")
+	if game.boss_mode: F.label(text,tr("SENTINEL / PHASE %d") % int(game.boss.get("phase",1)),"AmberLabel")
 	text.add_child(HSeparator.new())
 	var metrics := F.box(text,true)
 	metrics.add_theme_constant_override("separation",16)
-	metric(metrics,"SCORE","%06d" % game.score)
-	metric(metrics,"KILLS / SHOTS","%d / %d" % [game.run_total_kills,game.run_total_shots])
-	metric(metrics,"TIME / DEATHS","%02d:%02d / %d" % [int(game.run_elapsed)/60,int(game.run_elapsed)%60,game.run_deaths])
+	metric(metrics,"SCORE",tr("%06d") % game.score)
+	metric(metrics,"KILLS / SHOTS",tr("%d / %d") % [game.run_total_kills,game.run_total_shots])
+	metric(metrics,"TIME / DEATHS",tr("%02d:%02d / %d") % [int(game.run_elapsed)/60,int(game.run_elapsed)%60,game.run_deaths])
 	if game._meta_enabled():
 		text.add_child(HSeparator.new())
 		var bonus := int(game.settlement.get("bonus",0))
-		stat_row(text,"COINS THIS RUN","+%d G" % (game.run_coins+bonus),"AmberLabel")
-		stat_row(text,"WALLET","%d G" % game.progression.coins,"AmberLabel")
+		stat_row(text,"COINS THIS RUN",tr("+%d G") % (game.run_coins+bonus),"AmberLabel")
+		stat_row(text,"WALLET",tr("%d G") % game.progression.coins,"AmberLabel")
 	if game.endless_mode:
-		stat_row(text,"WAVE REACHED / BEST SCORE","%02d / %06d" % [game.endless_wave,record_result().best])
+		stat_row(text,"WAVE REACHED / BEST SCORE",tr("%02d / %06d") % [game.endless_wave,record_result().best])
 	STYLE.primary(F.button(content,"RESTART ENDLESS [R]" if game.endless_mode else S.RETRY,func(): game._request_retry("ui_button"))).grab_focus()
 	F.button(content,S.RETURN_TITLE,func(): game.return_to_start(),true)
 
@@ -121,7 +121,7 @@ func build_victory() -> void:
 	var title := F.box(header)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	F.label(title,S.VICTORY,"LargeLabel")
-	F.label(title,game.mode_caption()+" // COMPLETE","AmberLabel")
+	F.label(title,game.mode_caption()+tr(" // COMPLETE"),"AmberLabel")
 	var ranked: bool = not game.developer_mode and not game.boss_test_mode
 	if ranked:
 		var badge := PanelContainer.new()
@@ -139,12 +139,12 @@ func build_victory() -> void:
 	performance.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	performance.add_theme_constant_override("separation",10)
 	F.label(performance,"PERFORMANCE","AmberLabel")
-	stat_row(performance,"SCORE","%06d" % game.score,"LargeLabel")
-	stat_row(performance,"KILLS / SHOTS","%d / %d" % [game.run_total_kills,game.run_total_shots])
-	stat_row(performance,"TIME / DEATHS","%02d:%02d / %d" % [int(game.run_elapsed)/60,int(game.run_elapsed)%60,game.run_deaths])
+	stat_row(performance,"SCORE",tr("%06d") % game.score,"LargeLabel")
+	stat_row(performance,"KILLS / SHOTS",tr("%d / %d") % [game.run_total_kills,game.run_total_shots])
+	stat_row(performance,"TIME / DEATHS",tr("%02d:%02d / %d") % [int(game.run_elapsed)/60,int(game.run_elapsed)%60,game.run_deaths])
 	if not game.boss_test_mode:
-		stat_row(performance,"LIGHT TURRETS","%02d" % game.stats.unarmored)
-		stat_row(performance,"HEAVY TURRETS","%02d" % game.stats.heavy)
+		stat_row(performance,"LIGHT TURRETS",tr("%02d") % game.stats.unarmored)
+		stat_row(performance,"HEAVY TURRETS",tr("%02d") % game.stats.heavy)
 	stat_row(performance,"BOSS","DEFEATED","EnergyLabel")
 	if game._meta_enabled():
 		var reward := F.box(columns)
@@ -152,14 +152,14 @@ func build_victory() -> void:
 		reward.add_theme_constant_override("separation",10)
 		F.label(reward,"REWARD","AmberLabel")
 		var bonus := int(game.settlement.get("bonus",0))
-		stat_row(reward,"PICKED","%d G" % game.run_coins)
-		stat_row(reward,"BONUS","%d G" % bonus)
-		F.label(reward,"EARNED  +%d G" % (game.run_coins+bonus),"SmallLabel").modulate = STYLE.AMBER
+		stat_row(reward,"PICKED",tr("%d G") % game.run_coins)
+		stat_row(reward,"BONUS",tr("%d G") % bonus)
+		F.label(reward,tr("EARNED  +%d G") % (game.run_coins+bonus),"SmallLabel").modulate = STYLE.AMBER
 		F.label(reward,"WALLET","MutedLabel")
-		F.label(reward,"%d G" % game.progression.coins,"LargeLabel").modulate = STYLE.AMBER
+		F.label(reward,tr("%d G") % game.progression.coins,"LargeLabel").modulate = STYLE.AMBER
 	if ranked:
 		var result := record_result()
-		F.label(text,("NEW BEST  " if result.new_record else "PERSONAL BEST  ")+"%06d" % result.best,"AmberLabel")
+		F.label(text,(tr("NEW BEST  ") if result.new_record else tr("PERSONAL BEST  "))+tr("%06d") % result.best,"AmberLabel")
 	var primary: Button
 	if ranked and game.selected_level < 2:
 		primary = STYLE.primary(F.button(content,"NEXT MISSION",func(): game.next_level()))

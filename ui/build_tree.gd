@@ -91,18 +91,18 @@ func _ready() -> void:
 func refresh() -> void:
 	if not is_instance_valid(balance): return
 	graph.profile = game.progression
-	balance.text = "%d G" % game.progression.coins
+	balance.text = tr("%d G") % game.progression.coins
 	var node: Dictionary = DATA.NODES[selected]
 	var parents: Array[String] = []
 	var locked: Array[String] = []
 	for parent in node.parents:
 		if parent == "core": continue
-		parents.append(DATA.NODES[parent].name)
-		if not game.progression.has_upgrade(parent): locked.append(DATA.NODES[parent].name)
+		parents.append(tr(DATA.NODES[parent].name))
+		if not game.progression.has_upgrade(parent): locked.append(tr(DATA.NODES[parent].name))
 	name_label.text = str(node.name)
 	name_label.modulate = graph.branch_color(node.branch)
-	effect_label.text = "效果：" + str(node.text)
-	prereq_label.text = "前置：" + " + ".join(parents) if not parents.is_empty() else "从核心直接解锁"
+	effect_label.text = tr("效果：") + tr(str(node.text))
+	prereq_label.text = tr("前置：") + " + ".join(parents) if not parents.is_empty() else "从核心直接解锁"
 	var shortage: int = int(node.cost) - game.progression.coins
 	if game.progression.has_upgrade(selected):
 		status_label.text = "● 已购买"
@@ -110,12 +110,12 @@ func refresh() -> void:
 		buy_button.disabled = true
 		buy_button.text = "已购买"
 	elif not locked.is_empty():
-		status_label.text = "● 前置未满足：" + " + ".join(locked)
+		status_label.text = tr("● 前置未满足：") + " + ".join(locked)
 		status_label.modulate = P.RED
 		buy_button.disabled = true
 		buy_button.text = "未解锁"
 	elif shortage > 0:
-		status_label.text = "● 金币不足（还差 %d G）" % shortage
+		status_label.text = tr("● 金币不足（还差 %d G）") % shortage
 		status_label.modulate = P.AMBER
 		buy_button.disabled = true
 		buy_button.text = "金币不足"
@@ -123,6 +123,6 @@ func refresh() -> void:
 		status_label.text = "● 可购买"
 		status_label.modulate = P.TEXT
 		buy_button.disabled = false
-		buy_button.text = "购买  %d G" % node.cost
+		buy_button.text = tr("购买  %d G") % node.cost
 	graph.selected = selected
 	graph.refresh()

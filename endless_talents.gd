@@ -38,5 +38,5 @@ static func roll(ranks: Dictionary) -> Array[String]:
 
 static func description(id: String, current_rank: int) -> String:
 	if id == "homing":
-		return "每%d发子弹有1发追踪" % (6-mini(4,current_rank+1))
+		return TranslationServer.translate("每%d发子弹有1发追踪") % (6-mini(4,current_rank+1))
 	return str(POOL[id].text)

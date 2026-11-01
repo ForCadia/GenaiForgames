@@ -39,8 +39,8 @@ func apply_state(hp: int, maximum: int, plates: int, phase: int, armor_points :=
 	armor_bar.max_value = armor_maximum
 	armor_bar.value = remaining
 	armor_bar.modulate = Color.WHITE if remaining > 0 else Color(0.3,0.4,0.5,0.5)
-	title.text = "SENTINEL / PHASE %02d" % phase
-	armor.text = "ARMOR %d / %d // AP" % [remaining,armor_maximum] if plates > 0 else "WEAK POINT EXPOSED"
+	title.text = tr("SENTINEL / PHASE %02d") % phase
+	armor.text = tr("ARMOR %d / %d // AP") % [remaining,armor_maximum] if plates > 0 else "WEAK POINT EXPOSED"
 	if plates != last_plates: armor.modulate = Color.WHITE if plates > 0 else UIPalette.AMBER
 	if plates < last_plates:
 		if armor_tween: armor_tween.kill()

@@ -240,10 +240,10 @@ func sync() -> void:
 		score_tween.tween_property(self, "shown_score", float(target_score), 0.3)
 		score_tween.parallel().tween_property(score_label, "scale", Vector2(1.15, 1.15), 0.1)
 		score_tween.tween_property(score_label, "scale", Vector2.ONE, 0.12)
-	score_label.text = "%06d" % roundi(shown_score)
-	kills_label.text = "KILLS %02d" % game.run_total_kills
+	score_label.text = tr("%06d") % roundi(shown_score)
+	kills_label.text = tr("KILLS %02d") % game.run_total_kills
 	coins_label.get_parent().visible = game._meta_enabled()
-	coins_label.text = "%d G" % game.progression.coins
+	coins_label.text = tr("%d G") % game.progression.coins
 	mode_label.text = game.mode_caption()
 	var reached: int = 4 if game.boss_mode or game.state == "victory" else game.segment
 	for index in range(5):
@@ -255,7 +255,7 @@ func sync() -> void:
 	shield.modulate = P.RED if game.guard_lock > 0 else (P.AMBER if game.guard_energy < 25 else Color.WHITE)
 	shield_label.visible = game.guard_lock > 0
 	grenade_label.visible = game.has_grenade
-	grenade_label.text = "[F] GRENADE ×%d" % game.grenade_count
+	grenade_label.text = tr("[F] GRENADE ×%d") % game.grenade_count
 	boss_hud.visible = game.boss_mode
 	if game.boss_mode and not game.boss.is_empty(): game.refresh_boss_hud(boss_hud)
 	for i in range(3):
@@ -264,7 +264,7 @@ func sync() -> void:
 		slots[i].modulate.a = 0.35 if i == 2 and not game.has_grenade else 1.0
 	if game.selected_slot == 2:
 		weapon_label.text = S.WEAPONS[2]
-		ammo_label.text = "× %02d" % game.grenade_count
+		ammo_label.text = tr("× %02d") % game.grenade_count
 		penetration_label.text = "BLAST"
 		ammo_bar.value = 100 if game.has_grenade else 0
 	# Keep combat status popups and stage banners out of the upper playfield.
@@ -280,9 +280,9 @@ func refresh(_health: int, _max_health: int, _weapon_name: String, penetration: 
 	if not is_instance_valid(ammo_label): return
 	weapon_label.text = S.WEAPONS[game.weapon_index]
 	if reload_remaining > 0: weapon_label.text = S.RELOADING
-	ammo_label.text = "%02d / %02d" % [current_ammo, capacity]
+	ammo_label.text = tr("%02d / %02d") % [current_ammo, capacity]
 	ammo_label.modulate = P.RED if current_ammo <= 0 else (P.AMBER if current_ammo <= capacity * 0.25 else P.TEXT)
-	penetration_label.text = "PEN " + "◆".repeat(penetration)
+	penetration_label.text = tr("PEN ") + "◆".repeat(penetration)
 	var reloading := reload_remaining > 0
 	ammo_target = (1.0 - reload_remaining / maxf(reload_duration, 0.001)) * 100 if reloading else float(current_ammo) / maxi(capacity, 1) * 100
 	if reloading and not displayed_reloading:

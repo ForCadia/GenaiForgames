@@ -72,6 +72,7 @@ func advance_intro(delta: float, game: Node2D) -> bool:
 	return true
 
 func _center_text(text: String, y: float, size: int, color: Color) -> void:
+	text = tr(text)
 	var width: float = FONT.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,size).x
 	surface.draw_string(FONT,Vector2((GD.VIEW_SIZE.x-width)*0.5,y),text,HORIZONTAL_ALIGNMENT_LEFT,-1,size,color)
 

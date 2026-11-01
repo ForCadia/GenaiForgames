@@ -25,6 +25,16 @@ func rebuild() -> void:
 	body = F.box(scroll)
 	body.add_theme_constant_override("separation", 4)
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	section("LANGUAGE")
+	var languages := OptionButton.new()
+	languages.name = "LanguageSelect"
+	languages.custom_minimum_size = Vector2(560,44)
+	languages.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	languages.add_item("中文",0)
+	languages.add_item("English",1)
+	languages.select(1 if game.settings.options.language == "en" else 0)
+	languages.item_selected.connect(func(index: int): game.settings.set_option("language","en" if index == 1 else "zh_CN"))
+	body.add_child(languages)
 	section("AUDIO")
 	for spec in [["master", "MASTER VOLUME"], ["music", "MUSIC VOLUME"], ["sfx", "SOUND EFFECTS"]]: add_volume(spec[0],spec[1])
 	add_toggle("muted", "MUTE ALL / F10")

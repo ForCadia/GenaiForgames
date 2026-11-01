@@ -259,7 +259,7 @@ func _process(delta: float) -> void:
 			profile_label.text = "游客 / 本次进度不保存"
 		"named":
 			start_button.text = "继续游戏 [ENTER]"
-			profile_label.text = "存档：" + game.progression.profile_name.left(20)
+			profile_label.text = tr("存档：") + game.progression.profile_name.left(20)
 		_:
 			start_button.text = "游客模式 [ENTER]"
 			profile_label.text = "开发存档 / 保留当前状态，全部关卡开放"

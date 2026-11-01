@@ -1,5 +1,7 @@
 # Project instructions
 
+Language revision2026-11-01: Settings now provides 中文 / English, defaults to zh_CN and persists the language code in the existing settings.cfg. Runtime Translation resources accept both legacy English and Chinese source strings. Native control retranslation and deferred refresh preserve active menus, pause, profile, input name and currency; dynamic UI formats translate before interpolation. Catalog covers player menus, settings, mission selection, HUD/tutorials, results, build tree and Endless talents. Proper title branding and baked warning artwork remain assets. No gameplay numbers, telemetry or profile IDs changed. Language integration and existing settings smoke checks are the relevant checks; this source change does not automatically redeploy or replace the prior submission ZIP.
+
 ## Stack
 
 - Godot **4.7.2.stable.official.ed1daf0bf**, GDScript, 2D scene nodes. Verified with local executable `--version` on 2026-10-04.
