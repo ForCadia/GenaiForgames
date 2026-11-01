@@ -3,6 +3,7 @@ extends Node2D
 # Visual-only ribbon cloth. Global simulation points retain inertia when the
 # player moves; the renderer snaps back to the logical pixel grid.
 const SHEET := preload("res://assets/player/cape_red_ivory_atlas.png")
+const GD := preload("res://game_data.gd")
 const LINKS := 12
 const LINK_LENGTH := 6.5
 const STEP := 1.0/60.0
@@ -14,6 +15,9 @@ var clock := 0.0
 var accumulator := 0.0
 var initialized := false
 var previous_state := ""
+var last_anchor := Vector2.ZERO
+var anchor_velocity := Vector2.ZERO
+var movement_acceleration := Vector2.ZERO
 
 func _ready() -> void:
 	z_index = 1
@@ -31,7 +35,8 @@ func _configure_mesh(mesh: Polygon2D, region: Rect2) -> void:
 		uv.append(region.position+Vector2(t*region.size.x,0))
 		uv.append(region.position+Vector2(t*region.size.x,region.size.y))
 		if index < LINKS:
-			faces.append(PackedInt32Array([index*2,index*2+1,index*2+3,index*2+2]))
+			faces.append(PackedInt32Array([index*2,index*2+1,index*2+3]))
+			faces.append(PackedInt32Array([index*2,index*2+3,index*2+2]))
 	var initial := PackedVector2Array()
 	initial.resize((LINKS+1)*2)
 	mesh.polygon = initial
@@ -52,6 +57,9 @@ func _reset_strip(anchor: Vector2) -> void:
 		var point := anchor+Vector2(-float(index)*LINK_LENGTH,float(index)*1.5)
 		points.append(point)
 		previous.append(point)
+	last_anchor = anchor
+	anchor_velocity = Vector2.ZERO
+	movement_acceleration = Vector2.ZERO
 	initialized = true
 
 func _process(delta: float) -> void:
@@ -64,6 +72,17 @@ func _process(delta: float) -> void:
 	var anchor := _anchor()
 	if not initialized or anchor.distance_to(points[0]) > 180.0 or (previous_state == "death" and actor.body_state != "death"):
 		_reset_strip(anchor)
+	else:
+		# Carry the entire strip with root motion before solving relative flutter.
+		# Fast jumps/frame socket changes must not stretch or crush its mesh.
+		var shift := anchor-last_anchor
+		for index in range(points.size()):
+			points[index] += shift
+			previous[index] += shift
+		var velocity := (shift/maxf(delta,0.001)).limit_length(500.0)
+		movement_acceleration = ((velocity-anchor_velocity)/maxf(delta,0.001)).limit_length(1200.0)
+		anchor_velocity = velocity
+		last_anchor = anchor
 	previous_state = actor.body_state
 	clock += minf(delta,0.066)
 	accumulator = minf(accumulator+delta,STEP*4.0)
@@ -75,7 +94,7 @@ func _simulate(anchor: Vector2) -> void:
 	var dead: bool = actor.body_state == "death"
 	var running: bool = actor.body_state in ["run","slide","jump"]
 	var wind := -110.0 if running and not dead else -15.0
-	var floor_y: float = actor.global_position.y-2.0
+	var floor_y := _track_floor_y()-2.0
 	points[0] = anchor
 	previous[0] = anchor
 	for index in range(1,LINKS+1):
@@ -84,6 +103,7 @@ func _simulate(anchor: Vector2) -> void:
 		var t := float(index)/float(LINKS)
 		var flutter := sin(clock*7.0-float(index)*0.45)*22.0 if not dead else 0.0
 		var acceleration := Vector2(wind,(250.0 if dead else 85.0)+flutter)
+		if not dead: acceleration -= movement_acceleration*0.18*t
 		if not dead:
 			# A thick-cloth rest shape resists collapse without freezing the tail.
 			var rest := anchor+Vector2(-float(index)*LINK_LENGTH,t*(14.0 if running else 28.0)+sin(clock*4.0-t*3.0)*4.0*t)
@@ -117,9 +137,13 @@ func _simulate(anchor: Vector2) -> void:
 		for index in range(1,LINKS+1):
 			# Keep the cloth behind the torso and above the track.
 			if not dead:
-				points[index].x = minf(points[index].x,anchor.x-2.0)
+				points[index].x = minf(points[index].x,points[index-1].x-LINK_LENGTH*0.7)
 				points[index] = _outside_shoulder(points[index])
 			points[index].y = minf(points[index].y,floor_y)
+
+func _track_floor_y() -> float:
+	# Fixed world track, never the airborne player's feet.
+	return actor.get_parent().to_global(Vector2(0,GD.GROUND_Y)).y
 
 func _outside_shoulder(point: Vector2) -> Vector2:
 	if actor.body_state == "death": return point
@@ -139,14 +163,14 @@ func _draw_strip() -> void:
 		var before: Vector2 = points[maxi(0,index-1)]
 		var after: Vector2 = points[mini(LINKS,index+1)]
 		var tangent := (after-before).normalized()
-		var normal := Vector2(-tangent.y,tangent.x)
-		if normal.y < 0: normal = -normal
+		# Stable downward-facing width axis; never swap UV edges at a sharp bend.
+		var normal := Vector2(clampf(tangent.y,-0.45,0.45),maxf(0.75,-tangent.x)).normalized()
 		var half_width := lerpf(4.0,17.0,sin(t*PI*0.5))
 		if actor.body_state == "slide": half_width *= 0.8
 		for side in [-1.0,1.0]:
 			var world_point: Vector2 = points[index]+normal*half_width*side
 			if index > 0: world_point = _outside_shoulder(world_point)
-			world_point.y = minf(world_point.y,actor.global_position.y-1.0)
+			world_point.y = minf(world_point.y,_track_floor_y()-1.0)
 			red_vertices.append(to_local(world_point.round()))
 			var shade := 0.88 if side < 0 else 1.0
 			colors.append(Color(shade,shade,shade,1.0))

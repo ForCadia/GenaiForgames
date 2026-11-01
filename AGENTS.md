@@ -175,3 +175,6 @@ Latest procedural cape revision (2026-10-31): user authorizes first visual-only 
 
 
 Latest cape stiffness/layer revision (2026-10-31): user removes scarf and ivory backing; render red only. Cape z1 in front of body0, original back-arm/helmet/front-arm ordering at z2, guard3. Shape-rest springs, damping, reduced live gravity/flutter and two-link bend constraints make it thick/stiffer while leaving tail/death motion. Follow animated shoulder with visual ellipse exclusion for centerline and mesh edges; pin root attachment, no gameplay collider changes. Assets retained unused. No tests/import/game/captures.
+
+
+Latest cape jump correction (2026-10-31): fix airborne-foot floor clipping by using true GD.GROUND_Y world floor for simulation/vertices. Carry all current/previous points with shoulder displacement and apply capped acceleration inertia, maintain rearward spacing/stable width normals, explicit triangles prevent invalid folded-quad triangulation. No changes to cloth size per jump or gameplay. User tests, no runtime checks.
