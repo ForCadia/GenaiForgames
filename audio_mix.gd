@@ -2,6 +2,10 @@ extends RefCounted
 
 # Offline active-segment RMS calibration; preserve source files and timing.
 const GAINS_DB := {
+	"boss_melee_sword.wav": 2.95,
+	"iron_missile_fire.wav": -7.74,
+	"iron_cannon_fire.wav": 3.49,
+
 	"coin_pickup.wav": -0.24,
 	"ui_click.wav": 0.12,
 	"ui_error.wav": -4.12,

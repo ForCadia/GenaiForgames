@@ -3,6 +3,9 @@ extends Node
 const MIX := preload("res://audio_mix.gd")
 
 const SOUNDS := {
+	"boss_melee_sword": preload("res://assets/sfx/boss_melee_sword.wav"),
+	"iron_cannon_fire": preload("res://assets/sfx/iron_cannon_fire.wav"),
+	"iron_missile_fire": preload("res://assets/sfx/iron_missile_fire.wav"),
 	"coin_pickup": preload("res://assets/sfx/coin_pickup.wav"),
 	"armor_ricochet": preload("res://assets/sfx/armor_ricochet.wav"),
 	"light_turret_fire": preload("res://assets/sfx/light_turret_fire.wav"),

@@ -1,0 +1,31 @@
+{
+  "preconversion_gain_db": -8,
+  "target_active_rms_db": -20,
+  "missile_overlap_headroom_db": -3,
+  "files": [
+    {
+      "file": "boss_melee_sword.wav",
+      "gain": 2.95,
+      "source": "649361__sonofxaudio__sword_fire01.wav",
+      "trim_start": 0.025,
+      "trim_end": null,
+      "active_rms": -22.95
+    },
+    {
+      "file": "iron_missile_fire.wav",
+      "gain": -7.74,
+      "source": "563536__colorscrimsontears__fire-3-rpg.wav",
+      "trim_start": 0.034,
+      "trim_end": null,
+      "active_rms": -15.26
+    },
+    {
+      "file": "iron_cannon_fire.wav",
+      "gain": 3.49,
+      "source": "187767__qubodup__cannon-shot.flac",
+      "trim_start": 0.12,
+      "trim_end": 5.1,
+      "active_rms": -23.49
+    }
+  ]
+}

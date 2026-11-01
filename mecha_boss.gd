@@ -147,6 +147,7 @@ func _enter(next: String) -> void:
 	phase_start = position
 	action_contact_used = false
 	shot_count = 0
+	if state in ["slash","stab"]: sound_requested.emit("boss_melee_sword")
 	match state:
 		"slash": phase_goal = Vector2(maxf(280.0,position.x-DATA.CHARGE_DISTANCE),GD.GROUND_Y)
 		"retreat": phase_goal = Vector2(DATA.HOME_X,GD.GROUND_Y)

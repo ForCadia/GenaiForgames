@@ -160,7 +160,7 @@ func _shell() -> void:
 	var speed: float = sqrt(DATA.SHELL_GRAVITY*dx*dx/maxf(1.0,2.0*cos(angle)*cos(angle)*(dy+dx*tan(angle))))
 	var velocity := Vector2(-cos(angle),-sin(angle))*speed
 	projectiles.append({"kind":"shell","p":origin,"previous":origin,"v":velocity,"life":5.0,"target":target_x,"explode":0.0,"spent":false})
-	sound_requested.emit("heavy_turret_fire")
+	sound_requested.emit("iron_cannon_fire")
 
 func _missile(index: int) -> void:
 	var origin: Vector2 = launcher.to_global(DATA.LAUNCH_PORTS[index])
@@ -168,7 +168,7 @@ func _missile(index: int) -> void:
 	var destination := Vector2(target_x,GD.GROUND_Y-35.0-float(index%3)*50.0)
 	var velocity: Vector2 = (destination-origin).normalized()*DATA.MISSILE_SPEED
 	projectiles.append({"kind":"missile","p":origin,"previous":origin,"v":velocity,"life":4.0,"explode":0.0,"spent":false})
-	sound_requested.emit("light_turret_fire")
+	if index%2 == 0: sound_requested.emit("iron_missile_fire")
 
 func _advance_projectiles(delta: float) -> void:
 	for index in range(projectiles.size()-1,-1,-1):
