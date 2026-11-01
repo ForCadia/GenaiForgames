@@ -6,6 +6,7 @@ signal sound_requested(cue: String)
 signal feedback(origin: Vector2, color: Color, message: String)
 const DATA := preload("res://mecha_boss_data.gd")
 const GD := preload("res://game_data.gd")
+const EFFECTS := preload("res://mecha_boss_effects.gd")
 const SHEETS := {
 	"ground_fire":preload("res://assets/boss_mecha/ground_fire_spaced.png"),
 	"slash":preload("res://assets/boss_mecha/slash_spaced.png"),
@@ -35,6 +36,7 @@ var death_time := 0.0
 var previous_position := Vector2.ZERO
 var player_target := Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 var stab_direction := Vector2.LEFT
+var effects: EFFECTS
 
 func _ready() -> void:
 	frames = preload("res://mecha_boss_frames.gd").FRAMES.duplicate(true)
@@ -52,6 +54,9 @@ func _ready() -> void:
 			atlas.filter_clip = true
 			textures.append(atlas)
 		frame_textures[key] = textures
+	effects = EFFECTS.new()
+	effects.z_index = -1
+	add_child(effects)
 	set_process(false)
 	reset_for_battle(false)
 
@@ -61,10 +66,17 @@ func reset_for_battle(enabled: bool) -> void:
 	state = "entry" if enabled else "inactive"
 	elapsed = 0.0
 	visual.modulate = Color.WHITE
-	_set_pose("slash",0)
+	effects.clear_effects()
+	if enabled:
+		position = Vector2(DATA.HOME_X+DATA.ENTRY_OFFSET_X,-20.0)
+		phase_start = position
+		phase_goal = Vector2(DATA.HOME_X,GD.GROUND_Y)
+	if enabled: _set_pose("lift",3)
+	else: _set_pose("slash",0)
 
 func set_combat_enabled(enabled: bool) -> void:
 	combat_enabled = enabled
+	if not enabled: effects.clear_effects()
 
 func _set_pose(sheet: String, frame: int) -> void:
 	if frames.is_empty(): return
@@ -129,9 +141,16 @@ func advance(delta: float, target: Vector2 = Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 	elapsed += delta
 	match state:
 		"entry":
+			var descent: float = clampf(elapsed/DATA.ENTRY_TIME,0.0,1.0)
+			position = phase_start.lerp(phase_goal,descent*descent)
+			_set_pose("lift",4+mini(2,int(descent*3.0)))
+			if descent >= 1.0:
+				position = phase_goal
+				effects.landing_burst()
+				_enter("entry_recover")
+		"entry_recover":
 			_set_pose("slash",0)
-			position = position.move_toward(Vector2(DATA.HOME_X,GD.GROUND_Y),DATA.ENTRY_SPEED*delta)
-			if position.distance_to(Vector2(DATA.HOME_X,GD.GROUND_Y)) < 1: _enter("ground_prepare")
+			if elapsed >= DATA.ENTRY_RECOVERY: _enter("ground_prepare")
 		"ground_prepare":
 			_set_pose("slash",0)
 			if elapsed >= DATA.PREPARE: _enter("ground_fire")
@@ -194,10 +213,14 @@ func advance(delta: float, target: Vector2 = Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 			if index == 3: _set_pose("slash",0)
 			else: _set_pose("lift",4+index)
 			position = phase_start.lerp(phase_goal,smoothstep(0.0,1.0,minf(1.0,elapsed/DATA.LAND_TIME)))
-			if elapsed >= DATA.LAND_TIME: _enter("land_recover")
+			if elapsed >= DATA.LAND_TIME:
+				effects.landing_burst()
+				_enter("land_recover")
 		"land_recover":
 			_set_pose("slash",0)
 			if elapsed >= DATA.LAND_RECOVERY: _enter("ground_prepare")
+
+	effects.advance_effects(delta,combat_enabled,state,visual,pose_meta,scale_factor)
 
 func _muzzle(_air: bool) -> Vector2:
 	# Source-space barrel tip; no flame included, same transformed pose as artwork.
@@ -243,7 +266,7 @@ func _body_pixel(local: Vector2) -> bool:
 	return true
 
 func shot_hits(from: Vector2, to: Vector2) -> bool:
-	if not combat_enabled or state in ["entry","dead","inactive"]: return false
+	if not combat_enabled or state in ["entry","entry_recover","dead","inactive"]: return false
 	if _core_hit(from,to): return true
 	var a := visual.to_local(from)
 	var b := visual.to_local(to)
@@ -307,6 +330,7 @@ func start_death() -> void:
 	combat_enabled = false
 	state = "dead"
 	death_time = 0.0
+	effects.clear_effects()
 	position.y = GD.GROUND_Y
 	_set_pose("death",0)
 	set_process(true)

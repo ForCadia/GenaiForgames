@@ -44,3 +44,12 @@ const DEATH_FPS := 14.0
 const ATLAS_INSET := 2.0
 const STAB_HIT_LENGTH := 150.0
 const STAB_HIT_RADIUS := 10.0
+
+# Mecha entrance and cosmetic propulsion/friction, separate from combat tuning.
+const ENTRY_TIME := 1.1
+const ENTRY_OFFSET_X := 110.0
+const ENTRY_RECOVERY := 0.45
+const SPARK_INTERVAL := 0.025
+const SPARK_SPEED := 230.0
+const SPARK_LIFETIME := 0.32
+const THRUSTER_LENGTH := 30.0
