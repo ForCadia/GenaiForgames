@@ -6,7 +6,7 @@ const LEVELS := [
 	{"name":"IRON CITADEL","description":"第三关 · 钢铁堡垒｜重甲阵地与空地协同","tint":Color(1.0,0.82,0.72)},
 ]
 # Hand-authored phase rosters. Tokens: L light turret, H heavy turret,
-# D kamikaze, G laser gate, S spikes. These are not Level01 duplicates.
+# D kamikaze, R aerial rifleman (Level03 only), G laser gate, S spikes.
 const LEVEL_TWO := [
 	{"title":"01 // AIRSPACE BREACH","duration":24.0,"scroll":220.0,
 	"hint":"CLEAR THE AIR / SLIDE THE LASER GATES","keys":["1","S"],"beats":[
@@ -33,27 +33,27 @@ const LEVEL_TWO := [
 const LEVEL_THREE := [
 	{"title":"01 // ARMOR SPEARHEAD","duration":25.0,"scroll":230.0,
 	"hint":"PIERCER FIRST / RIFLE ON EXPOSED TARGETS","keys":["2","1","R"],"beats":[
-		[1.0,"H"],[2.0,"L"],[3.1,"H"],[4.2,"D"],[5.3,"H"],[6.4,"G"],
+		[1.0,"H"],[2.0,"L"],[3.1,"H"],[4.2,"R"],[5.3,"H"],[6.4,"G"],
 		[7.7,"H"],[8.8,"L"],[9.9,"H"],[11.0,"D"],[12.1,"H"],[13.2,"S"],
-		[14.6,"L"],[15.7,"H"],[16.8,"H"],[18.0,"G"],[19.4,"D"],[20.6,"H"],
+		[14.6,"L"],[15.7,"H"],[16.8,"H"],[18.0,"G"],[19.4,"R"],[20.6,"H"],
 		[21.8,"L"],[23.0,"H"]]},
 	{"title":"02 // FORTRESS BATTERIES","duration":26.0,"scroll":235.0,
 	"hint":"RELOAD BETWEEN BATTERIES / KEEP YOUR SHIELD","keys":["R","RMB","2"],"beats":[
 		[0.9,"H"],[1.9,"H"],[3.0,"L"],[4.0,"G"],[5.2,"H"],[6.3,"D"],
-		[7.4,"H"],[8.5,"L"],[9.6,"H"],[10.7,"S"],[12.0,"H"],[13.1,"D"],
+		[7.4,"H"],[8.5,"L"],[9.6,"H"],[10.7,"S"],[12.0,"H"],[13.1,"R"],
 		[14.2,"H"],[15.3,"G"],[16.6,"L"],[17.7,"H"],[18.8,"H"],[19.9,"D"],
 		[21.0,"G"],[22.3,"H"],[23.4,"L"],[24.6,"H"]]},
 	{"title":"03 // COMBINED ARMS","duration":27.0,"scroll":240.0,
 	"hint":"SPLIT YOUR AIM / AIR RAID ABOVE THE ARMOR","keys":["1","2","F"],"beats":[
-		[1.0,"H"],[2.1,"D"],[3.2,"H"],[4.3,"L"],[5.4,"H"],[6.5,"G"],
+		[1.0,"H"],[2.1,"R"],[3.2,"H"],[4.3,"L"],[5.4,"H"],[6.5,"G"],
 		[7.8,"H"],[8.9,"D"],[10.0,"H"],[11.1,"H"],[12.2,"S"],[13.6,"L"],
-		[14.7,"H"],[15.8,"D"],[16.9,"H"],[18.0,"G"],[19.3,"H"],[20.4,"H"],
+		[14.7,"H"],[15.8,"R"],[16.9,"H"],[18.0,"G"],[19.3,"H"],[20.4,"H"],
 		[21.5,"D"],[22.6,"L"],[23.7,"H"],[25.0,"H"]]},
 	{"title":"04 // CITADEL LOCKDOWN","duration":28.0,"scroll":245.0,
 	"hint":"SIEGE LINE / CLEAR THE COLLAPSE WITH A GRENADE","keys":["2","F","RMB"],"beats":[
-		[0.8,"H"],[1.8,"L"],[2.8,"H"],[3.8,"D"],[4.8,"H"],[5.8,"G"],
+		[0.8,"H"],[1.8,"L"],[2.8,"H"],[3.8,"R"],[4.8,"H"],[5.8,"G"],
 		[7.0,"H"],[8.0,"H"],[9.0,"D"],[10.0,"L"],[11.0,"H"],[12.0,"S"],
-		[13.3,"H"],[14.3,"D"],[15.3,"H"],[16.3,"L"],[17.3,"H"],[18.3,"G"],
+		[13.3,"H"],[14.3,"R"],[15.3,"H"],[16.3,"L"],[17.3,"H"],[18.3,"G"],
 		[19.6,"H"],[20.6,"D"],[21.6,"H"],[22.6,"L"],[23.6,"H"],[25.0,"H"]]},
 ]
 
@@ -61,14 +61,14 @@ static func _make_stage(spec: Dictionary, include_drones := true) -> Dictionary:
 	var events: Array = [{"at":0.7,"kind":"grenade"}]
 	for beat in spec.beats:
 		var token: String = beat[1]
-		if token == "D" and not include_drones: continue
+		if token in ["D","R"] and not include_drones: continue
 		var event := {"at":float(beat[0])}
 		match token:
 			"G": event.kind = "high_barrage"
 			"S": event.kind = "low_obstacle"
 			_:
 				event.kind = "enemy"
-				event.type = "heavy" if token == "H" else ("kamikaze" if token == "D" else "light")
+				event.type = "heavy" if token == "H" else ("kamikaze" if token == "D" else ("aerial" if token == "R" else "light"))
 		events.append(event)
 	return {"title":spec.title,"duration":spec.duration,"scroll":spec.scroll,
 		"hint":spec.hint,"keys":spec.keys.duplicate(),"events":events}

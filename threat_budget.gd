@@ -3,7 +3,7 @@ extends RefCounted
 # Encounter pressure points, independent of kill score/currency.
 const LIMIT := 100
 const SPAWN_GAP := 0.6
-const COSTS := {"unarmored":25,"light":25,"heavy":50,"kamikaze":35}
+const COSTS := {"unarmored":25,"light":25,"heavy":50,"kamikaze":35,"aerial":40}
 const GATE_COST := 40
 const SPIKES_COST := 25
 

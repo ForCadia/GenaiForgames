@@ -1,4 +1,4 @@
-﻿extends Node2D
+extends Node2D
 # Runs the actual main.tscn in a separate world. This node only supplies controls.
 const GD := preload("res://game_data.gd")
 var game: Node
@@ -95,6 +95,14 @@ func choose_controls() -> Dictionary:
 			required = 0
 	for drone in session.kamikaze_drones:
 		if not is_instance_valid(drone) or drone.state == "explode": continue
+		var dx: float = drone.position.x-session.player.x
+		if dx > 0 and dx < distance_to_target:
+			distance_to_target = dx
+			target = drone.global_position
+			has_target = true
+			required = 0
+	for drone in session.aerial_riflemen:
+		if not is_instance_valid(drone) or drone.state == "dead": continue
 		var dx: float = drone.position.x-session.player.x
 		if dx > 0 and dx < distance_to_target:
 			distance_to_target = dx

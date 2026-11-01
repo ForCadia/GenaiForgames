@@ -1,6 +1,7 @@
 extends Node2D
 
 const BALANCE := preload("res://combat_balance.gd")
+const AERIAL := preload("res://aerial_rifleman.gd")
 const KAMIKAZE := preload("res://kamikaze_drone.gd")
 const GD := preload("res://game_data.gd")
 const CAMPAIGNS := preload("res://campaign_data.gd")
@@ -120,6 +121,7 @@ var laser_gates: Array[LaserGateEnemy] = []
 var ground_spikes: Array[GroundSpikes] = []
 var turrets: Array[TurretBase] = []
 var kamikaze_drones: Array[Node2D] = []
+var aerial_riflemen: Array[Node2D] = []
 var obstacles: Array[Dictionary] = []
 var pickups: Array[Dictionary] = []
 var shots: Array[Dictionary] = []
@@ -449,6 +451,8 @@ func _grenade() -> void:
 			turret.force_kill()
 	for drone in kamikaze_drones:
 		if is_instance_valid(drone) and screen.intersects(drone.body_rect()): drone.force_kill()
+	for soldier in aerial_riflemen:
+		if is_instance_valid(soldier) and screen.intersects(soldier.body_rect()): soldier.force_kill()
 	for gate in laser_gates:
 		if is_instance_valid(gate) and screen.intersects(gate.hazard_rect()): gate.take_damage()
 	for i in range(ground_spikes.size() - 1, -1, -1):
@@ -497,7 +501,7 @@ func _update_segment() -> void:
 			segment_transition_pending = true
 	# Let the outgoing enemies, obstacles, pickups and hostile rounds leave
 	# the screen instead of making them vanish mid-frame at the time limit.
-	if segment_transition_pending and enemies.is_empty() and turrets.is_empty() and kamikaze_drones.is_empty() and laser_gates.is_empty() and ground_spikes.is_empty() and obstacles.is_empty() and pickups.is_empty() and coin_drops.is_empty() and threats.is_empty():
+	if segment_transition_pending and enemies.is_empty() and turrets.is_empty() and kamikaze_drones.is_empty() and aerial_riflemen.is_empty() and laser_gates.is_empty() and ground_spikes.is_empty() and obstacles.is_empty() and pickups.is_empty() and coin_drops.is_empty() and threats.is_empty():
 		if endless_mode: _advance_endless()
 		elif segment == GD.CAMPAIGN_SEGMENT_COUNT - 1: _start_boss(true)
 		else: _start_segment(segment + 1, true)
@@ -510,6 +514,9 @@ func _uses_threat_budget() -> bool:
 
 func _active_threat_points() -> int:
 	var total := 0
+	for soldier in aerial_riflemen:
+		if is_instance_valid(soldier) and not soldier.is_queued_for_deletion() and soldier.state != "dead":
+			total += int(THREAT_BUDGET.COSTS.aerial)
 	for turret in turrets:
 		if is_instance_valid(turret) and not turret.is_queued_for_deletion() and turret.state != TurretBase.TurretState.DEAD:
 			total += int(THREAT_BUDGET.COSTS.heavy if turret.turret_kind == TurretBase.TurretKind.HEAVY else THREAT_BUDGET.COSTS.light)
@@ -536,6 +543,17 @@ func _spawn_event(event: Dictionary) -> void:
 		_: pass
 
 func _spawn_enemy(kind: String, _y: float, _returns: bool) -> void:
+	if kind == "aerial":
+		if developer_mode or (not endless_mode and selected_level != 2): return
+		var soldier: Node2D = AERIAL.new()
+		turret_root.add_child(soldier)
+		soldier.position = Vector2(1040,280 if segment % 2 == 0 else 340)
+		soldier.base_y = soldier.position.y
+		soldier.projectile_requested.connect(_on_turret_projectile)
+		soldier.killed.connect(func(actor: Node2D): _award_enemy_kill("aerial",actor.global_position))
+		soldier.sound_requested.connect(func(cue: String): world_audio.play_cue(cue))
+		aerial_riflemen.append(soldier)
+		return
 	if kind == "kamikaze":
 		var drone: Node2D = KAMIKAZE.new()
 		turret_root.add_child(drone)
@@ -595,6 +613,8 @@ func _on_laser_gate_destroyed(gate: LaserGateEnemy) -> void:
 func _update_world(delta: float) -> void:
 	_update_coins(delta)
 	_update_kamikaze_drones(delta)
+	if state != "playing": return
+	_update_aerial_riflemen(delta)
 	if state != "playing": return
 	var scroll := _scroll()
 	distance += scroll * delta
@@ -730,6 +750,9 @@ func _enemy_contact(enemy: Dictionary) -> void:
 
 func _round_targets() -> Array[Dictionary]:
 	var targets: Array[Dictionary] = []
+	for soldier in aerial_riflemen:
+		if is_instance_valid(soldier) and not soldier.is_queued_for_deletion() and soldier.state != "dead":
+			targets.append({"id":soldier.get_instance_id(),"kind":"drone","actor":soldier,"point":soldier.body_rect().get_center()})
 	for turret in turrets:
 		if is_instance_valid(turret) and not turret.is_queued_for_deletion() and turret.state not in [TurretBase.TurretState.BREAKING,TurretBase.TurretState.DEAD]:
 			targets.append({"id":turret.get_instance_id(),"kind":"turret","actor":turret,"point":turret.hurt_collision.global_position})
@@ -833,7 +856,7 @@ func _kill_enemy(enemy: Dictionary) -> void:
 	_award_enemy_kill(enemy.type, enemy.pos)
 
 func _award_enemy_kill(enemy_type: String, origin: Vector2) -> void:
-	var points: int = GD.SCORE.get(enemy_type,KAMIKAZE.SCORE)
+	var points: int = GD.SCORE.get(enemy_type,AERIAL.SCORE if enemy_type == "aerial" else KAMIKAZE.SCORE)
 	stats[enemy_type] = int(stats.get(enemy_type,0))+1
 	_register_kill(enemy_type, origin)
 	score += points
@@ -1230,6 +1253,9 @@ func _reset_player(preserve_motion := false) -> void:
 	player_hud.follow_hitbox(_player_hitbox())
 
 func _clear_world() -> void:
+	for soldier in aerial_riflemen:
+		if is_instance_valid(soldier): soldier.queue_free()
+	aerial_riflemen.clear()
 	for drone in kamikaze_drones:
 		if is_instance_valid(drone): drone.queue_free()
 	kamikaze_drones.clear()
@@ -1635,6 +1661,12 @@ func _auto_select_weapon() -> void:
 			if distance_to_target < nearest:
 				nearest = distance_to_target
 				armor = 0
+	for soldier in aerial_riflemen:
+		if is_instance_valid(soldier) and soldier.shot_hits(origin,ray_end):
+			var distance_to_target: float = origin.distance_squared_to(soldier.global_position)
+			if distance_to_target < nearest:
+				nearest = distance_to_target
+				armor = 0
 	var desired := _best_weapon_for_armor(armor)
 	if desired != weapon_index: _select_slot(desired,true)
 
@@ -1751,3 +1783,22 @@ func _update_kamikaze_drones(delta: float) -> void:
 
 func endless_wave_record_key() -> String:
 	return "endless_best_wave" if endless_difficulty == "normal" else "endless_%s_best_wave" % endless_difficulty
+
+func _update_aerial_riflemen(delta: float) -> void:
+	for index in range(aerial_riflemen.size()-1,-1,-1):
+		var soldier: Node2D = aerial_riflemen[index]
+		if not is_instance_valid(soldier):
+			aerial_riflemen.remove_at(index)
+			continue
+		soldier.advance(delta,_scroll(),_player_center())
+		if soldier.state != "dead":
+			if guarding and guard_energy > 0 and soldier.body_rect().intersects(_guard_hitbox()):
+				soldier.force_kill()
+				_consume_guard_hit()
+			elif soldier.contact_left <= 0 and soldier.body_rect().intersects(_player_hitbox()):
+				soldier.contact_left = 0.8
+				_receive(false,"AERIAL RIFLEMAN")
+				if state != "playing": return
+		if soldier.is_finished():
+			soldier.queue_free()
+			aerial_riflemen.remove_at(index)

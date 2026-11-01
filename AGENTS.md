@@ -193,3 +193,6 @@ Latest underarm ribbons (2026-10-31): user restores two narrow pure-red cloth st
 
 
 Latest user rollback (2026-10-31): remove both underarm ribbons from player_visual.gd; retain main red cape unchanged. Ribbon asset/configuration remain unused. No tests.
+
+
+Latest aerial ranged enemy (2026-10-31): user authorizes aerial_rifleman.gd from Downloads/空中射击兵像素动画设定表.png, imagegen transparent assets/enemies/aerial_rifleman_8x6.png. Level03 and Endless only, enforced spawn API;3HP rifle1/AP2,40 threat,180score/4G,0.6s aim then3 orange320px/s shots at0.18s intervals, boost/reposition, exit after two bursts. Level03 replaces7 kamikaze events without increasing total; independent Endless profiles add10–22% nominal aerial share. Integrates shots/homing/piercing/grenade/shield/coins/cleanup/smart aim/demo AI. Level01/02/LAB/Boss unchanged. No tests/import/game/captures. See AERIAL_RIFLEMAN.md.

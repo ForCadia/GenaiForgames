@@ -1,12 +1,12 @@
 extends RefCounted
 
 # Independent Endless encounter pool. No campaign stages or timelines are read.
-const TYPES := ["unarmored", "light", "heavy", "kamikaze", "gate", "spikes"]
+const TYPES := ["unarmored", "light", "heavy", "kamikaze", "aerial", "gate", "spikes"]
 const PROFILES := [
-	{"name":"MIXED ASSAULT", "weights":[14.0,25.0,22.0,23.0,10.0,6.0]},
-	{"name":"AIR RAID", "weights":[10.0,20.0,16.0,40.0,9.0,5.0]},
-	{"name":"ARMORED SIEGE", "weights":[8.0,20.0,42.0,16.0,9.0,5.0]},
-	{"name":"FIRELINE", "weights":[20.0,36.0,18.0,12.0,9.0,5.0]},
+	{"name":"MIXED ASSAULT", "weights":[12.0,23.0,20.0,17.0,12.0,10.0,6.0]},
+	{"name":"AIR RAID", "weights":[8.0,16.0,12.0,28.0,22.0,9.0,5.0]},
+	{"name":"ARMORED SIEGE", "weights":[8.0,18.0,38.0,12.0,10.0,9.0,5.0]},
+	{"name":"FIRELINE", "weights":[16.0,29.0,16.0,10.0,15.0,9.0,5.0]},
 ]
 
 static func generate_wave(wave: int, difficulty: String = "normal") -> Dictionary:

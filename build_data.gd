@@ -24,7 +24,7 @@ const NODES := {
 	"loader_two": {"name":"联动供弹", "cost":95, "parents":["magazine_two","projectile"], "branch":"offense", "pos":Vector2(715,420), "text":"换弹时间再缩短 8%", "effects":{"reload":-0.08}},
 	"auto_weapon": {"name":"终极·智能切枪", "cost":150, "parents":["loader_two"], "branch":"offense", "pos":Vector2(790,465), "text":"按目标护甲与 DPS 智能切枪；弹匣打空自动换弹，保留手雷选择", "effects":{}},
 }
-const COIN_VALUES := {"kamikaze":4, "unarmored":3, "light":3, "heavy":7, "flyer":4, "boss":35}
+const COIN_VALUES := {"aerial":4,"kamikaze":4, "unarmored":3, "light":3, "heavy":7, "flyer":4, "boss":35}
 const BASE_REGEN := 12.5
 const ORIGINAL_REGEN := 50.0
 const ROOT_POSITION := Vector2(430,250)

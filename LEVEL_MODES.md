@@ -93,3 +93,6 @@ Latest Endless talents — homing and target piercing: homing is a single-rank f
 
 
 Latest homing balance: four ranks now guide one actual emitted projectile per5/4/3/2 rounds. This counts split/volley rounds individually, so an entire volley does not become guided at once. Non-proc rounds remain ballistic; proc rounds retain full guidance. Homing cadence is run-local and clears on restart/title. Talent cards now state effects only, without rule explanations/rank-cap prose; homing card describes its next-rank interval. No runtime tests.
+
+
+Latest enemy addition: aerial riflemen appear only in Level03 and Endless. Level03 swaps7 kamikaze events for riflemen; total roster length unchanged. Endless incorporates their own weights (mixed12%, air22%, armor10%, fire15%), keeping difficulty counts/pressure caps unchanged. Their40-point cost limits simultaneous pressure. See AERIAL_RIFLEMAN.md. No runtime testing.
