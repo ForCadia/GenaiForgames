@@ -1,6 +1,6 @@
 class_name MechaBoss
 extends Node2D
-signal damage_requested
+signal damage_requested(origin: Vector2)
 signal projectile_requested(origin: Vector2, direction: Vector2, speed: float, color: Color)
 signal sound_requested(cue: String)
 signal feedback(origin: Vector2, color: Color, message: String)
@@ -284,24 +284,37 @@ func _body_pixel(local: Vector2) -> bool:
 			if neighbor.a > 0.5 and neighbor.r > 0.6 and neighbor.g < 0.3 and neighbor.b < 0.3: return false
 	return true
 
-func shot_hits(from: Vector2, to: Vector2) -> bool:
-	if not combat_enabled or state in ["entry","entry_recover","dead","inactive"]: return false
-	if _core_hit(from,to): return true
-	var a := visual.to_local(from)
-	var b := visual.to_local(to)
-	var steps := maxi(1,int(ceil(a.distance_to(b))))
+func shot_contact(from: Vector2, to: Vector2) -> Dictionary:
+	if not combat_enabled or state in ["entry","entry_recover","dead","inactive"]: return {}
+	var a: Vector2 = visual.to_local(from)
+	var b: Vector2 = visual.to_local(to)
+	var steps: int = maxi(1,int(ceil(a.distance_to(b))))
+	# Walk from the incoming side, not the end of this physics tick or actor origin.
 	for index in range(steps+1):
-		if _body_pixel(a.lerp(b,float(index)/float(steps))): return true
-	return false
+		var local: Vector2 = a.lerp(b,float(index)/float(steps))
+		if _body_pixel(local):
+			return {"position":visual.to_global(local)}
+	# Retain the authored chest hitbox if a shot crosses a transparent chest gap.
+	if _core_hit(from,to):
+		for index in range(steps+1):
+			var local: Vector2 = a.lerp(b,float(index)/float(steps))
+			var chest: Vector2 = (local-Vector2(float(pose_meta.cx),float(pose_meta.cy)))*scale_factor
+			if DATA.CORE_HIT_RECT.has_point(chest): return {"position":visual.to_global(local)}
+	return {}
+
+func shot_hits(from: Vector2, to: Vector2) -> bool:
+	return not shot_contact(from,to).is_empty()
 
 func receive_shot_segment(penetration: int, from: Vector2, to: Vector2) -> void:
-	if not shot_hits(from,to): return
+	var contact: Dictionary = shot_contact(from,to)
+	if contact.is_empty(): return
+	var origin: Vector2 = contact.position
 	var required: int = DATA.CORE_PENETRATION if _core_hit(from,to) else DATA.BODY_PENETRATION
 	if penetration < required:
 		sound_requested.emit("armor_ricochet")
-		feedback.emit(to,Color.WHITE,"RICOCHET")
+		feedback.emit(origin,Color.WHITE,"RICOCHET")
 		return
-	damage_requested.emit()
+	damage_requested.emit(origin)
 
 func required_penetration(from: Vector2, to: Vector2) -> int:
 	return DATA.CORE_PENETRATION if _core_hit(from,to) else DATA.BODY_PENETRATION

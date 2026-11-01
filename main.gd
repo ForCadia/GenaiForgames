@@ -1077,11 +1077,12 @@ func _hit_boss(bullet: Dictionary) -> void:
 		return
 	boss_actor.receive_shot(bullet.penetration, bullet.pos)
 
-func _boss_damage() -> void:
+func _boss_damage(hit_origin: Vector2 = Vector2.INF) -> void:
 	if state != "playing" or boss.is_empty() or int(boss.hp) <= 0: return
 	boss.hp -= 1
 	boss.phase = 1 if is_mecha_boss() else int(boss_actor.form)+1
-	_emit(_boss_pos(), WHITE, 45, 390)
+	var effect_origin: Vector2 = hit_origin if hit_origin.is_finite() else (mecha_actor.core_position() if is_mecha_boss() else _boss_pos())
+	_emit(effect_origin, WHITE, 45, 390)
 	if boss.hp <= 0:
 		score += GD.SCORE.boss
 		_register_kill("boss", _boss_pos())

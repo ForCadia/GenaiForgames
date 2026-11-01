@@ -79,3 +79,6 @@ Mecha core collision correction: replace the tiny core circle with a66x48 chest 
 
 
 Latest user armor rule: mecha chest and body both require the existing heavy-armor penetration threshold3; rifle/penetration1 ricochets everywhere. This explicitly supersedes the original light-armor core exception. Core keeps its chest-sized hitbox, but the previous front-arm approach lane is removed now that core/body requirements match. Shared HP, no armor depletion/bar, grenade direct damage and one hit per projectile remain unchanged. Smart targeting reads the same threshold. No runtime tests.
+
+
+Impact spark correction: sample the incoming shot segment in source-pixel order to obtain the first opaque body contact, with existing chest-box fallback. Both ricochet feedback and successful-hit damage signal now carry that contact position. Shared Boss damage uses the supplied point for sparks instead of the feet-origin; no-origin mecha grenade damage uses chest center. Eyeball HP/damage and historical data remain unchanged. No engine/tests.
