@@ -6,10 +6,11 @@ signal reinforcement_requested(kind: String, origin: Vector2)
 signal feedback(origin: Vector2, color: Color, message: String)
 const DATA := preload("res://iron_boss_data.gd")
 const GD := preload("res://game_data.gd")
+const PIXEL_FRAMES := preload("res://iron_boss_frames.gd").FRAMES
 const VFX := preload("res://assets/vfx/neon_effects_source.png")
 const ART := {
- "hull":preload("res://assets/boss_iron/hull.png"),
- "cannon":preload("res://assets/boss_iron/cannon_fire.png"),
+ "hull":preload("res://assets/boss_iron/reverse_spaced_pixel.png"),
+ "cannon":preload("res://assets/boss_iron/cannon_spaced_pixel.png"),
  "cannon_dead":preload("res://assets/boss_iron/cannon_death.png"),
  "launcher":preload("res://assets/boss_iron/launcher_fire_clean.png"),
  "launcher_dead":preload("res://assets/boss_iron/launcher_death.png"),
@@ -31,6 +32,10 @@ var wait_multiplier := 1.0
 var attack := "cannon"
 var emitted := 0
 var cannon_frame := 0
+var hull_frame := 0
+var track_time := 0.0
+var hull_textures: Array[Texture2D] = []
+var cannon_textures: Array[Texture2D] = []
 var target_x := 190.0
 var projectiles: Array[Dictionary] = []
 var foreground_hitboxes: Array[Rect2] = []
@@ -45,7 +50,9 @@ func _ready() -> void:
 		var image: Image = ART[key].get_image()
 		if image.is_compressed(): image.decompress()
 		images[key] = image
-	hull = _sprite(ART.hull,DATA.HULL_ORIGIN,Vector2.ONE*DATA.HULL_SCALE)
+	for metadata in PIXEL_FRAMES.hull: hull_textures.append(_atlas(ART.hull,metadata))
+	for metadata in PIXEL_FRAMES.cannon: cannon_textures.append(_atlas(ART.cannon,metadata))
+	hull = _sprite(ART.hull,Vector2.ZERO,Vector2.ONE*DATA.HULL_ANIM_SCALE)
 	cannon = _sprite(ART.cannon,DATA.CANNON_MOUNT,Vector2.ONE*DATA.CANNON_SCALE)
 	launcher = _sprite(ART.launcher,DATA.LAUNCHER_MOUNT,Vector2.ONE*DATA.LAUNCHER_SCALE)
 	plate = _sprite(ART.plate,DATA.PLATE_MOUNT,Vector2.ONE*DATA.PLATE_SCALE)
@@ -53,7 +60,26 @@ func _ready() -> void:
 	hull.z_index = 0
 	launcher.z_index = 1
 	plate.z_index = 2
+	for sprite in [hull,cannon]:
+		var pixel_material := ShaderMaterial.new()
+		pixel_material.shader = preload("res://assets/boss_iron/pixel_sample.gdshader")
+		pixel_material.set_shader_parameter("pixel_step",1.0 if sprite == hull else 4.0)
+		sprite.material = pixel_material
 	reset_for_battle(false)
+
+func _atlas(texture: Texture2D, metadata: Dictionary) -> AtlasTexture:
+	var atlas := AtlasTexture.new()
+	atlas.atlas = texture
+	atlas.region = Rect2(metadata.x,metadata.y,metadata.w,metadata.h)
+	atlas.filter_clip = true
+	return atlas
+
+func _animate_hull(delta: float) -> void:
+	track_time += delta
+	hull_frame = int(track_time*DATA.REVERSE_FPS)%8
+	var metadata: Dictionary = PIXEL_FRAMES.hull[hull_frame]
+	hull.texture = hull_textures[hull_frame]
+	hull.position = -Vector2(float(metadata.anchor_x),float(metadata.bottom))*DATA.HULL_ANIM_SCALE
 
 func _sprite(texture: Texture2D, origin: Vector2, sizing: Vector2) -> Sprite2D:
 	var sprite := Sprite2D.new()
@@ -68,15 +94,15 @@ func _sprite(texture: Texture2D, origin: Vector2, sizing: Vector2) -> Sprite2D:
 func _pose(sprite: Sprite2D, key: String, frame: int, mount: Vector2) -> void:
 	if key == "cannon":
 		cannon_frame = frame
-		var region: Rect2 = DATA.CANNON_REGIONS[frame]
-		var cannon_atlas := AtlasTexture.new()
-		cannon_atlas.atlas = ART.cannon
-		cannon_atlas.region = region
-		cannon_atlas.filter_clip = true
-		sprite.texture = cannon_atlas
-		var anchor: Vector2 = DATA.CANNON_ANCHORS[frame]-region.position
-		sprite.position = mount-anchor*sprite.scale
+		var metadata: Dictionary = PIXEL_FRAMES.cannon[frame]
+		sprite.texture = cannon_textures[frame]
+		sprite.scale = Vector2.ONE*DATA.CANNON_ANIM_SCALE
+		sprite.position = mount-Vector2(float(metadata.anchor_x),float(metadata.bottom))*sprite.scale
+		(sprite.material as ShaderMaterial).set_shader_parameter("pixel_step",4.0)
 		return
+	if key == "cannon_dead":
+		sprite.scale = Vector2.ONE*DATA.CANNON_SCALE
+		(sprite.material as ShaderMaterial).set_shader_parameter("pixel_step",6.0)
 	var columns: int = 4 if key == "plate" else 2
 	var width: int = 384 if columns == 4 else 768
 	var source_origin := Vector2((frame%columns)*width,int(frame/columns)*512)
@@ -110,6 +136,8 @@ func reset_for_battle(enabled: bool) -> void:
 	attack = "cannon"
 	emitted = 0
 	hull.modulate = Color.WHITE
+	track_time = 0.0
+	_animate_hull(0.0)
 	clear_projectiles()
 	position = Vector2(GD.VIEW_SIZE.x+200.0,GD.GROUND_Y)
 	_pose(cannon,"cannon",0,DATA.CANNON_MOUNT)
@@ -129,6 +157,7 @@ func finish_intro() -> void:
 
 func advance_intro(delta: float, target: Vector2) -> void:
 	if state == "entry": advance(delta,target)
+	else: _animate_hull(delta)
 
 func _enter(next: String) -> void:
 	state = next
@@ -140,6 +169,7 @@ func _enter(next: String) -> void:
 func advance(delta: float, target: Vector2) -> void:
 	if not combat_enabled: return
 	elapsed += delta
+	_animate_hull(delta)
 	_update_wrecks(delta)
 	_advance_projectiles(delta)
 	match state:
@@ -171,8 +201,8 @@ func advance(delta: float, target: Vector2) -> void:
 	queue_redraw()
 
 func _shell() -> void:
-	var cannon_region: Rect2 = DATA.CANNON_REGIONS[cannon_frame]
-	var source: Vector2 = DATA.CANNON_MUZZLES[cannon_frame]-cannon_region.position
+	var muzzles := [Vector2(295,235),Vector2(285,232),Vector2(295,200),Vector2(252,195)]
+	var source: Vector2 = muzzles[cannon_frame]
 	var origin: Vector2 = cannon.to_global(source)
 	# Solve speed for the authored left/up barrel angle and the locked landing point.
 	var angle: float = deg_to_rad(DATA.CANNON_ANGLE)
@@ -225,7 +255,7 @@ func _segment_rect(a: Vector2, b: Vector2, rect: Rect2) -> bool:
 		if Geometry2D.segment_intersects_segment(a,b,points[index],points[(index+1)%4]) != null: return true
 	return false
 
-func _pixel_hit(sprite: Sprite2D, key: String, point: Vector2) -> bool:
+func _pixel_hit(sprite: Sprite2D, key: String, point: Vector2, exclude_flash: bool = true) -> bool:
 	var atlas: AtlasTexture = sprite.texture as AtlasTexture
 	if atlas == null: return false
 	var local: Vector2 = sprite.to_local(point)
@@ -233,7 +263,7 @@ func _pixel_hit(sprite: Sprite2D, key: String, point: Vector2) -> bool:
 	if not atlas.region.has_point(source): return false
 	var image: Image = images[key]
 	var pixel: Color = image.get_pixel(int(source.x),int(source.y))
-	return pixel.a > 0.9 and not (pixel.r > pixel.g*1.6 and pixel.g > pixel.b*1.8)
+	return pixel.a > 0.9 and (not exclude_flash or not (pixel.r > pixel.g*1.6 and pixel.g > pixel.b*1.8))
 
 func shot_contact(from: Vector2, to: Vector2) -> Dictionary:
 	if not combat_enabled or state in ["entry","intro_hold","dead","inactive"]: return {}
@@ -253,14 +283,12 @@ func shot_contact(from: Vector2, to: Vector2) -> Dictionary:
 				foreground = true
 				break
 		if foreground: continue
-		if DATA.CORE_RECT.has_point(local): return {"position":p,"module":"core"}
+		var core_rect: Rect2 = Rect2(to_local(core_position())-DATA.CORE_RECT.size*0.5,DATA.CORE_RECT.size)
+		if core_rect.has_point(local): return {"position":p,"module":"core"}
 		if cannon_hp > 0 and _pixel_hit(cannon,"cannon",p): return {"position":p,"module":"cannon"}
 		# Restrict hull collision to opaque artwork instead of its broad rectangular bounds.
-		var core_lane: bool = local.y >= DATA.CORE_RECT.position.y and local.y <= DATA.CORE_RECT.end.y and local.x <= DATA.CORE_RECT.end.x
-		var source: Vector2 = hull.to_local(p)
-		var image: Image = images.hull
-		if not core_lane and source.x >= 0 and source.y >= 0 and source.x < image.get_width() and source.y < image.get_height():
-			if image.get_pixel(int(source.x),int(source.y)).a > 0.9: return {"position":p,"module":"body"}
+		var core_lane: bool = local.y >= core_rect.position.y and local.y <= core_rect.end.y and local.x <= core_rect.end.x
+		if not core_lane and _pixel_hit(hull,"hull",p,false): return {"position":p,"module":"body"}
 	return {}
 
 func shot_hits(from: Vector2, to: Vector2) -> bool:
@@ -305,7 +333,8 @@ func intro_focus_position() -> Vector2:
 	return to_global(DATA.INTRO_FOCUS)
 
 func core_position() -> Vector2:
-	return to_global(DATA.CORE_RECT.get_center())
+	var metadata: Dictionary = PIXEL_FRAMES.hull[hull_frame]
+	return hull.to_global(Vector2(float(metadata.core_x),float(metadata.core_y)))
 
 func clear_projectiles() -> void:
 	projectiles.clear()
