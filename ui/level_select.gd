@@ -33,7 +33,7 @@ func _ready() -> void:
 	F.label(text,"构筑升级 / BUILD TREE","LargeLabel").modulate = STYLE.AMBER
 	upgrade_hint = F.label(text,"强化护盾与武器，再出击","MutedLabel")
 	var coin := TextureRect.new()
-	coin.texture = preload("res://assets/items/credit_coin.png")
+	coin.texture = preload("res://assets/retro_shooter/coin_icon.tres")
 	coin.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	coin.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	coin.custom_minimum_size = Vector2(24,24)

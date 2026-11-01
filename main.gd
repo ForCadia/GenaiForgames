@@ -20,7 +20,8 @@ const WHITE := Color("e4f8ff")
 const YELLOW := Color("ffcf70")
 const RED := Color("ff5f6d")
 const DIM := Color("54718e")
-const COIN_TEXTURE := preload("res://assets/items/credit_coin.png")
+const COIN_TEXTURE := preload("res://assets/retro_shooter/coin_icon.tres")
+const RETRO := preload("res://retro_shooter_assets.gd")
 const GRENADE_TEXTURE := preload("res://assets/items/grenade.png")
 const PLAYER_CAN_DIE := true
 const BOSS_IDLE_Y := 350.0
@@ -154,6 +155,7 @@ var auto_guard_left := 0.0
 var settings: Node
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	randomize()
 	progression = preload("res://progression.gd").new()
 	progression.preview_only = attract_mode
@@ -1399,7 +1401,7 @@ func _line_circle(a: Vector2, b: Vector2, center: Vector2, radius: float) -> boo
 func _draw() -> void:
 	for coin in coin_drops:
 		draw_circle(coin.pos, 14, Color(1, 0.65, 0.1, 0.12))
-		draw_texture_rect(COIN_TEXTURE, Rect2(coin.pos - Vector2(13,13), Vector2(26,26)), false)
+		draw_texture_rect(RETRO.coin(float(Time.get_ticks_msec())*0.001,float(coin.get("vx",0.0))*0.01), Rect2(coin.pos-Vector2(16,16),Vector2(32,32)),false)
 	for pickup in pickups:
 		draw_circle(pickup.pos, 31, Color(1.0, 0.7, 0.15, 0.18))
 		var marker := PackedVector2Array([pickup.pos + Vector2(0, -34), pickup.pos + Vector2(33, 0), pickup.pos + Vector2(0, 34), pickup.pos + Vector2(-33, 0), pickup.pos + Vector2(0, -34)])
@@ -1410,7 +1412,12 @@ func _draw() -> void:
 	for bullet in threats:
 		var threat_color: Color = bullet.get("color", RED)
 		draw_circle(bullet.pos, bullet.radius + float(bullet.get("glow",8.0)), Color(threat_color, 0.12))
-		draw_circle(bullet.pos, bullet.radius, threat_color)
+		if threat_color.b > threat_color.r*1.2:
+			draw_circle(bullet.pos,bullet.radius,threat_color)
+		elif threat_color.g > 0.3:
+			_draw_retro_round(bullet.pos,bullet.velocity,Vector2(bullet.radius*3.5,bullet.radius*1.4),RETRO.rifle_round())
+		else:
+			_draw_retro_round(bullet.pos,bullet.velocity,Vector2(bullet.radius*5.0,bullet.radius*1.8),RETRO.energy_round(),false)
 	for bullet in shots: _draw_player_shot(bullet)
 	for particle in particles: draw_circle(particle.pos, 3, Color(particle.color, clampf(particle.life * 2, 0, 1)))
 	if state == "playing" and not ui_paused and not attract_mode: _draw_reticle()
@@ -1424,9 +1431,16 @@ func _draw_player_shot(bullet: Dictionary) -> void:
 		draw_line(tail, tip, Color(color, 0.22), 8.0)
 		draw_line(tail, tip, color, 4.0)
 		draw_line(tail, tip, Color("d5efff"), 1.5)
+	elif color.b > color.r*1.2:
+		draw_line(tip-direction*14.0,tip,color,4.0)
+		draw_circle(tip,2.0,Color("d5efff"))
 	else:
-		draw_line(tip - direction * 14.0, tip, color, 4.0)
-		draw_circle(tip, 2.0, Color("ffe0a3"))
+		_draw_retro_round(tip,bullet.velocity,Vector2(18,8),RETRO.rifle_round())
+
+func _draw_retro_round(origin: Vector2, velocity: Vector2, size: Vector2, texture: Texture2D, right_facing := true) -> void:
+	draw_set_transform(origin,velocity.angle()-(0.0 if right_facing else PI))
+	draw_texture_rect(texture,Rect2(Vector2(-size.x if right_facing else 0.0,-size.y*0.5),size),false)
+	draw_set_transform(Vector2.ZERO)
 
 func _draw_reticle() -> void:
 	var color := UIPalette.AMBER

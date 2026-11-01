@@ -52,7 +52,7 @@ func _ready() -> void:
 	var wallet := F.box(heading, true)
 	wallet.add_theme_constant_override("separation", 6)
 	var coin := TextureRect.new()
-	coin.texture = load("res://assets/items/credit_coin.png")
+	coin.texture = load("res://assets/retro_shooter/coin_icon.tres")
 	coin.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	coin.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	coin.custom_minimum_size = Vector2(20, 20)
