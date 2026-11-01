@@ -1,4 +1,4 @@
-﻿extends VBoxContainer
+extends VBoxContainer
 const F := preload("res://ui/ui_factory.gd")
 const STYLE := preload("res://ui/menu_style.gd")
 const CAMPAIGNS := preload("res://campaign_data.gd")
@@ -110,4 +110,4 @@ func refresh() -> void:
 		label.text = ("未解锁 / 通关第 %d 关后开放" % index) if button.disabled else DESCRIPTIONS[index]
 		if index == 3 and not button.disabled:
 			var names := {"easy":"简单","normal":"普通","hard":"困难"}
-			label.text = "%s / 每五波 Boss · 死亡从首波重开" % names[game.endless_difficulty]
+			label.text = "%s / 威胁上限 %d · 每波三选一强化" % [names[game.endless_difficulty],preload("res://threat_budget.gd").endless_limit(game.endless_difficulty)]

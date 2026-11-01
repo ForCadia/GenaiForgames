@@ -48,6 +48,10 @@ var endless_wave := 1
 var level_segments: Array = []
 var endless_wave_data: Dictionary = {}
 var endless_intermission := 0.0
+var endless_talent_ranks: Dictionary = {}
+var endless_talent_effects: Dictionary = {}
+var endless_talent_choices: Array[String] = []
+var endless_reward_ui: CanvasLayer
 var attract_mode := false
 var attract_settings: Node
 var attract_input: Dictionary = {}
@@ -202,7 +206,7 @@ func _ready() -> void:
 	return_to_start()
 
 func _process(delta: float) -> void:
-	if state == "start" or ui_paused or lab_panel.blocked: return
+	if state in ["start","talent"] or ui_paused or lab_panel.blocked: return
 	if lab.active: lab.duration += delta
 	if state != "victory": _update_fx(delta)
 	if state == "dead":
@@ -255,7 +259,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		else: return_to_start()
 		get_viewport().set_input_as_handled()
 		return
-	if state == "start" or ui_paused or lab_panel.blocked: return
+	if state in ["start","talent"] or ui_paused or lab_panel.blocked: return
 	if state == "dead":
 		for action in ["restart", "jump", "fire"]:
 			if event.is_action_pressed(action) and not event.is_echo():
@@ -434,10 +438,10 @@ func _update_segment() -> void:
 			var event: Dictionary = data.events[next_event]
 			var cost: int = THREAT_BUDGET.event_cost(event)
 			if _uses_threat_budget() and cost > 0:
-				if segment_time < next_budget_spawn_at or _active_threat_points()+cost > THREAT_BUDGET.LIMIT:
+				if segment_time < next_budget_spawn_at or _active_threat_points()+cost > _threat_limit():
 					break
 				# Reserve offscreen arrivals too; never burst a delayed queue at once.
-				next_budget_spawn_at = segment_time+THREAT_BUDGET.SPAWN_GAP
+				next_budget_spawn_at = segment_time+(THREAT_BUDGET.endless_gap(endless_difficulty) if endless_mode else THREAT_BUDGET.SPAWN_GAP)
 			_spawn_event(event)
 			next_event += 1
 		if segment_time >= data.duration * GD.SEGMENT_PACE and (not _uses_threat_budget() or next_event >= data.events.size()):
@@ -448,6 +452,9 @@ func _update_segment() -> void:
 		if endless_mode: _advance_endless()
 		elif segment == GD.CAMPAIGN_SEGMENT_COUNT - 1: _start_boss(true)
 		else: _start_segment(segment + 1, true)
+
+func _threat_limit() -> int:
+	return THREAT_BUDGET.endless_limit(endless_difficulty) if endless_mode else THREAT_BUDGET.LIMIT
 
 func _uses_threat_budget() -> bool:
 	return not developer_mode and not boss_mode and (endless_mode or selected_level > 0)
@@ -955,6 +962,9 @@ func _retry() -> void:
 	_start_lab_run()
 
 func _reset_campaign() -> void:
+	_close_endless_reward()
+	endless_talent_ranks.clear()
+	endless_talent_effects.clear()
 	level_segments = CAMPAIGNS.segments(selected_level,not developer_mode)
 	endless_wave = 1
 	endless_intermission = 0
@@ -1050,6 +1060,9 @@ func start_game(mode := "checkpoint", parameter_index := 0, development := false
 	if not attract_mode: get_tree().paused = false
 
 func return_to_start() -> void:
+	_close_endless_reward()
+	endless_talent_ranks.clear()
+	endless_talent_effects.clear()
 	_reset_death_camera()
 	grenade_count = 0
 	ui_paused = false
@@ -1323,7 +1336,47 @@ func record_key() -> String:
 	return "best_score" if selected_level == 0 else "level_%d_best_score" % (selected_level + 1)
 
 func _advance_endless() -> void:
+	if state == "talent": return
 	_bank_remaining_coins()
+	state = "talent"
+	guarding = false
+	auto_guard_left = 0.0
+	world_audio.stop_all()
+	weapon_audio.stop_all()
+	endless_talent_choices = preload("res://endless_talents.gd").roll(endless_talent_ranks)
+	if attract_mode:
+		choose_endless_talent(endless_talent_choices[0])
+		return
+	endless_reward_ui = preload("res://ui/endless_reward.gd").new()
+	endless_reward_ui.game = self
+	endless_reward_ui.choices = endless_talent_choices.duplicate()
+	add_child(endless_reward_ui)
+
+func _close_endless_reward() -> void:
+	if is_instance_valid(endless_reward_ui):
+		endless_reward_ui.hide()
+		endless_reward_ui.queue_free()
+	endless_reward_ui = null
+	endless_talent_choices.clear()
+
+func choose_endless_talent(id: String) -> void:
+	if state != "talent" or id not in endless_talent_choices: return
+	var data: Dictionary = preload("res://endless_talents.gd").POOL[id]
+	endless_talent_ranks[id] = int(endless_talent_ranks.get(id,0))+1
+	for key in data.effects:
+		endless_talent_effects[key] = float(endless_talent_effects.get(key,0.0))+float(data.effects[key])
+	match id:
+		"grenade": grenade_count += 2
+		"battery": guard_energy = minf(guard_capacity(),guard_energy+20.0)
+		"ammo":
+			ammo = [weapon_data(0).magazine,weapon_data(1).magazine]
+			reload_left = 0.0
+			grenade_count += 1
+	_close_endless_reward()
+	_continue_endless()
+	_gate_gameplay_input()
+
+func _continue_endless() -> void:
 	endless_wave += 1
 	state = "playing"
 	if endless_wave % 5 == 0:
@@ -1343,7 +1396,12 @@ func _meta_enabled() -> bool:
 	return not developer_mode and not boss_test_mode and not ui_preview
 
 func _meta_effect(key: String) -> float:
-	return progression.effect(key) if _meta_enabled() and is_instance_valid(progression) else 0.0
+	var value: float = progression.effect(key) if _meta_enabled() and is_instance_valid(progression) else 0.0
+	if endless_mode and _meta_enabled(): value += float(endless_talent_effects.get(key,0.0))
+	if key == "reload": return maxf(-0.75,value)
+	if key == "cadence": return maxf(-0.65,value)
+	if key == "drain": return maxf(-0.7,value)
+	return value
 
 func _upgrade(id: String) -> bool:
 	return _meta_enabled() and is_instance_valid(progression) and progression.has_upgrade(id)
@@ -1353,7 +1411,7 @@ func guard_capacity() -> float:
 
 func guard_regen() -> float:
 	if developer_mode: return float(lab_panel.values.guard_regen)
-	if _upgrade("fast_regen"): return 50.0 * BALANCE.GUARD_REGEN_MULTIPLIER
+	if _upgrade("fast_regen"): return (50.0 + (float(endless_talent_effects.get("regen",0.0)) if endless_mode else 0.0)) * BALANCE.GUARD_REGEN_MULTIPLIER
 	return (12.5 + _meta_effect("regen")) * BALANCE.GUARD_REGEN_MULTIPLIER
 
 func _register_kill(kind: String, origin: Vector2) -> void:

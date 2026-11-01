@@ -38,8 +38,6 @@ static func generate_wave(wave: int, difficulty: String = "normal") -> Dictionar
 	var roster: Array[String] = []
 	for index in range(TYPES.size()):
 		var count: int = quotas[index]
-		if difficulty == "easy": count = int(ceil(float(count)*0.5))
-		elif difficulty == "hard": count *= 3
 		for unused in range(count): roster.append(TYPES[index])
 	# Local RNG also controls order; do not consume gameplay's global RNG.
 	for index in range(roster.size()-1,0,-1):
@@ -48,7 +46,7 @@ static func generate_wave(wave: int, difficulty: String = "normal") -> Dictionar
 		roster[index] = roster[other]
 		roster[other] = previous
 	var spacing := maxf(0.7,1.0-float(maxi(0,wave-1))*0.025)
-	var duration := 28.0*spacing
+	var duration := 28.0*spacing*float({"easy":1.25,"normal":1.0,"hard":0.75}.get(difficulty,1.0))
 	var events: Array = [{"at":0.7,"kind":"grenade"}]
 	var interval := (duration-3.0)/float(roster.size())
 	for index in range(roster.size()):

@@ -13,3 +13,9 @@ static func event_cost(event: Dictionary) -> int:
 		"high_barrage": return GATE_COST
 		"low_obstacle": return SPIKES_COST
 	return 0
+
+static func endless_limit(difficulty: String) -> int:
+	return int({"easy":50,"normal":100,"hard":150}.get(difficulty,100))
+
+static func endless_gap(difficulty: String) -> float:
+	return float({"easy":0.9,"normal":0.6,"hard":0.4}.get(difficulty,0.6))

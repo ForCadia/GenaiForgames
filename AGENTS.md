@@ -145,3 +145,6 @@ Latest independent Endless revision (2026-10-31): user rejects all campaign-deri
 
 
 Latest pressure-budget revision (2026-10-31): user adds active threat cap to Level02/03 AND Endless. threat_budget.gd defines cap100, light/unarmored25, heavy50, kamikaze35, gate40, spikes25 and0.6s minimum release gap. main.gd reserves incoming actors, delays over-budget events without dropping them and waits for event dispatch before transition; harmless dead actors release points, damaging drone explosions retain reservation. Hard total3x retained; same cap. Level01/LAB/Boss unchanged. File edits only; user tests.
+
+
+Latest Endless roguelite revision (2026-10-31): every Endless wave clear (Boss included) opens run-only three-choice talents via endless_talents.gd and ui/endless_reward.gd, freezes gameplay until selected, then advances with input-release gate. Bonuses combine with meta stats with bounded reload/cadence/drain reductions; ranks5 except repeatable supplies/projectile. No persistence; retry/new run/title clears talents. Endless difficulties now share22–32 total combat-event budgets; Easy/Normal/Hard cap50/100/150 with spawn gaps0.9/0.6/0.4 and duration factors1.25/1/0.75. Supersedes previous half/triple total counts and universal100 Endless cap. Level02/03 remain100 and Boss cadence/stats unchanged. Only edit files, no tests/import/game/captures.
