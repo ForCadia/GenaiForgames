@@ -62,9 +62,9 @@ func _draw() -> void:
 	for spark in sparks:
 		var p: Vector2 = to_local(Vector2(spark.p)).round()
 		var fade: float = clampf(float(spark.life)/float(spark.max_life),0.0,1.0)
-		var tail := Vector2(6.0,-2.0)
-		draw_line(p,p+tail,Color(1.0,0.48,0.08,fade),2.0,false)
-		draw_rect(Rect2(p,Vector2(2,2)),Color(1.0,0.9,0.5,fade))
+		var tail := Vector2(16.0,-4.0)
+		draw_line(p,p+tail,Color(1.0,0.48,0.08,fade),3.0,false)
+		draw_rect(Rect2(p,Vector2(4,4)),Color(1.0,0.9,0.5,fade))
 	if not thrust: return
 	# Stepped, unfiltered pixel flame behind the backpack, not a damage region.
 	var pulse: float = 0.84+0.16*sin(effect_time*43.0)
@@ -72,6 +72,6 @@ func _draw() -> void:
 	var axis: Vector2 = thrust_direction
 	var side := axis.orthogonal()
 	var root: Vector2 = nozzle.round()
-	draw_colored_polygon(PackedVector2Array([root-side*6.0,root+side*6.0,root+axis*(length*0.5)+side*4.0,root+axis*length,root+axis*(length*0.5)-side*4.0]),Color("287adf"))
-	draw_colored_polygon(PackedVector2Array([root-side*3.0,root+side*3.0,root+axis*(length*0.72)]),Color("65e8ff"))
-	draw_rect(Rect2(root-Vector2(2,2),Vector2(4,5)),Color("e8ffff"))
+	draw_colored_polygon(PackedVector2Array([root-side*13.0,root+side*13.0,root+axis*(length*0.5)+side*9.0,root+axis*length,root+axis*(length*0.5)-side*9.0]),Color("287adf"))
+	draw_colored_polygon(PackedVector2Array([root-side*7.0,root+side*7.0,root+axis*(length*0.72)]),Color("65e8ff"))
+	draw_rect(Rect2(root-Vector2(4,3),Vector2(8,9)),Color("e8ffff"))

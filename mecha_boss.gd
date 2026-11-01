@@ -7,6 +7,7 @@ signal feedback(origin: Vector2, color: Color, message: String)
 const DATA := preload("res://mecha_boss_data.gd")
 const GD := preload("res://game_data.gd")
 const EFFECTS := preload("res://mecha_boss_effects.gd")
+const MELEE_EFFECTS := preload("res://mecha_melee_effects.gd")
 const SHEETS := {
 	"ground_fire":preload("res://assets/boss_mecha/ground_fire_spaced.png"),
 	"slash":preload("res://assets/boss_mecha/slash_spaced.png"),
@@ -37,6 +38,7 @@ var previous_position := Vector2.ZERO
 var player_target := Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 var stab_direction := Vector2.LEFT
 var effects: EFFECTS
+var melee_effects: MELEE_EFFECTS
 
 func _ready() -> void:
 	frames = preload("res://mecha_boss_frames.gd").FRAMES.duplicate(true)
@@ -57,6 +59,9 @@ func _ready() -> void:
 	effects = EFFECTS.new()
 	effects.z_index = -1
 	add_child(effects)
+	melee_effects = MELEE_EFFECTS.new()
+	melee_effects.z_index = 1
+	add_child(melee_effects)
 	set_process(false)
 	reset_for_battle(false)
 
@@ -67,6 +72,7 @@ func reset_for_battle(enabled: bool) -> void:
 	elapsed = 0.0
 	visual.modulate = Color.WHITE
 	effects.clear_effects()
+	melee_effects.clear_effects()
 	if enabled:
 		position = Vector2(DATA.HOME_X+DATA.ENTRY_OFFSET_X,-20.0)
 		phase_start = position
@@ -76,7 +82,9 @@ func reset_for_battle(enabled: bool) -> void:
 
 func set_combat_enabled(enabled: bool) -> void:
 	combat_enabled = enabled
-	if not enabled: effects.clear_effects()
+	if not enabled:
+		effects.clear_effects()
+		melee_effects.clear_effects()
 
 func _set_pose(sheet: String, frame: int) -> void:
 	if frames.is_empty(): return
@@ -98,7 +106,7 @@ func _set_pose(sheet: String, frame: int) -> void:
 	var anchor_x: float = float(pose_meta.bx) if sheet == "death" else float(pose_meta.cx)+20.0*source_unit
 	visual.position = -Vector2(anchor_x,float(pose_meta.bottom))*scale_factor
 	if state in ["stab_prepare","stab","stab_recover"]:
-		var direction: Vector2 = stab_direction if state != "stab_prepare" else (player_target-core_position()).normalized()
+		var direction: Vector2 = stab_direction
 		var angle := clampf(angle_difference(PI,direction.angle()),-1.1,0.5)
 		if state == "stab_recover": angle *= 1.0-smoothstep(0.0,1.0,minf(1.0,elapsed/DATA.STAB_RECOVERY))
 		# Rotate around the chest, never around the sheet's top-left corner.
@@ -109,6 +117,10 @@ func _set_pose(sheet: String, frame: int) -> void:
 
 func _frame(sequence: Array, duration: float) -> int:
 	return int(sequence[clampi(int(elapsed/maxf(duration,0.001)*sequence.size()),0,sequence.size()-1)])
+
+func _windup_frame(sequence: Array, duration: float) -> int:
+	var animation_time: float = maxf(0.0,elapsed-(duration-DATA.MELEE_WINDUP_ANIMATION))
+	return int(sequence[clampi(int(animation_time/DATA.MELEE_WINDUP_ANIMATION*sequence.size()),0,sequence.size()-1)])
 
 func _enter(next: String) -> void:
 	state = next
@@ -121,9 +133,10 @@ func _enter(next: String) -> void:
 		"retreat": phase_goal = Vector2(DATA.HOME_X,GD.GROUND_Y)
 		"takeoff": phase_goal = Vector2(DATA.AIR_X,GD.GROUND_Y-DATA.HOVER_HEIGHT)
 		"air_fire": fire_direction = Vector2(-0.84,0.542586).normalized()
-		"stab":
+		"stab_prepare":
 			stab_direction = (player_target-core_position()).normalized()
 			if stab_direction.x > -0.2: stab_direction = Vector2(-0.2,stab_direction.y).normalized()
+		"stab":
 			phase_goal = position+stab_direction*DATA.STAB_DISTANCE
 			phase_goal.x = maxf(130.0,phase_goal.x)
 			phase_goal.y = minf(GD.GROUND_Y-4.0,phase_goal.y)
@@ -162,10 +175,10 @@ func advance(delta: float, target: Vector2 = Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 			_set_pose("slash",0)
 			if elapsed >= DATA.RECOVERY: _enter("slash_prepare")
 		"slash_prepare":
-			_set_pose("slash",_frame(DATA.SLASH_READY,DATA.SLASH_PREPARE))
+			_set_pose("slash",_windup_frame(DATA.SLASH_READY,DATA.SLASH_PREPARE))
 			if elapsed >= DATA.SLASH_PREPARE: _enter("slash")
 		"slash":
-			_set_pose("slash",_frame(DATA.SLASH_ACTIVE,DATA.SLASH_TIME))
+			_set_pose("slash",DATA.SLASH_CHARGE_FRAME)
 			position = position.move_toward(phase_goal,DATA.CHARGE_SPEED*delta)
 			if elapsed >= DATA.SLASH_TIME: _enter("slash_recover")
 		"slash_recover":
@@ -195,7 +208,7 @@ func advance(delta: float, target: Vector2 = Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 			_set_pose("lift",3)
 			if elapsed >= DATA.RECOVERY: _enter("stab_prepare")
 		"stab_prepare":
-			_set_pose("stab",_frame(DATA.STAB_READY,DATA.STAB_PREPARE))
+			_set_pose("stab",_windup_frame(DATA.STAB_READY,DATA.STAB_PREPARE))
 			if elapsed >= DATA.STAB_PREPARE: _enter("stab")
 		"stab":
 			_set_pose("stab",_frame(DATA.STAB_ACTIVE,DATA.STAB_TIME))
@@ -221,6 +234,7 @@ func advance(delta: float, target: Vector2 = Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 			if elapsed >= DATA.LAND_RECOVERY: _enter("ground_prepare")
 
 	effects.advance_effects(delta,combat_enabled,state,visual,pose_meta,scale_factor)
+	melee_effects.advance_effects(delta,self)
 
 func _muzzle(_air: bool) -> Vector2:
 	# Source-space barrel tip; no flame included, same transformed pose as artwork.
@@ -331,6 +345,7 @@ func start_death() -> void:
 	state = "dead"
 	death_time = 0.0
 	effects.clear_effects()
+	melee_effects.clear_effects()
 	position.y = GD.GROUND_Y
 	_set_pose("death",0)
 	set_process(true)
