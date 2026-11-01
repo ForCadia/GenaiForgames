@@ -49,17 +49,15 @@ func _ready() -> void:
 		mission_buttons.append(button)
 		if index == 0: first_button = button
 	add_child(HSeparator.new())
-	F.label(self,"ENDLESS / 无尽挑战","SmallLabel")
+	F.label(self,"ENDLESS","SmallLabel")
 	var difficulty_row := F.box(self,true)
 	difficulty_row.add_theme_constant_override("separation",12)
 	for spec in [["easy","简单无尽"],["normal","普通无尽"],["hard","困难无尽"]]:
 		var id: String = spec[0]
-		var limit: int = preload("res://threat_budget.gd").endless_limit(id)
-		var button := F.button(difficulty_row,"%s\n威胁上限 %d" % [spec[1],limit],func(): game.start_endless(id))
+		var button := F.button(difficulty_row,spec[1],func(): game.start_endless(id))
 		button.custom_minimum_size = Vector2(192,76)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		difficulty_buttons[id] = button
-	F.label(self,"每波三选一强化 · 每五波 Boss · 死亡从首波重开","MutedLabel")
 
 	var center := CenterContainer.new()
 	add_child(center)

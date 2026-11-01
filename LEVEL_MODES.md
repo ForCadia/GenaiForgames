@@ -57,3 +57,6 @@ Every cleared Endless wave, including Boss waves, pauses gameplay and offers thr
 
 
 Latest Endless entry UI: mission selector now shows three direct-start buttons labeled 简单无尽 / 普通无尽 / 困难无尽 in one row, each displaying its pressure cap. Removed the separate Endless start row and difficulty toggles. All three use the same existing Endless unlock requirement. No gameplay values changed; no runtime tests.
+
+
+Latest UI simplification: Endless section shows only ENDLESS and 简单无尽 / 普通无尽 / 困难无尽 entry labels, without budget numbers or rules copy. Upper-center temporary combat notices and phase banners are hidden; progress/Boss HUD and lower tutorial remain. Gameplay unchanged. File-only edits, no tests.

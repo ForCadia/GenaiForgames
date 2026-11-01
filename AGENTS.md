@@ -151,3 +151,6 @@ Latest Endless roguelite revision (2026-10-31): every Endless wave clear (Boss i
 
 
 Latest Endless entry UI (2026-10-31): mission page replaces Endless-plus-difficulty-toggle flow with three direct-start buttons: 简单无尽 / 普通无尽 / 困难无尽, showing50/100/150 caps. Common Endless unlock requirement preserved; campaigns and gameplay unchanged. File-only, user tests.
+
+
+Latest UI simplification (2026-10-31): Endless selector contains only ENDLESS plus 简单无尽 / 普通无尽 / 困难无尽; remove visible50/100/150 and rules copy. Hide HUD upper-center banner/toast messages during combat, retaining progress/Boss HUD/tutorial. No gameplay changes or runtime tests.

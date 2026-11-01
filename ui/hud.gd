@@ -252,18 +252,9 @@ func sync() -> void:
 		ammo_label.text = "× %02d" % game.grenade_count
 		penetration_label.text = "BLAST"
 		ammo_bar.value = 100 if game.has_grenade else 0
-	if game.banner != last_banner and game.banner_time > 0 and game.state == "playing":
-		last_banner = game.banner
-		banner_label.text = game.banner
-		if banner_tween: banner_tween.kill()
-		banner_panel.modulate.a = 0
-		banner_tween = create_tween()
-		banner_tween.tween_property(banner_panel, "modulate:a", 1.0, 0.35)
-		banner_tween.tween_interval(1.8)
-		banner_tween.tween_property(banner_panel, "modulate:a", 0.0, 0.4)
-	banner_panel.visible = game.state == "playing" and game.banner_time > 0
-	toast_label.visible = game.state in ["playing", "intermission"] and game.notice_time > 0
-	toast_label.text = game.notice
+	# Keep combat status popups and stage banners out of the upper playfield.
+	banner_panel.hide()
+	toast_label.hide()
 	tutorial_label.visible = game.state == "playing"
 	if game.state != "playing": tutorial_panel.hide()
 	intro_panel.visible = game.state == "playing" and not game.boss_mode and game.run_elapsed < 6
