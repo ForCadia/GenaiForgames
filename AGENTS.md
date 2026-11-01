@@ -169,3 +169,6 @@ Latest Endless homing/piercing revision (2026-10-31): user changes homing to sin
 
 
 Latest homing nerf/copy (2026-10-31): homing now max4 ranks; every5/4/3/2 actual emitted rounds grants one fully guided round. Count multishot rounds individually, never entire volley at once; reset counter with run/title. Reward text directly states effects, removes explanation/cap/repeat prose; homing card shows next-rank interval. File-only, no tests.
+
+
+Latest procedural cape revision (2026-10-31): user authorizes first visual-only broad ribbon cape. player_visual.gd instantiates player_cape.gd,12-link fixed-step global Verlet mesh using generated transparent pixel red/ivory atlas, bone-white edge, wind/gravity/motion inertia, behind-body/ground constraints and pixel-snapped vertices. Separate scarf_red_pixel.png is pure red, positioned below neck and inserted before Helmet sibling (body < scarf < helmet < front arm), never weapon rotation. Cape z=-3; death settles cloth and hides separate scarf to preserve baked death head. Source Downloads unchanged. No gameplay/collider changes, no tests/import/game/captures. See PLAYER_CAPE.md.

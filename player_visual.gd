@@ -73,6 +73,7 @@ const HEAD_AIM_LIMIT := 0.28
 @onready var hurt_collision: CollisionShape2D = $Hurtbox/CollisionShape2D
 @onready var muzzle: Marker2D = $Muzzle
 
+var cape: Node2D
 var body_state := "idle"
 var run_palette := ShaderMaterial.new()
 var body_time := 0.0
@@ -88,6 +89,9 @@ var front_frame := 0
 var barrel_tilt := 0.0
 
 func _ready() -> void:
+	cape = preload("res://player_cape.gd").new()
+	cape.actor = self
+	visual_root.add_child(cape)
 	helmet.scale = Vector2(0.88, 0.88)
 	run_palette.shader = preload("res://assets/player/run_palette.gdshader")
 	set_collision_pose(false)
