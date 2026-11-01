@@ -70,3 +70,6 @@ Backpack/scale follow-up: replace chest-relative exhaust offset with eight per-f
 
 
 Slash flipbook v2: imagegen edit changes expanding/contracting frames to left-wide/right-narrow shapes, and peak frames4/5 to flat rectangular bars. Retains eight frames, pixel filtering and full-screen display. Old atlas preserved; v2 row cropping aligned. No runtime tests.
+
+
+Ground retreat follow-up: use separate GROUND_RETREAT_SPEED700px/s (formerly shared280px/s), returning450px in about0.64s. Aerial return remains280px/s; preparation/recovery/damage unchanged. No runtime tests.

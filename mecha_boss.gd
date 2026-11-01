@@ -187,7 +187,7 @@ func advance(delta: float, target: Vector2 = Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 			if elapsed >= DATA.RECOVERY: _enter("retreat")
 		"retreat":
 			_set_pose("slash",0)
-			position = position.move_toward(phase_goal,DATA.RETREAT_SPEED*delta)
+			position = position.move_toward(phase_goal,DATA.GROUND_RETREAT_SPEED*delta)
 			if position.distance_to(phase_goal) < 1: _enter("takeoff_wait")
 		"takeoff_wait":
 			_set_pose("slash",0)
