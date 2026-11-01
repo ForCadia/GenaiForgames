@@ -7,12 +7,13 @@ signal feedback(origin: Vector2, color: Color, message: String)
 const DATA := preload("res://mecha_boss_data.gd")
 const GD := preload("res://game_data.gd")
 const SHEETS := {
-	"ground_fire":preload("res://assets/boss_mecha/ground_fire.png"),
-	"slash":preload("res://assets/boss_mecha/slash.png"),
-	"lift":preload("res://assets/boss_mecha/lift.png"),
-	"air_fire":preload("res://assets/boss_mecha/air_fire.png"),
-	"stab":preload("res://assets/boss_mecha/stab.png"),
-	"death":preload("res://assets/boss_mecha/death.png")}
+	"ground_fire":preload("res://assets/boss_mecha/ground_fire_spaced.png"),
+	"slash":preload("res://assets/boss_mecha/slash_spaced.png"),
+	"lift":preload("res://assets/boss_mecha/lift_spaced.png"),
+	"air_fire":preload("res://assets/boss_mecha/air_fire_spaced.png"),
+	"stab":preload("res://assets/boss_mecha/stab_spaced.png"),
+	"death":preload("res://assets/boss_mecha/death_spaced.png")}
+const ORIGINAL_BODY_HEIGHT := {"ground_fire":275.0,"air_fire":335.0,"lift":285.0,"stab":286.0,"slash":214.0,"death":335.0}
 @onready var visual: Sprite2D = $Visual
 var frames: Dictionary = {}
 var images: Dictionary = {}
@@ -25,6 +26,7 @@ var pose_sheet := "slash"
 var pose_frame := 0
 var pose_meta: Dictionary = {}
 var scale_factor := 0.7
+var source_unit := 1.0
 var phase_start := Vector2.ZERO
 var phase_goal := Vector2.ZERO
 var shot_count := 0
@@ -72,16 +74,17 @@ func _set_pose(sheet: String, frame: int) -> void:
 	visual.texture = frame_textures[sheet][pose_frame]
 	visual.region_enabled = false
 	visual.region_filter_clip_enabled = true
-	# Keep chest-to-helmet scale consistent rather than resizing low/raised legs.
+	# Each repacked sheet has its own source resolution; hold scale across its poses.
 	var reference: Dictionary = frames[sheet][0]
-	var chest_span := maxf(45.0,float(reference.cy)-float(reference.top))
-	scale_factor = (DATA.BODY_HEIGHT*0.38)/chest_span
-	if sheet == "death": scale_factor = (DATA.BODY_HEIGHT*0.38)/maxf(45.0,float(frames.lift[3].cy)-float(frames.lift[3].top))
+	var reference_height: float = maxf(32.0,float(reference.bottom)-float(reference.top))
+	scale_factor = DATA.BODY_HEIGHT/reference_height
+	source_unit = reference_height/float(ORIGINAL_BODY_HEIGHT[sheet])
 	visual.scale = Vector2.ONE*scale_factor
 	visual.flip_h = false
 	visual.flip_v = false
 	visual.rotation = 0.0
-	visual.position = -Vector2(float(pose_meta.cx)+20.0,float(pose_meta.bottom))*scale_factor
+	var anchor_x: float = float(pose_meta.bx) if sheet == "death" else float(pose_meta.cx)+20.0*source_unit
+	visual.position = -Vector2(anchor_x,float(pose_meta.bottom))*scale_factor
 	if state in ["stab_prepare","stab","stab_recover"]:
 		var direction: Vector2 = stab_direction if state != "stab_prepare" else (player_target-core_position()).normalized()
 		var angle := clampf(angle_difference(PI,direction.angle()),-1.1,0.5)
@@ -196,10 +199,9 @@ func advance(delta: float, target: Vector2 = Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 			_set_pose("slash",0)
 			if elapsed >= DATA.LAND_RECOVERY: _enter("ground_prepare")
 
-func _muzzle(air: bool) -> Vector2:
+func _muzzle(_air: bool) -> Vector2:
 	# Source-space barrel tip; no flame included, same transformed pose as artwork.
-	var source := Vector2(float(pose_meta.cx)-168.0,float(pose_meta.cy)-3.0)
-	if air: source = Vector2(float(pose_meta.cx)-151.0,float(pose_meta.cy)+89.0)
+	var source := Vector2(float(pose_meta.mx),float(pose_meta.my))
 	return visual.to_global(source)
 
 func _fire_burst(_delta: float, air: bool) -> void:
@@ -218,7 +220,7 @@ func core_position() -> Vector2:
 	return visual.to_global(Vector2(pose_meta.cx,pose_meta.cy))
 
 func _core_hit(from: Vector2, to: Vector2) -> bool:
-	var radius := maxf(7.0,13.0*scale_factor)
+	var radius := maxf(7.0,13.0*source_unit*scale_factor)
 	return Geometry2D.get_closest_point_to_segment(core_position(),from,to).distance_to(core_position()) <= radius
 
 func _body_pixel(local: Vector2) -> bool:
@@ -226,15 +228,15 @@ func _body_pixel(local: Vector2) -> bool:
 	var y := int(local.y)
 	if x < int(DATA.ATLAS_INSET) or y < int(DATA.ATLAS_INSET) or x >= int(pose_meta.w-DATA.ATLAS_INSET) or y >= int(pose_meta.h-DATA.ATLAS_INSET): return false
 	# Exclude the gun/sword beyond the actual torso/limbs envelope.
-	if x < float(pose_meta.cx)-65.0 and y < float(pose_meta.cy)+48.0: return false
-	if x > float(pose_meta.cx)+175.0 or y < float(pose_meta.top): return false
+	if x < float(pose_meta.cx)-65.0*source_unit and y < float(pose_meta.cy)+48.0*source_unit: return false
+	if x > float(pose_meta.cx)+175.0*source_unit or y < float(pose_meta.top): return false
 	var pixel: Color = images[pose_sheet].get_pixel(int(pose_meta.x)+x,int(pose_meta.y)+y)
 	if pixel.a < 0.85: return false
 	# Red blade/energy glow and orange gun flash never count as body armor.
 	if pixel.r > 0.4 and pixel.r > pixel.g*1.7 and pixel.r > pixel.b*1.7: return false
 	if pixel.r > 0.8 and pixel.g > 0.8 and pixel.b > 0.8:
 		for offset in [-4,-2,2,4]:
-			var sample_y: int = int(pose_meta.y)+y+int(offset)
+			var sample_y: int = int(pose_meta.y)+y+int(round(float(offset)*source_unit))
 			if sample_y < 0 or sample_y >= images[pose_sheet].get_height(): continue
 			var neighbor: Color = images[pose_sheet].get_pixel(int(pose_meta.x)+x,sample_y)
 			if neighbor.a > 0.5 and neighbor.r > 0.6 and neighbor.g < 0.3 and neighbor.b < 0.3: return false

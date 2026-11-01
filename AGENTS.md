@@ -220,3 +220,6 @@ Latest retro asset replacement (2026-10-31): Downloads/复古像素射击游戏�
 
 
 Latest mecha frame/timing/aim correction (2026-10-31): replace uniform atlas grid with actual transparent-gutter rectangles and per-frame clipped AtlasTextures/inset+coordinate margins. Source frame ordering unchanged. Accelerate action/recovery/death timing, raise charge/stab speeds to preserve distance. User overrides fixed-height air stab: lock player's end-of-prep position and lunge toward it, rotate around chest and use swept blade-axis segment hits, never mid-lunge tracking. Preserve0.9s stab prep and one shield contact per attack. No runtime tests/import/game/captures.
+
+
+Mecha atlas repack (2026-10-31): all six action sheets now use transparent `_spaced.png` assets, with full blade clearance and individually measured frame regions. Original sheets and user-authored frame selection/order are retained. All 56 source regions have an empty two-pixel outer border in the asset inspection. Per-sheet body scale, source-space hit masks, core anchors and per-frame muzzle coordinates are recalibrated for the new source sizes; death anchors use the neutral body center. Attack timing and gameplay rules are unchanged. No Godot run, import, export or runtime tests were performed, per user instruction.
