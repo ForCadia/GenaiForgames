@@ -269,11 +269,6 @@ func _body_pixel(local: Vector2) -> bool:
 	var x := int(local.x)
 	var y := int(local.y)
 	if x < int(DATA.ATLAS_INSET) or y < int(DATA.ATLAS_INSET) or x >= int(pose_meta.w-DATA.ATLAS_INSET) or y >= int(pose_meta.h-DATA.ATLAS_INSET): return false
-	# Leave an approach lane through overlapping front arm/gun pixels at chest height.
-	# Otherwise an earlier physics tick consumes a rifle shot before it reaches the core.
-	var chest_point := (local-Vector2(float(pose_meta.cx),float(pose_meta.cy)))*scale_factor
-	if chest_point.y >= DATA.CORE_HIT_RECT.position.y and chest_point.y <= DATA.CORE_HIT_RECT.end.y and chest_point.x <= DATA.CORE_HIT_RECT.end.x:
-		return false
 	# Exclude the gun/sword beyond the actual torso/limbs envelope.
 	if x < float(pose_meta.cx)-65.0*source_unit and y < float(pose_meta.cy)+48.0*source_unit: return false
 	if x > float(pose_meta.cx)+175.0*source_unit or y < float(pose_meta.top): return false

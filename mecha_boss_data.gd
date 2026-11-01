@@ -1,7 +1,7 @@
 extends RefCounted
 const GD := preload("res://game_data.gd")
 # Reuse actual project thresholds, not a newly invented medium armor value.
-const CORE_PENETRATION: int = GD.ENEMIES.light.armor
+const CORE_PENETRATION: int = GD.ENEMIES.heavy.armor
 const BODY_PENETRATION: int = GD.ENEMIES.heavy.armor
 const HEALTH := 24
 const BODY_HEIGHT := 160.0

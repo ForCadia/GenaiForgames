@@ -238,3 +238,6 @@ Backpack/scale follow-up: replace chest-relative exhaust offset with eight per-f
 
 
 Mecha core collision correction: replace the tiny core circle with a66x48 chest box, offset(-30,-23) from the red core in unrotated world-size units and transformed with the current sprite. Core is checked first; overlapping front arm/gun body pixels at that chest-height approach lane no longer consume incoming bullets on an earlier physics tick. Body armor remains outside the chest lane. Both smart targeting and shot damage use the same core predicate; shared HP, penetration thresholds and one hit per projectile remain unchanged. Source-only inspection, no game/tests.
+
+
+Latest user armor rule: mecha chest and body both require the existing heavy-armor penetration threshold3; rifle/penetration1 ricochets everywhere. This explicitly supersedes the original light-armor core exception. Core keeps its chest-sized hitbox, but the previous front-arm approach lane is removed now that core/body requirements match. Shared HP, no armor depletion/bar, grenade direct damage and one hit per projectile remain unchanged. Smart targeting reads the same threshold. No runtime tests.
