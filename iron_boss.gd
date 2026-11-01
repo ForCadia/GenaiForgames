@@ -9,8 +9,8 @@ const GD := preload("res://game_data.gd")
 const PIXEL_FRAMES := preload("res://iron_boss_frames.gd").FRAMES
 const VFX := preload("res://assets/vfx/neon_effects_source.png")
 const ART := {
- "hull":preload("res://assets/boss_iron/reverse_spaced_pixel.png"),
- "cannon":preload("res://assets/boss_iron/cannon_spaced_pixel.png"),
+ "hull":preload("res://assets/boss_iron/reverse_pixel_user_4.png"),
+ "cannon":preload("res://assets/boss_iron/cannon_pixel_user_v2.png"),
  "cannon_dead":preload("res://assets/boss_iron/cannon_death.png"),
  "launcher":preload("res://assets/boss_iron/launcher_fire_clean.png"),
  "launcher_dead":preload("res://assets/boss_iron/launcher_death.png"),
@@ -63,7 +63,7 @@ func _ready() -> void:
 	for sprite in [hull,cannon]:
 		var pixel_material := ShaderMaterial.new()
 		pixel_material.shader = preload("res://assets/boss_iron/pixel_sample.gdshader")
-		pixel_material.set_shader_parameter("pixel_step",1.0 if sprite == hull else 4.0)
+		pixel_material.set_shader_parameter("pixel_step",2.0 if sprite == hull else 4.0)
 		sprite.material = pixel_material
 	reset_for_battle(false)
 
@@ -76,7 +76,7 @@ func _atlas(texture: Texture2D, metadata: Dictionary) -> AtlasTexture:
 
 func _animate_hull(delta: float) -> void:
 	track_time += delta
-	hull_frame = int(track_time*DATA.REVERSE_FPS)%8
+	hull_frame = int(track_time*DATA.REVERSE_FPS)%hull_textures.size()
 	var metadata: Dictionary = PIXEL_FRAMES.hull[hull_frame]
 	hull.texture = hull_textures[hull_frame]
 	hull.position = -Vector2(float(metadata.anchor_x),float(metadata.bottom))*DATA.HULL_ANIM_SCALE
@@ -101,8 +101,8 @@ func _pose(sprite: Sprite2D, key: String, frame: int, mount: Vector2) -> void:
 		(sprite.material as ShaderMaterial).set_shader_parameter("pixel_step",4.0)
 		return
 	if key == "cannon_dead":
-		sprite.scale = Vector2.ONE*DATA.CANNON_SCALE
-		(sprite.material as ShaderMaterial).set_shader_parameter("pixel_step",6.0)
+		sprite.scale = Vector2.ONE*DATA.CANNON_SCALE*1.4
+		(sprite.material as ShaderMaterial).set_shader_parameter("pixel_step",4.0)
 	var columns: int = 4 if key == "plate" else 2
 	var width: int = 384 if columns == 4 else 768
 	var source_origin := Vector2((frame%columns)*width,int(frame/columns)*512)
@@ -201,7 +201,7 @@ func advance(delta: float, target: Vector2) -> void:
 	queue_redraw()
 
 func _shell() -> void:
-	var muzzles := [Vector2(295,235),Vector2(285,232),Vector2(295,200),Vector2(252,195)]
+	var muzzles := [Vector2(233,193),Vector2(241,220),Vector2(252,149),Vector2(236,174)]
 	var source: Vector2 = muzzles[cannon_frame]
 	var origin: Vector2 = cannon.to_global(source)
 	# Solve speed for the authored left/up barrel angle and the locked landing point.

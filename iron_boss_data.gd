@@ -10,10 +10,10 @@ const HOME_X := 790.0
 const ENTRY_SPEED := 430.0
 const HULL_SCALE := 0.45
 const HULL_ORIGIN := Vector2(-300.0,-475.0)
-const CANNON_MOUNT := Vector2(25,-421.966)
+const CANNON_MOUNT := Vector2(25,-390.317)
 const LAUNCHER_MOUNT := Vector2(8,-286)
 const PLATE_MOUNT := Vector2(-127,-157)
-const CORE_RECT := Rect2(-176.472,-314.944,46,104)
+const CORE_RECT := Rect2(-196.340,-320.566,46,104)
 const PLATE_RECT := Rect2(-169,-337,84,182)
 const BODY_RECT := Rect2(-240,-390,530,360)
 const PREPARE := 1.0
@@ -42,8 +42,8 @@ const CANNON_REGIONS := [Rect2(0,0,700,512),Rect2(700,0,836,512),Rect2(0,504,768
 const CANNON_ANCHORS := [Vector2(445,500),Vector2(1177,501),Vector2(478,1005),Vector2(1180,1005)]
 const CANNON_MUZZLES := [Vector2(205,155),Vector2(950,195),Vector2(232,671),Vector2(940,680)]
 
-const DEPLOY_ORIGIN := Vector2(-60,-431.966)
+const DEPLOY_ORIGIN := Vector2(-60,-440.317)
 
-const HULL_ANIM_SCALE := 2.24719101
-const CANNON_ANIM_SCALE := 0.56
+const HULL_ANIM_SCALE := 1.15163148
+const CANNON_ANIM_SCALE := 0.52
 const REVERSE_FPS := 10.0
