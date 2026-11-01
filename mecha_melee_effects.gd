@@ -1,7 +1,7 @@
 extends Node2D
 # Telegraph geometry shares the actual blade sweep; the oversized sprite is cosmetic.
 const DATA := preload("res://mecha_boss_data.gd")
-const SCREEN_SLASH := preload("res://assets/vfx/mecha_screen_slash_flipbook.png")
+const SCREEN_SLASH := preload("res://assets/vfx/mecha_screen_slash_flipbook_v2.png")
 const GD := preload("res://game_data.gd")
 const SHEET := preload("res://assets/vfx/neon_effects_source.png")
 var band := PackedVector2Array()
@@ -30,7 +30,7 @@ func _ready() -> void:
 		var frame := AtlasTexture.new()
 		frame.atlas = SCREEN_SLASH
 		# Individually aligned row centers, with empty gutters around the pixel blade.
-		frame.region = Rect2((index%4)*384,212 if index < 4 else 694,384,100)
+		frame.region = Rect2((index%4)*384,218 if index < 4 else 694,384,100)
 		frame.filter_clip = true
 		flipbook.add_frame("default",frame)
 	screen_slash.sprite_frames = flipbook

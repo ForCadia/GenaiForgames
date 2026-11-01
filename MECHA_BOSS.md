@@ -67,3 +67,6 @@ Pixel flipbook supersedes the single-strip slash: generated 4x2 eight-frame tran
 
 
 Backpack/scale follow-up: replace chest-relative exhaust offset with eight per-frame, full-sheet backpack outlet landmarks for lift, aerial fire and thrust. Convert through each frame region and actual sprite transform; exhaust points outwards right/down and only emits for sheets with known backpack anchors. No exhaust is guessed for ground slash poses. Narrow nozzle to18px, retain85px flame length. Per-sheet fixed helmet-width calibration (46 world pixels) now supersedes helmet-to-core normalization, avoiding torso/leg pose-dependent scale changes. Death uses matching helmet calibration too. Values/landmarks are centralized in mecha_boss_data.gd. Source/image inspection only; no game or tests.
+
+
+Slash flipbook v2: imagegen edit changes expanding/contracting frames to left-wide/right-narrow shapes, and peak frames4/5 to flat rectangular bars. Retains eight frames, pixel filtering and full-screen display. Old atlas preserved; v2 row cropping aligned. No runtime tests.
