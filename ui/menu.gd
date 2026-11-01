@@ -3,9 +3,7 @@ extends CanvasLayer
 const F := preload("res://ui/ui_factory.gd")
 const S := preload("res://ui/ui_strings.gd")
 const TERMINAL_TEXTURE := preload("res://assets/ui_title_terminal.png")
-const PEDESTAL_TEXTURE := preload("res://assets/ui_title_terminal_pedestal_v2.png")
 const STANDING_TEXTURE := preload("res://assets/ui_title_terminal_stand.png")
-var terminal_stand: TextureRect
 var submenu_terminal: NinePatchRect
 var submenu_empty := StyleBoxEmpty.new()
 var submenu_padding := 20.0
@@ -53,15 +51,6 @@ func _ready() -> void:
 	terminal.patch_margin_bottom = 80
 	terminal.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(terminal)
-	terminal_stand = TextureRect.new()
-	var feet := AtlasTexture.new()
-	feet.atlas = PEDESTAL_TEXTURE
-	feet.region = Rect2(72,132,1631,689)
-	terminal_stand.texture = feet
-	terminal_stand.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	terminal_stand.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(terminal_stand)
-	root.move_child(terminal_stand,terminal.get_index())
 	submenu_terminal = NinePatchRect.new()
 	var flat := AtlasTexture.new()
 	flat.atlas = TERMINAL_TEXTURE
@@ -285,7 +274,6 @@ func _position_menu() -> void:
 	if layout_busy: return
 	layout_busy = true
 	terminal.visible = menu.visible
-	terminal_stand.visible = menu.visible
 	submenu_terminal.visible = not menu.visible
 	if menu.visible:
 		title_style_active = true
@@ -297,16 +285,9 @@ func _position_menu() -> void:
 		var origin := Vector2(root.size.x-width,-96)
 		var image_scale := width/1200.0
 		var head_height := minimum.y+208
-		# Uniformly scale the newly drawn long pedestal; never stretch y alone.
-		var pedestal_native := Vector2(1631,689)
-		var needed_height := maxf(0.0,root.size.y-origin.y-head_height)
-		var pedestal_scale := maxf(width/pedestal_native.x,needed_height/pedestal_native.y)
-		var pedestal_size := pedestal_native*pedestal_scale
 		terminal.position = origin
 		terminal.scale = Vector2.ONE*image_scale
 		terminal.size = Vector2(1200,head_height/image_scale)
-		terminal_stand.position = Vector2(root.size.x-pedestal_size.x,root.size.y-pedestal_size.y)
-		terminal_stand.size = pedestal_size
 		var content_position := origin+Vector2(92,156)
 		center.offset_left = 2*content_position.x+minimum.x-root.size.x
 		center.offset_top = 2*content_position.y+minimum.y-root.size.y

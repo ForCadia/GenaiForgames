@@ -122,3 +122,5 @@ Latest terminal placement (2026-10-31): title monitor retains its existing upper
 Latest title offset (2026-10-31): move the title terminal another24px right and120px up: artwork origin is now (viewport_width-640,-96), positioning the actual display/controls in the upper-right rather than reserving top margin for the antenna. Pedestal still reaches the viewport bottom. File-only change, no tests.
 
 Latest pedestal revision (2026-10-31): replace the vertically stretched support with regenerated ui_title_terminal_pedestal_v2.png. Render with one uniform scale using its native aspect ratio, align feet to viewport bottom/right and occlude surplus upper mounts behind the unchanged monitor. No runtime tests/captures, per user.
+
+Latest title simplification (2026-10-31): user removes the stand entirely; title renders the monitor/head only at its existing upper-right placement. Pedestal drawing/loading/layout removed; asset files retained unused. No runtime testing.
