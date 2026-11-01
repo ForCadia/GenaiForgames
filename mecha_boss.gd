@@ -16,6 +16,7 @@ const SHEETS := {
 @onready var visual: Sprite2D = $Visual
 var frames: Dictionary = {}
 var images: Dictionary = {}
+var frame_textures: Dictionary = {}
 var state := "inactive"
 var elapsed := 0.0
 var combat_enabled := false
@@ -30,6 +31,8 @@ var shot_count := 0
 var fire_direction := Vector2.LEFT
 var death_time := 0.0
 var previous_position := Vector2.ZERO
+var player_target := Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
+var stab_direction := Vector2.LEFT
 
 func _ready() -> void:
 	frames = preload("res://mecha_boss_frames.gd").FRAMES.duplicate(true)
@@ -37,6 +40,16 @@ func _ready() -> void:
 		var image: Image = SHEETS[key].get_image()
 		if image.is_compressed(): image.decompress()
 		images[key] = image
+		var textures: Array[Texture2D] = []
+		for metadata in frames[key]:
+			var atlas := AtlasTexture.new()
+			atlas.atlas = SHEETS[key]
+			# Crop grid-border contamination and retain the same local coordinates.
+			atlas.region = Rect2(float(metadata.x)+DATA.ATLAS_INSET,float(metadata.y)+DATA.ATLAS_INSET,float(metadata.w)-DATA.ATLAS_INSET*2,float(metadata.h)-DATA.ATLAS_INSET*2)
+			atlas.margin = Rect2(Vector2.ONE*DATA.ATLAS_INSET,Vector2.ONE*DATA.ATLAS_INSET*2)
+			atlas.filter_clip = true
+			textures.append(atlas)
+		frame_textures[key] = textures
 	set_process(false)
 	reset_for_battle(false)
 
@@ -56,9 +69,9 @@ func _set_pose(sheet: String, frame: int) -> void:
 	pose_sheet = sheet
 	pose_frame = clampi(frame,0,frames[sheet].size()-1)
 	pose_meta = frames[sheet][pose_frame]
-	visual.texture = SHEETS[sheet]
-	visual.region_enabled = true
-	visual.region_rect = Rect2(pose_meta.x,pose_meta.y,pose_meta.w,pose_meta.h)
+	visual.texture = frame_textures[sheet][pose_frame]
+	visual.region_enabled = false
+	visual.region_filter_clip_enabled = true
 	# Keep chest-to-helmet scale consistent rather than resizing low/raised legs.
 	var reference: Dictionary = frames[sheet][0]
 	var chest_span := maxf(45.0,float(reference.cy)-float(reference.top))
@@ -69,6 +82,15 @@ func _set_pose(sheet: String, frame: int) -> void:
 	visual.flip_v = false
 	visual.rotation = 0.0
 	visual.position = -Vector2(float(pose_meta.cx)+20.0,float(pose_meta.bottom))*scale_factor
+	if state in ["stab_prepare","stab","stab_recover"]:
+		var direction: Vector2 = stab_direction if state != "stab_prepare" else (player_target-core_position()).normalized()
+		var angle := clampf(angle_difference(PI,direction.angle()),-1.1,0.5)
+		if state == "stab_recover": angle *= 1.0-smoothstep(0.0,1.0,minf(1.0,elapsed/DATA.STAB_RECOVERY))
+		# Rotate around the chest, never around the sheet's top-left corner.
+		var pivot := Vector2(pose_meta.cx,pose_meta.cy)
+		var pivot_position := visual.position+pivot*scale_factor
+		visual.rotation = angle
+		visual.position = pivot_position-(pivot*scale_factor).rotated(angle)
 
 func _frame(sequence: Array, duration: float) -> int:
 	return int(sequence[clampi(int(elapsed/maxf(duration,0.001)*sequence.size()),0,sequence.size()-1)])
@@ -84,14 +106,20 @@ func _enter(next: String) -> void:
 		"retreat": phase_goal = Vector2(DATA.HOME_X,GD.GROUND_Y)
 		"takeoff": phase_goal = Vector2(DATA.AIR_X,GD.GROUND_Y-DATA.HOVER_HEIGHT)
 		"air_fire": fire_direction = Vector2(-0.84,0.542586).normalized()
-		"stab": phase_goal = Vector2(maxf(210.0,position.x-DATA.STAB_DISTANCE),position.y)
+		"stab":
+			stab_direction = (player_target-core_position()).normalized()
+			if stab_direction.x > -0.2: stab_direction = Vector2(-0.2,stab_direction.y).normalized()
+			phase_goal = position+stab_direction*DATA.STAB_DISTANCE
+			phase_goal.x = maxf(130.0,phase_goal.x)
+			phase_goal.y = minf(GD.GROUND_Y-4.0,phase_goal.y)
 		"air_return": phase_goal = Vector2(DATA.HOME_X,GD.GROUND_Y-DATA.HOVER_HEIGHT)
 		"land": phase_goal = Vector2(DATA.HOME_X,GD.GROUND_Y)
 
-func advance(delta: float) -> void:
+func advance(delta: float, target: Vector2 = Vector2(GD.PLAYER_X,GD.GROUND_Y-46)) -> void:
+	player_target = target
 	if state == "dead":
 		death_time += delta
-		_set_pose("death",mini(7,int(death_time*9.0)))
+		_set_pose("death",mini(7,int(death_time*DATA.DEATH_FPS)))
 		return
 	if not combat_enabled: return
 	previous_position = position
@@ -196,7 +224,7 @@ func _core_hit(from: Vector2, to: Vector2) -> bool:
 func _body_pixel(local: Vector2) -> bool:
 	var x := int(local.x)
 	var y := int(local.y)
-	if x < 0 or y < 0 or x >= int(pose_meta.w) or y >= int(pose_meta.h): return false
+	if x < int(DATA.ATLAS_INSET) or y < int(DATA.ATLAS_INSET) or x >= int(pose_meta.w-DATA.ATLAS_INSET) or y >= int(pose_meta.h-DATA.ATLAS_INSET): return false
 	# Exclude the gun/sword beyond the actual torso/limbs envelope.
 	if x < float(pose_meta.cx)-65.0 and y < float(pose_meta.cy)+48.0: return false
 	if x > float(pose_meta.cx)+175.0 or y < float(pose_meta.top): return false
@@ -245,6 +273,18 @@ func try_melee(player_rect: Rect2, guard_rect: Rect2) -> bool:
 	if not combat_enabled or action_contact_used: return false
 	var active: bool = (state == "slash" and pose_frame in [7,8,10,9]) or (state == "stab" and pose_frame == 4)
 	if not active: return false
+	if state == "stab":
+		var blade_start := core_position()
+		var blade_end := blade_start+stab_direction*DATA.STAB_HIT_LENGTH
+		var stab_movement := global_position-previous_position
+		for candidate in [player_rect,guard_rect]:
+			var rect: Rect2 = candidate
+			if not rect.has_area(): continue
+			var expanded: Rect2 = rect.grow(DATA.STAB_HIT_RADIUS)
+			if _segment_rect(blade_start,blade_end,expanded) or _segment_rect(blade_start-stab_movement,blade_end-stab_movement,expanded) or _segment_rect(blade_end-stab_movement,blade_end,expanded):
+				action_contact_used = true
+				return true
+		return false
 	var area := _blade_rect()
 	# Include swept travel so fast lunges cannot skip player contact.
 	var movement := global_position-previous_position
@@ -252,6 +292,13 @@ func try_melee(player_rect: Rect2, guard_rect: Rect2) -> bool:
 	if area.intersects(player_rect) or (guard_rect.has_area() and area.intersects(guard_rect)):
 		action_contact_used = true
 		return true
+	return false
+
+func _segment_rect(from: Vector2, to: Vector2, rect: Rect2) -> bool:
+	if rect.has_point(from) or rect.has_point(to): return true
+	var corners := [rect.position,Vector2(rect.end.x,rect.position.y),rect.end,Vector2(rect.position.x,rect.end.y)]
+	for index in range(4):
+		if Geometry2D.segment_intersects_segment(from,to,corners[index],corners[(index+1)%4]) != null: return true
 	return false
 
 func start_death() -> void:

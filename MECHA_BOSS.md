@@ -30,3 +30,10 @@ Ground bullets440px/s, air390px/s; shot emission snaps to the actual selected fl
 ## Validation status
 
 Only source/assets were inspected. NO Godot launch, import, automated tests or captures per standing user instruction. Manual acceptance remains: eye selector/regression; both retry paths; core AR/body ricochet/AP damage; grenade1HP and clear; shield one debit; crouch/jump/ground-under-stab evasion; source animation order, anchors/muzzles and death frames. Do not claim runtime verification. User's pre-existing HUD/layout/artwork changes were preserved; only the Boss HUD call is staged from that file.
+
+
+## Frame/timing/aim correction
+
+Source layouts are NOT exact uniform grids. Read alpha row/column gutters to derive per-row frame rectangles, keeping one-based frame orders unchanged. Examples: death row divider531 (not443), air fire472, ground fire495, lift470, stab485; slash row dividers258/512/760. Per-frame AtlasTextures clip filtering and inset2 pixels with margins restoring local size/anchor coordinates. This replaces Sprite2D region sampling and avoids sampling adjacent frame borders. No source image pixels were redrawn.
+
+Ground/air fire durations0.8→0.55s, slash0.65→0.45s, takeoff0.75→0.48s, landing0.8→0.5s, recovery0.8→0.5s; death14fps. Increase charge/stab speeds to1000/850 so faster animations still cover configured distances. Slash prepare0.8s; stab prepare remains0.9s. Air stab now targets the player's position at the END of preparation, locks one direction and goal for the full lunge (overrides original fixed-height request). Sprite rotates about chest toward that direction, never flips. Capsule-like segment/swept-tip checks align melee to the locked blade axis and retain once-per-attack guard/contact. Recovery returns pose rotation to neutral before flying home/landing. No continuous tracking during lunge. No game/import/tests/captures run; manual acceptance pending.

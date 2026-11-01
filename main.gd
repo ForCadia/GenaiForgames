@@ -987,7 +987,7 @@ func _update_boss(delta: float) -> void:
 		boss_grenade_spawned = true
 		_spawn_grenade_pickup()
 	if is_mecha_boss():
-		mecha_actor.advance(delta)
+		mecha_actor.advance(delta,_player_center())
 		if mecha_actor.try_melee(_player_hitbox(),_guard_hitbox() if guarding else Rect2()):
 			_receive(false,"MECHA BLADE")
 		return

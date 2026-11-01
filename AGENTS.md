@@ -217,3 +217,6 @@ Latest Gunblade Mecha Boss (2026-10-31): user-authorized24HP independent MechaBo
 
 
 Latest retro asset replacement (2026-10-31): Downloads/复古像素射击游戏素材表.png (one file found) alpha-extracted via imagegen into assets/retro_shooter/sheet.png. World coins9-frame10fps atlas animation; HUD/menu/build coin icons use coin_icon.tres. retro_shooter_assets.gd supplies rifle-slug orange player/hostile rounds and red generic energy bolts. Preserve blue AP/cyan proc/heavy beams/dedicated Boss attacks, all mechanics and audio. Other board effects unused. No tests/import/game/captures; see RETRO_SHOOTER_ASSETS.md.
+
+
+Latest mecha frame/timing/aim correction (2026-10-31): replace uniform atlas grid with actual transparent-gutter rectangles and per-frame clipped AtlasTextures/inset+coordinate margins. Source frame ordering unchanged. Accelerate action/recovery/death timing, raise charge/stab speeds to preserve distance. User overrides fixed-height air stab: lock player's end-of-prep position and lunge toward it, rotate around chest and use swept blade-axis segment hits, never mid-lunge tracking. Preserve0.9s stab prep and one shield contact per attack. No runtime tests/import/game/captures.
