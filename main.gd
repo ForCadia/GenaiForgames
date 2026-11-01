@@ -974,15 +974,20 @@ func _start_boss(preserve_motion := false) -> void:
 	checkpoint_weapon_index = weapon_index; checkpoint_distance = distance
 	lab.set_location(segment, true)
 	if lab.active: lab.record("checkpoint_reached", {"score": score})
+	var growth: Dictionary = preload("res://endless_data.gd").boss_growth(endless_wave) if endless_mode and not boss_test_mode and not developer_mode else {"health_multiplier":1.0,"wait_multiplier":1.0}
+	var difficulty_wait: float = float(MECHA_DATA.ATTACK_WAIT_MULTIPLIER.get(endless_difficulty,1.0)) if endless_mode and not boss_test_mode else 1.0
 	if is_mecha_boss():
-		boss = {"armor":0,"hp":MECHA_DATA.HEALTH,"maximum":MECHA_DATA.HEALTH,"phase":1}
+		var mecha_maximum: int = int(ceil(MECHA_DATA.HEALTH*float(growth.health_multiplier)))
+		boss = {"armor":0,"hp":mecha_maximum,"maximum":mecha_maximum,"phase":1}
 		mecha_actor.position = Vector2(GD.VIEW_SIZE.x+180.0,GD.GROUND_Y)
-		mecha_actor.set_difficulty(endless_difficulty if endless_mode else "normal")
+		mecha_actor.set_difficulty(endless_difficulty if endless_mode else "normal",float(growth.wait_multiplier))
 		mecha_actor.reset_for_battle(true)
 		boss_entering = false
 		banner = mode_caption()+" // GUNBLADE MECHA"; banner_time = 2.2
 		return
-	boss = {"armor": GD.BOSS.armor_per_cycle, "hp": GD.BOSS.health, "phase": 1}
+	var eye_maximum: int = int(ceil(GD.BOSS.health*float(growth.health_multiplier)))
+	boss = {"armor": GD.BOSS.armor_per_cycle, "hp":eye_maximum,"maximum":eye_maximum,"phase":1}
+	boss_actor.attack_wait_multiplier = difficulty_wait*float(growth.wait_multiplier)
 	boss_actor.position = Vector2(GD.VIEW_SIZE.x + 220.0, BOSS_IDLE_Y)
 	boss_actor.armor_per_layer = 3 if developer_mode else BALANCE.BOSS_ARMOR_PER_LAYER
 	boss_actor.reset_for_battle(true)
@@ -1885,4 +1890,4 @@ func refresh_boss_hud(hud: Node) -> void:
 	if is_mecha_boss():
 		hud.apply_mecha_state(int(boss.hp),int(boss.get("maximum",MECHA_DATA.HEALTH)))
 	else:
-		hud.apply_state(boss.hp,GD.BOSS.health,boss.armor,boss.phase,boss_actor.armor_points(),boss_actor.armor_per_layer*2)
+		hud.apply_state(boss.hp,int(boss.get("maximum",GD.BOSS.health)),boss.armor,boss.phase,boss_actor.armor_points(),boss_actor.armor_per_layer*2)

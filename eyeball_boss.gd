@@ -50,6 +50,7 @@ var barrage_wave := 0
 var attack_position_ready := true
 var combat_enabled := false
 var target_x := 440.0
+var attack_wait_multiplier := 1.0
 
 func _ready() -> void:
 	reset_for_battle(false)
@@ -59,7 +60,7 @@ func reset_for_battle(enabled: bool) -> void:
 	form = BossForm.DOUBLE_ARMOR
 	armor_hp = armor_per_layer
 	attack_state = AttackState.IDLE
-	state_time = 1.15
+	state_time = 1.15*attack_wait_multiplier
 	idle_frame_time = 0.0
 	next_attack_is_bomb = true
 	next_attack_is_barrage = false
@@ -76,7 +77,7 @@ func set_combat_enabled(enabled: bool) -> void:
 	_set_hurtbox_enabled(enabled and attack_state != AttackState.ARMOR_BREAK and attack_state != AttackState.DEAD)
 	if not enabled and attack_state != AttackState.DEAD:
 		attack_state = AttackState.IDLE
-		state_time = attack_interval
+		state_time = attack_interval*attack_wait_multiplier
 		_show_form_idle()
 
 func advance(delta: float, player_position: Vector2) -> void:
@@ -117,11 +118,11 @@ func advance(delta: float, player_position: Vector2) -> void:
 					_fire_barrage_wave()
 				else:
 					attack_state = AttackState.RECOVERY
-					state_time = recovery_time
+					state_time = recovery_time*attack_wait_multiplier
 		AttackState.BOMB_ATTACK, AttackState.PARTICLE_ATTACK:
 			if state_time <= 0.0:
 				attack_state = AttackState.RECOVERY
-				state_time = recovery_time
+				state_time = recovery_time*attack_wait_multiplier
 		AttackState.RECOVERY:
 			_animate_idle()
 			if state_time <= 0.0:
@@ -133,7 +134,7 @@ func advance(delta: float, player_position: Vector2) -> void:
 					next_attack_is_barrage = false
 					next_attack_is_bomb = true
 				attack_state = AttackState.IDLE
-				state_time = attack_interval
+				state_time = attack_interval*attack_wait_multiplier
 		AttackState.ARMOR_BREAK:
 			# Existing cracked -> detached frames show the layer actually falling off.
 			visual.frame = int(form) * 8 + (6 if state_time > armor_break_time * 0.5 else 7)
@@ -142,7 +143,7 @@ func advance(delta: float, player_position: Vector2) -> void:
 				armor_hp = armor_per_layer if form != BossForm.WEAK_POINT else 0
 				form_changed.emit(form)
 				attack_state = AttackState.RECOVERY
-				state_time = recovery_time
+				state_time = recovery_time*attack_wait_multiplier
 				_set_hurtbox_enabled(true)
 				_show_form_idle()
 

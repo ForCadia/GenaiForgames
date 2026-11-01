@@ -66,11 +66,11 @@ func _ready() -> void:
 	set_process(false)
 	reset_for_battle(false)
 
-func set_difficulty(difficulty: String) -> void:
-	attack_wait_multiplier = float(DATA.ATTACK_WAIT_MULTIPLIER.get(difficulty,1.0))
+func set_difficulty(difficulty: String, growth_wait: float = 1.0) -> void:
+	attack_wait_multiplier = float(DATA.ATTACK_WAIT_MULTIPLIER.get(difficulty,1.0))*growth_wait
 
 func wait_time(duration: float) -> float:
-	return duration*attack_wait_multiplier
+	return maxf(0.5 if duration >= 0.8 else 0.12,duration*attack_wait_multiplier)
 
 func reset_for_battle(enabled: bool) -> void:
 	combat_enabled = enabled

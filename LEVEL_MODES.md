@@ -108,3 +108,6 @@ Latest heavy pressure cost: heavy turret now reserves75 points (formerly50), ind
 
 
 Level03 roster rebalance: heavy turrets reduced to4/4/4/5 across four authored stages (17 total); removed heavy slots replaced with light turrets, aerial riflemen and occasional kamikazes at the same authored times. Remaining heavies are spaced through each stage; no adjacent heavy-heavy beats. Event counts, durations, scroll,75-point heavy cost and mecha Boss unchanged. Level01/02 and independent Endless rosters untouched. Source-only edit, no engine/tests.
+
+
+Endless Boss growth: tier=floor((wave-1)/5). Both Bosses gain25% of base HP per tier, uncapped, and multiply attack downtime by0.9^tier with a0.5 floor; selected easy/normal/hard downtime modifier stacks. Wave05 base24HP,10=30,15=36,20=42. Eye scales idle/recovery but preserves telegraph/barrage timings. Mecha preserves at least0.5s for its longer preparation windows and0.12s shorter waits. HP bars use encounter maximum, not base24. Damage, armor, bullet/charge speeds unchanged; campaign, Boss test and historical LAB use baseline growth. Source-only inspection, no runtime tests.

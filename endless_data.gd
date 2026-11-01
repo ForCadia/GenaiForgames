@@ -58,3 +58,13 @@ static func generate_wave(wave: int, difficulty: String = "normal") -> Dictionar
 	return {"title":"WAVE %02d // %s" % [wave,profile.name],
 		"duration":duration,"scroll":230.0,"events":events,
 		"hint":"READ THE WAVE / ADAPT YOUR WEAPON","keys":["1","2","F"]}
+
+# After each completed five-wave block, bosses gain HP and reduce downtime.
+const BOSS_HEALTH_GROWTH := 0.25
+const BOSS_WAIT_DECAY := 0.9
+const BOSS_MIN_WAIT_SCALE := 0.5
+
+static func boss_growth(wave: int) -> Dictionary:
+	var tier: int = maxi(0,int((wave-1)/5))
+	return {"health_multiplier":1.0+BOSS_HEALTH_GROWTH*tier,
+		"wait_multiplier":maxf(BOSS_MIN_WAIT_SCALE,pow(BOSS_WAIT_DECAY,tier))}
