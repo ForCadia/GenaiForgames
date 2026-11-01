@@ -57,3 +57,14 @@ const THRUSTER_LENGTH := 85.0
 const MELEE_WINDUP_ANIMATION := 0.20
 const SLASH_CHARGE_FRAME := 8
 const MELEE_TRAIL_TIME := 0.22
+
+# Source-pixel helmet widths measured independently of legs, blades and backpack.
+const HELMET_WORLD_WIDTH := 46.0
+const HELMET_SOURCE_WIDTH := {"slash":34.0,"ground_fire":44.0,"lift":44.0,"air_fire":46.0,"stab":45.0,"death":44.0}
+# Backpack outlet landmarks in full-sheet coordinates, frame order retained.
+const BACKPACK_OUTLETS := {
+ "air_fire":[Vector2(300,215),Vector2(744,214),Vector2(1187,214),Vector2(1630,214),Vector2(299,636),Vector2(744,636),Vector2(1187,636),Vector2(1631,636)],
+ "stab":[Vector2(287,218),Vector2(733,215),Vector2(1174,213),Vector2(1619,213),Vector2(275,638),Vector2(742,638),Vector2(1187,638),Vector2(1624,635)],
+ "lift":[Vector2(290,219),Vector2(735,213),Vector2(1174,209),Vector2(1619,207),Vector2(288,650),Vector2(735,635),Vector2(1174,662),Vector2(1616,666)]
+}
+const THRUSTER_WIDTH := 18.0

@@ -64,3 +64,6 @@ Screen-wide slash art: built-in imagegen generated assets/vfx/mecha_screen_slash
 
 
 Pixel flipbook supersedes the single-strip slash: generated 4x2 eight-frame transparent atlas, played with AnimatedSprite2D at fixed scale/nearest filtering, synchronized to melee execution (25fps). The source frames provide the thin/wide/thin shape changes; previous vertical scale animation is removed. Full-screen cosmetic coverage remains. No runtime tests.
+
+
+Backpack/scale follow-up: replace chest-relative exhaust offset with eight per-frame, full-sheet backpack outlet landmarks for lift, aerial fire and thrust. Convert through each frame region and actual sprite transform; exhaust points outwards right/down and only emits for sheets with known backpack anchors. No exhaust is guessed for ground slash poses. Narrow nozzle to18px, retain85px flame length. Per-sheet fixed helmet-width calibration (46 world pixels) now supersedes helmet-to-core normalization, avoiding torso/leg pose-dependent scale changes. Death uses matching helmet calibration too. Values/landmarks are centralized in mecha_boss_data.gd. Source/image inspection only; no game or tests.

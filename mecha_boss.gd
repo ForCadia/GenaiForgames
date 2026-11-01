@@ -97,12 +97,8 @@ func _set_pose(sheet: String, frame: int) -> void:
 	# Each repacked sheet has its own source resolution; hold scale across its poses.
 	var reference: Dictionary = frames[sheet][0]
 	var reference_height: float = maxf(32.0,float(reference.bottom)-float(reference.top))
-	# Match helmet/chest size across sheets, independent of bent or extended legs.
-	var ground_reference: Dictionary = frames.slash[0]
-	var ground_height: float = float(ground_reference.bottom)-float(ground_reference.top)
-	var chest_height: float = maxf(20.0,float(reference.cy)-float(reference.top))
-	var target_chest: float = DATA.BODY_HEIGHT/ground_height*(float(ground_reference.cy)-float(ground_reference.top))
-	scale_factor = DATA.BODY_HEIGHT/reference_height if sheet == "death" else target_chest/chest_height
+	# Calibrate fixed helmet width per sheet; weapon/leg pose cannot change body size.
+	scale_factor = DATA.HELMET_WORLD_WIDTH/float(DATA.HELMET_SOURCE_WIDTH[sheet])
 	source_unit = reference_height/float(ORIGINAL_BODY_HEIGHT[sheet])
 	visual.scale = Vector2.ONE*scale_factor
 	visual.flip_h = false
@@ -238,7 +234,7 @@ func advance(delta: float, target: Vector2 = Vector2(GD.PLAYER_X,GD.GROUND_Y-46)
 			_set_pose("slash",0)
 			if elapsed >= DATA.LAND_RECOVERY: _enter("ground_prepare")
 
-	effects.advance_effects(delta,combat_enabled,state,visual,pose_meta,scale_factor)
+	effects.advance_effects(delta,combat_enabled,state,visual,pose_meta,pose_sheet,pose_frame)
 	melee_effects.advance_effects(delta,self)
 
 func _muzzle(_air: bool) -> Vector2:

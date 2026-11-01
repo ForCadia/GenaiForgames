@@ -29,7 +29,7 @@ func landing_burst() -> void:
 	for index in range(18):
 		_spark(get_parent().global_position+Vector2(rng.randf_range(-35.0,25.0),-2.0),true)
 
-func advance_effects(delta: float, enabled: bool, state: String, sprite: Sprite2D, metadata: Dictionary, body_scale: float) -> void:
+func advance_effects(delta: float, enabled: bool, state: String, sprite: Sprite2D, metadata: Dictionary, sheet: String, frame: int) -> void:
 	effect_time += delta
 	for index in range(sparks.size()-1,-1,-1):
 		var spark: Dictionary = sparks[index]
@@ -51,11 +51,14 @@ func advance_effects(delta: float, enabled: bool, state: String, sprite: Sprite2
 	else:
 		spark_clock = 0.0
 	thrust = enabled and state in ["entry","takeoff","air_prepare","air_fire","air_recover","stab_prepare","stab","stab_recover","air_return","land"]
+	thrust = thrust and DATA.BACKPACK_OUTLETS.has(sheet)
 	if thrust and not metadata.is_empty():
-		# Rear backpack outlet, attached in the sprite's rotated source space.
-		var source := Vector2(float(metadata.cx)+27.0/body_scale,float(metadata.cy)+10.0/body_scale)
+		# Full-sheet measured backpack outlet, not a chest-relative offset.
+		var landmarks: Array = DATA.BACKPACK_OUTLETS[sheet]
+		var source: Vector2 = landmarks[clampi(frame,0,landmarks.size()-1)]-Vector2(float(metadata.x),float(metadata.y))
 		nozzle = to_local(sprite.to_global(source))
-		thrust_direction = Vector2.DOWN.rotated(sprite.global_rotation-global_rotation)
+		# Exhaust exits outwards behind the pack, never through the torso.
+		thrust_direction = Vector2(0.7,0.714143).rotated(sprite.global_rotation-global_rotation)
 	queue_redraw()
 
 func _draw() -> void:
@@ -72,6 +75,6 @@ func _draw() -> void:
 	var axis: Vector2 = thrust_direction
 	var side := axis.orthogonal()
 	var root: Vector2 = nozzle.round()
-	draw_colored_polygon(PackedVector2Array([root-side*13.0,root+side*13.0,root+axis*(length*0.5)+side*9.0,root+axis*length,root+axis*(length*0.5)-side*9.0]),Color("287adf"))
-	draw_colored_polygon(PackedVector2Array([root-side*7.0,root+side*7.0,root+axis*(length*0.72)]),Color("65e8ff"))
+	draw_colored_polygon(PackedVector2Array([root-side*DATA.THRUSTER_WIDTH*0.5,root+side*DATA.THRUSTER_WIDTH*0.5,root+axis*(length*0.5)+side*6.0,root+axis*length,root+axis*(length*0.5)-side*6.0]),Color("287adf"))
+	draw_colored_polygon(PackedVector2Array([root-side*4.5,root+side*4.5,root+axis*(length*0.72)]),Color("65e8ff"))
 	draw_rect(Rect2(root-Vector2(4,3),Vector2(8,9)),Color("e8ffff"))
