@@ -58,3 +58,6 @@ Aerial thrust presentation correction: aerial attack now uses the straight red s
 
 
 Mecha presentation update: normalize alive action-sheet scale using helmet-to-core span against ground idle, instead of total leg-dependent body height, correcting smaller aerial fire/thrust appearance. Ground melee cosmetic is now a thin red line across its swept path, expanding rapidly and contracting back to thin; the crescent is removed from ground melee. Slash preparation adds a red/white cross attached to per-pose sword-hand source anchors. Aerial straight thrust trail, HP/armor/damage and timings remain unchanged. Source changes only; no runtime verification per user instruction.
+
+
+Screen-wide slash art: built-in imagegen generated assets/vfx/mecha_screen_slash.png with actual alpha. Ground slash now draws this strip across the logical viewport plus 120px overscan on each side, retaining thin/wide/thin animation. Original PNG and generation prompt are retained. This updates cosmetic reach only; melee damage and warning geometry remain unchanged. No runtime tests.

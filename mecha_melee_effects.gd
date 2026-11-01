@@ -1,6 +1,8 @@
 extends Node2D
 # Telegraph geometry shares the actual blade sweep; the oversized sprite is cosmetic.
 const DATA := preload("res://mecha_boss_data.gd")
+const SCREEN_SLASH := preload("res://assets/vfx/mecha_screen_slash.png")
+const GD := preload("res://game_data.gd")
 const SHEET := preload("res://assets/vfx/neon_effects_source.png")
 var band := PackedVector2Array()
 var warning := false
@@ -18,6 +20,7 @@ var line_end := Vector2.ZERO
 const HAND_OFFSETS := [Vector2(56,20),Vector2(83,-4),Vector2(80,-4),Vector2(67,0),Vector2(18,-1)]
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	slash = Sprite2D.new()
 	slash.texture = SHEET
 	slash.region_enabled = true
@@ -69,8 +72,8 @@ func advance_effects(delta: float, boss: Node2D) -> void:
 	if state in ["slash","stab"] and state != last_state:
 		if state == "slash":
 			var core_offset: Vector2 = core-boss.position
-			line_start = boss.phase_start+core_offset+Vector2(14.0,30.5)
-			line_end = boss.phase_goal+core_offset+Vector2(-128.0,30.5)
+			line_start = Vector2(-120.0,boss.phase_start.y+core_offset.y+30.5)
+			line_end = Vector2(GD.VIEW_SIZE.x+120.0,line_start.y)
 		effect_kind = state
 		effect_direction = boss.stab_direction if state == "stab" else Vector2.LEFT
 		trail_left = DATA.SLASH_TIME if state == "slash" else DATA.MELEE_TRAIL_TIME
@@ -106,6 +109,6 @@ func _draw() -> void:
 		var width: float = 2.0+72.0*maxf(0.0,envelope)
 		var a: Vector2 = to_local(line_start)
 		var b: Vector2 = to_local(line_end)
-		draw_line(a,b,Color(1.0,0.01,0.04,0.18),width+18.0)
-		draw_line(a,b,Color(0.95,0.015,0.04,0.85),width)
-		draw_line(a,b,Color(1.0,0.3,0.3,0.95),maxf(2.0,width*0.22))
+		# Transparent imagegen strip; tips extend outside both viewport edges.
+		var target := Rect2(Vector2(minf(a.x,b.x),a.y-width*0.5),Vector2(absf(b.x-a.x),width))
+		draw_texture_rect_region(SCREEN_SLASH,target,Rect2(0,280,2172,166),Color.WHITE,false,true)
