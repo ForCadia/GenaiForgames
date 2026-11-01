@@ -24,3 +24,16 @@ Latest pressure revision: Level01 keeps the original GD timelines without kamika
 无尽难度：选关页增加简单/普通/困难选择，默认普通。当前加强版即普通（每组2份敌人/障碍）；简单1份，困难3份，即简单约普通一半、困难约普通1.5倍刷怪。沿用逐波间隔加压、每五波Boss和原Boss数值；手雷不翻倍。难度随本轮重试保留，成绩与最高波数分别记录，普通保留原记录键。无尽解锁后一起开放。只改文件，未运行测试。
 
 困难倍率更新：困难现在为普通刷怪量的3倍（原始事件6份，普通2份）；覆盖此前1.5倍说明。简单和普通不变。未运行测试。
+
+
+## Latest encounter redesign — campaign phases as waves (2026-10-31)
+
+This supersedes the older duplicate-event pressure implementation and old stage names above. Level01 and historical LAB retain their original timelines. Level02/03 now use independent hand-authored event rosters in campaign_data.gd, rather than copying Level01 or duplicating each campaign event.
+
+- Level02: Airspace Breach, Hunter Swarm, Relay Crossfire, Signal Blackout. Light turret fire, kamikaze air raids and laser gates dominate, with occasional heavy anchors and spikes.
+- Level03: Armor Spearhead, Fortress Batteries, Combined Arms, Citadel Lockdown. Heavy turrets dominate, with mixed airborne pressure, light turrets and fewer track hazards.
+- Each ordinary campaign phase is one Endless wave. Waves1–4 use the four Level02 phases; wave5 is Boss; waves6–9 use the four Level03 phases; wave10 is Boss. This ten-wave sequence then repeats with the existing gradually reduced timing interval (30% cap).
+- Normal uses the authored roster. Easy keeps alternating events within each enemy/hazard type (approximately half). Hard uses exactly three copies per Normal combat event, staggered in time. Grenade supplies and Boss stats do not scale with difficulty.
+- Stage durations and scroll values remain as previously authored. Mission descriptions now reflect the distinct encounter mixes.
+
+Only files were edited. No game, imports, captures or tests were run; manual acceptance is left to the user.

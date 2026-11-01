@@ -11,7 +11,7 @@ var first_button: Button
 var mission_buttons: Array[Button] = []
 var mode_label: Label
 var difficulty_buttons: Dictionary = {}
-const DESCRIPTIONS := ["前线突围 · 四阶段 + Boss", "突破信号封锁 · 四阶段 + Boss", "攻入钢铁堡垒 · 四阶段 + Boss", "每五波迎战 Boss · 死亡从首波重新开始"]
+const DESCRIPTIONS := ["前线突围 · 四阶段 + Boss", "轻型火力 / 自爆空袭 / 激光封锁", "重甲阵地 / 空地协同 / 堡垒封锁", "每五波迎战 Boss · 死亡从首波重新开始"]
 
 func _ready() -> void:
 	custom_minimum_size.x = 600
