@@ -47,3 +47,6 @@ const DEPLOY_ORIGIN := Vector2(-60,-440.317)
 const HULL_ANIM_SCALE := 1.15163148
 const CANNON_ANIM_SCALE := 0.52
 const REVERSE_FPS := 10.0
+
+const GROUND_OFFSET := 18.0
+const CHASSIS_BOUNCE := [Vector2(0,0),Vector2(0,-2),Vector2(0,1),Vector2(0,-1)]

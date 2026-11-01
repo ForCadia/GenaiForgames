@@ -40,12 +40,19 @@ var target_x := 190.0
 var projectiles: Array[Dictionary] = []
 var foreground_hitboxes: Array[Rect2] = []
 var rng := RandomNumberGenerator.new()
+var mount_motion := Vector2.ZERO
+var projectile_visual: Node2D
 
 func _ready() -> void:
 	rng.randomize()
 	var vfx_material := ShaderMaterial.new()
 	vfx_material.shader = preload("res://assets/vfx/black_key.gdshader")
-	material = vfx_material
+	# World effects live behind the hull, immediately above the rear-mounted cannon.
+	projectile_visual = Node2D.new()
+	projectile_visual.z_index = -1
+	projectile_visual.material = vfx_material
+	projectile_visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	projectile_visual.draw.connect(_draw_projectiles)
 	for key in ART:
 		var image: Image = ART[key].get_image()
 		if image.is_compressed(): image.decompress()
@@ -60,6 +67,7 @@ func _ready() -> void:
 	hull.z_index = 0
 	launcher.z_index = 1
 	plate.z_index = 2
+	add_child(projectile_visual)
 	for sprite in [hull,cannon]:
 		var pixel_material := ShaderMaterial.new()
 		pixel_material.shader = preload("res://assets/boss_iron/pixel_sample.gdshader")
@@ -79,7 +87,14 @@ func _animate_hull(delta: float) -> void:
 	hull_frame = int(track_time*DATA.REVERSE_FPS)%hull_textures.size()
 	var metadata: Dictionary = PIXEL_FRAMES.hull[hull_frame]
 	hull.texture = hull_textures[hull_frame]
-	hull.position = -Vector2(float(metadata.anchor_x),float(metadata.bottom))*DATA.HULL_ANIM_SCALE
+	var bounce: Vector2 = DATA.CHASSIS_BOUNCE[hull_frame%DATA.CHASSIS_BOUNCE.size()]
+	hull.position = -Vector2(float(metadata.anchor_x),float(metadata.bottom))*DATA.HULL_ANIM_SCALE+bounce
+	var reference: Dictionary = PIXEL_FRAMES.hull[0]
+	var roof_delta: float = ((float(metadata.top)-float(metadata.bottom))-(float(reference.top)-float(reference.bottom)))*DATA.HULL_ANIM_SCALE
+	mount_motion = bounce+Vector2(0,roof_delta)
+	if cannon_hp > 0:
+		var cannon_metadata: Dictionary = PIXEL_FRAMES.cannon[cannon_frame]
+		cannon.position = DATA.CANNON_MOUNT+mount_motion-Vector2(float(cannon_metadata.anchor_x),float(cannon_metadata.bottom))*cannon.scale
 
 func _sprite(texture: Texture2D, origin: Vector2, sizing: Vector2) -> Sprite2D:
 	var sprite := Sprite2D.new()
@@ -97,7 +112,7 @@ func _pose(sprite: Sprite2D, key: String, frame: int, mount: Vector2) -> void:
 		var metadata: Dictionary = PIXEL_FRAMES.cannon[frame]
 		sprite.texture = cannon_textures[frame]
 		sprite.scale = Vector2.ONE*DATA.CANNON_ANIM_SCALE
-		sprite.position = mount-Vector2(float(metadata.anchor_x),float(metadata.bottom))*sprite.scale
+		sprite.position = mount+mount_motion-Vector2(float(metadata.anchor_x),float(metadata.bottom))*sprite.scale
 		(sprite.material as ShaderMaterial).set_shader_parameter("pixel_step",4.0)
 		return
 	if key == "cannon_dead":
@@ -118,7 +133,7 @@ func _pose(sprite: Sprite2D, key: String, frame: int, mount: Vector2) -> void:
 	if key.begins_with("launcher"): anchor = Vector2(480,467)
 	if key == "plate": anchor = Vector2(225,495)
 	if key == "cannon" and frame >= 2: anchor = Vector2(480 if frame == 2 else 450,495)
-	sprite.position = mount-anchor*sprite.scale
+	sprite.position = mount+(mount_motion if key == "cannon_dead" else Vector2.ZERO)-anchor*sprite.scale
 
 func set_difficulty(difficulty: String, growth_wait: float = 1.0) -> void:
 	wait_multiplier = float(DATA.ATTACK_WAIT.get(difficulty,1.0))*growth_wait
@@ -139,7 +154,7 @@ func reset_for_battle(enabled: bool) -> void:
 	track_time = 0.0
 	_animate_hull(0.0)
 	clear_projectiles()
-	position = Vector2(GD.VIEW_SIZE.x+200.0,GD.GROUND_Y)
+	position = Vector2(GD.VIEW_SIZE.x+200.0,GD.GROUND_Y+DATA.GROUND_OFFSET)
 	_pose(cannon,"cannon",0,DATA.CANNON_MOUNT)
 	_pose(launcher,"launcher",0,DATA.LAUNCHER_MOUNT)
 	launcher.hide()
@@ -174,7 +189,7 @@ func advance(delta: float, target: Vector2) -> void:
 	_advance_projectiles(delta)
 	match state:
 		"entry":
-			position = position.move_toward(Vector2(DATA.HOME_X,GD.GROUND_Y),DATA.ENTRY_SPEED*delta)
+			position = position.move_toward(Vector2(DATA.HOME_X,GD.GROUND_Y+DATA.GROUND_OFFSET),DATA.ENTRY_SPEED*delta)
 			if position.x <= DATA.HOME_X+1.0: _enter("intro_hold")
 		"prepare":
 			if elapsed >= maxf(0.65,DATA.PREPARE*wait_multiplier):
@@ -198,7 +213,7 @@ func advance(delta: float, target: Vector2) -> void:
 			if elapsed >= maxf(0.3,DATA.RECOVERY*wait_multiplier):
 				attack = "deploy" if attack == "cannon" else "cannon"
 				_enter("prepare")
-	queue_redraw()
+	_redraw_projectiles()
 
 func _shell() -> void:
 	var muzzles := [Vector2(233,193),Vector2(241,220),Vector2(252,149),Vector2(236,174)]
@@ -338,7 +353,7 @@ func core_position() -> Vector2:
 
 func clear_projectiles() -> void:
 	projectiles.clear()
-	queue_redraw()
+	_redraw_projectiles()
 
 func start_death() -> void:
 	combat_enabled = false
@@ -358,20 +373,21 @@ func _process(delta: float) -> void:
 	_update_wrecks(delta)
 	hull.modulate = Color(0.45,0.45,0.45)
 
-func _draw() -> void:
-	if combat_enabled and state == "prepare" and attack == "cannon" and cannon_hp > 0:
-		draw_circle(to_local(cannon.to_global(Vector2(300,250))),9.0+sin(elapsed*14.0)*2.0,Color(1,0.2,0.05,0.8))
+func _redraw_projectiles() -> void:
+	if is_instance_valid(projectile_visual): projectile_visual.queue_redraw()
+
+func _draw_projectiles() -> void:
 	for round in projectiles:
 		var p: Vector2 = to_local(Vector2(round.p))
 		if float(round.explode) > 0:
 			var progress: float = 1.0-float(round.explode)/DATA.EXPLOSION_TIME
 			var frames := [Rect2(28,650,100,90),Rect2(133,650,72,90),Rect2(210,660,60,75),Rect2(276,670,48,60)]
 			var frame: int = clampi(int(progress*frames.size()),0,frames.size()-1)
-			draw_texture_rect_region(VFX,Rect2(p-Vector2(40,40),Vector2(80,80)),frames[frame])
+			projectile_visual.draw_texture_rect_region(VFX,Rect2(p-Vector2(40,40),Vector2(80,80)),frames[frame])
 			continue
 		var direction: Vector2 = Vector2(round.v).normalized()
-		draw_set_transform(p,direction.angle()-PI)
-		draw_texture_rect_region(VFX,Rect2(-16,-12,32,24),Rect2(28,40,95,68))
-		draw_set_transform(Vector2.ZERO,0.0)
+		projectile_visual.draw_set_transform(p,direction.angle()-PI)
+		projectile_visual.draw_texture_rect_region(VFX,Rect2(-16,-12,32,24),Rect2(28,40,95,68))
+		projectile_visual.draw_set_transform(Vector2.ZERO,0.0)
 		var landing := Vector2(float(round.target)-global_position.x,GD.GROUND_Y-global_position.y)
-		draw_line(landing-Vector2(25,0),landing+Vector2(25,0),Color(1,0.15,0.07,0.8),3)
+		projectile_visual.draw_line(landing-Vector2(25,0),landing+Vector2(25,0),Color(1,0.15,0.07,0.8),3)
